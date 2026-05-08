@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComercialIQ — Dashboard Empresarial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+/* ═══════════════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0B1526;
+  --navy2:#0F1D32;
+  --navy3:#162540;
+  --navy4:#1C2E4E;
+  --navy5:#243650;
+  --accent:#2D83FF;
+  --accent2:#1A6AE0;
+  --accent-light:rgba(45,131,255,0.10);
+  --accent-glow:rgba(45,131,255,0.20);
+  --teal:#00D4A8;
+  --teal-light:rgba(0,212,168,0.10);
+  --amber:#F7B731;
+  --amber-light:rgba(247,183,49,0.10);
+  --red:#F0494A;
+  --red-light:rgba(240,73,74,0.10);
+  --green:#1EC97E;
+  --green-light:rgba(30,201,126,0.10);
+  --text:#EDF2FF;
+  --text2:#A8BBDA;
+  --text3:#637899;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.10);
+  --border3:rgba(255,255,255,0.15);
+  --card:rgba(255,255,255,0.03);
+  --card2:rgba(255,255,255,0.055);
+  --sidebar-w:230px;
+  --header-h:58px;
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+html,body{height:100%;background:var(--navy);color:var(--text);font-size:13px;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.shell{display:flex;height:100vh}
+.sidebar{
+  width:var(--sidebar-w);
+  background:var(--navy2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;flex-shrink:0;
+  transition:width .25s cubic-bezier(.4,0,.2,1);
+  position:relative;z-index:10;
+}
+.sidebar.collapsed{width:54px}
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .brand-name,
+.sidebar.collapsed .brand-sub,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .section-title,
+.sidebar.collapsed .nav-badge{display:none}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 0}
+.sidebar.collapsed .sidebar-footer{padding:10px 0;align-items:center;justify-content:center}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.brand{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.brand-icon{
+  width:32px;height:32px;flex-shrink:0;
+  background:linear-gradient(135deg,#2D83FF,#00D4A8);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(45,131,255,.35);
+}
+.brand-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.brand-sub{font-size:10px;color:var(--text3);letter-spacing:.05em;text-transform:uppercase}
+
+.nav-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 0}
+.nav-scroll::-webkit-scrollbar{width:3px}
+.nav-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.section-title{
+  font-size:10px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.09em;
+  padding:12px 16px 4px;font-weight:600;
+}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 14px;cursor:pointer;
+  transition:all .15s;color:var(--text3);
+  white-space:nowrap;position:relative;
+  border-left:2px solid transparent;
+  margin:1px 0;
+}
+.nav-item:hover{background:var(--card2);color:var(--text2)}
+.nav-item.active{
+  background:var(--accent-light);
+  color:var(--accent);
+  border-left-color:var(--accent);
+}
+.nav-item .ti{font-size:16px;flex-shrink:0}
+.nav-label{font-size:12.5px;font-weight:500}
+.nav-badge{
+  margin-left:auto;
+  background:var(--accent);color:#fff;
+  font-size:10px;padding:1px 6px;
+  border-radius:10px;font-weight:700;
+  line-height:1.6;
+}
+
+.sidebar-footer{
+  padding:12px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  color:#fff;letter-spacing:.02em;
+}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role-lbl{font-size:10px;color:var(--text3)}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.header{
+  height:var(--header-h);
+  background:var(--navy2);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 18px;gap:10px;flex-shrink:0;
+}
+.h-icon-btn{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;cursor:pointer;color:var(--text3);
+  transition:all .15s;flex-shrink:0;border:none;background:none;
+}
+.h-icon-btn:hover{background:var(--card2);color:var(--text)}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)}
+.breadcrumb .sep{opacity:.4}
+.breadcrumb span{color:var(--text2);font-weight:500}
+.h-spacer{flex:1}
+.h-actions{display:flex;align-items:center;gap:6px}
+
+.role-switch{
+  display:flex;background:var(--navy3);
+  border-radius:8px;padding:3px;gap:2px;
+  border:1px solid var(--border);
+}
+.role-btn{
+  padding:5px 12px;border-radius:6px;
+  font-size:11.5px;cursor:pointer;color:var(--text3);
+  transition:all .15s;font-weight:600;border:none;background:none;
+}
+.role-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(45,131,255,.3)}
+
+.h-btn{
+  height:32px;padding:0 12px;
+  border-radius:7px;
+  border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;
+  transition:all .15s;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.h-btn:hover{background:var(--card2);color:var(--text);border-color:var(--border3)}
+.h-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(45,131,255,.3)}
+.h-btn.primary:hover{background:var(--accent2);box-shadow:0 3px 14px rgba(45,131,255,.4)}
+.h-btn .ti{font-size:14px}
+
+.notif-btn{position:relative}
+.notif-dot{
+  position:absolute;top:5px;right:5px;
+  width:7px;height:7px;
+  background:var(--red);border-radius:50%;
+  border:1.5px solid var(--navy2);
+}
+
+/* ═══════════════════════════════════════════════
+   CONTENT
+═══════════════════════════════════════════════ */
+.content{
+  flex:1;overflow-y:auto;
+  padding:20px;
+  display:flex;flex-direction:column;gap:16px;
+  background:var(--navy);
+}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ═══════════════════════════════════════════════
+   PANELS
+═══════════════════════════════════════════════ */
+.panel{display:none;flex-direction:column;gap:16px;animation:fadeIn .2s ease}
+.panel.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════════════
+   FILTER BAR
+═══════════════════════════════════════════════ */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:10px 14px;
+}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;color:var(--text3);font-weight:500}
+.filter-select{
+  background:var(--navy3);
+  border:1px solid var(--border2);
+  color:var(--text2);padding:5px 10px;
+  border-radius:7px;font-size:12px;
+  cursor:pointer;outline:none;
+  font-family:'DM Sans',sans-serif;
+  transition:border-color .15s;
+}
+.filter-select:focus{border-color:var(--accent);color:var(--text)}
+.filter-divider{width:1px;height:20px;background:var(--border2)}
+.saved-filter{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--accent-light);
+  border:1px solid rgba(45,131,255,.2);
+  color:var(--accent);padding:5px 10px;
+  border-radius:7px;font-size:11px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.saved-filter:hover{background:var(--accent-glow);border-color:rgba(45,131,255,.4)}
+.saved-filter .ti{font-size:12px}
+
+/* ═══════════════════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+.kpi-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;padding:15px;
+  transition:all .2s;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.kpi-card:hover{background:var(--card2);border-color:var(--border2);transform:translateY(-1px)}
+.kpi-card:hover::before{opacity:1}
+.kpi-icon-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.kpi-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;
+}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--text);line-height:1.1;letter-spacing:-.02em}
+.kpi-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.kpi-delta{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;
+}
+.kpi-delta.up{background:var(--green-light);color:var(--green)}
+.kpi-delta.down{background:var(--red-light);color:var(--red)}
+.kpi-sub{font-size:10px;color:var(--text3)}
+.kpi-sparkline{display:flex;align-items:flex-end;gap:2px;height:28px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:opacity .15s}
+.kpi-card:hover .spark-bar{opacity:.85!important}
+
+/* ═══════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════ */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.card-header{display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:700;color:var(--text)}
+.card-action{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;transition:opacity .15s}
+.card-action:hover{opacity:.7}
+
+.bar-chart-area{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:8px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.bar-wrap{flex:1;width:100%;display:flex;align-items:flex-end}
+.bar{
+  width:100%;border-radius:4px 4px 0 0;
+  transition:opacity .15s,transform .15s;cursor:pointer;
+}
+.bar:hover{opacity:.75;transform:scaleY(1.03);transform-origin:bottom}
+.bar-lbl{font-size:9.5px;color:var(--text3);font-weight:500}
+.bar-val{font-size:9px;color:var(--text3)}
+
+.donut-section{display:flex;align-items:center;gap:16px;flex:1}
+.donut-legend{display:flex;flex-direction:column;gap:7px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text2);cursor:pointer;transition:color .15s}
+.legend-item:hover{color:var(--text)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.leg-pct{font-weight:700;font-size:12px;color:var(--text)}
+
+/* ═══════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════ */
+.table-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+}
+.table-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+}
+.table-tools{display:flex;gap:6px}
+.table-wrap{overflow-x:auto}
+.table-wrap::-webkit-scrollbar{height:4px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+table{width:100%;border-collapse:collapse}
+th{
+  text-align:left;padding:10px 14px;
+  font-size:10.5px;color:var(--text3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+  background:rgba(0,0,0,.1);
+}
+td{
+  padding:10px 14px;font-size:12.5px;color:var(--text2);
+  border-bottom:1px solid rgba(255,255,255,.03);
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--card2);color:var(--text)}
+.status-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+}
+.sp-green{background:var(--green-light);color:var(--green)}
+.sp-amber{background:var(--amber-light);color:var(--amber)}
+.sp-red{background:var(--red-light);color:var(--red)}
+.sp-blue{background:var(--accent-light);color:var(--accent)}
+
+/* ═══════════════════════════════════════════════
+   UPLOAD PANEL
+═══════════════════════════════════════════════ */
+.upload-zone{
+  border:2px dashed var(--border3);
+  border-radius:14px;padding:36px 24px;
+  text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--card);
+}
+.upload-zone:hover,.upload-zone.drag{
+  border-color:var(--accent);
+  background:var(--accent-light);
+}
+.upload-zone .ti-cloud-upload{font-size:40px;color:var(--text3);display:block;margin-bottom:10px;transition:color .2s}
+.upload-zone:hover .ti-cloud-upload,.upload-zone.drag .ti-cloud-upload{color:var(--accent)}
+.upload-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--text3)}
+.file-types{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.file-badge{
+  background:var(--navy3);color:var(--text3);
+  padding:3px 9px;border-radius:5px;
+  font-size:10.5px;font-weight:700;letter-spacing:.04em;
+  border:1px solid var(--border2);
+}
+.upload-list{display:flex;flex-direction:column;gap:8px}
+.upload-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+}
+.upload-item .ti{font-size:22px;flex-shrink:0}
+.upload-info{flex:1;min-width:0}
+.upload-name{font-size:12.5px;font-weight:600;color:var(--text)}
+.upload-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.progress-bar{height:3px;background:var(--navy3);border-radius:2px;margin-top:6px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--teal));border-radius:2px;transition:width .4s ease}
+
+/* ═══════════════════════════════════════════════
+   METRICS CONFIG
+═══════════════════════════════════════════════ */
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.metric-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+}
+.metric-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.metric-name{font-size:13px;font-weight:700;color:var(--text)}
+.formula-box{
+  background:var(--navy3);border-radius:7px;
+  padding:10px 12px;font-size:11.5px;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--teal);margin-bottom:10px;
+  border:1px solid var(--border2);
+  line-height:1.5;
+}
+.threshold-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.threshold-input{
+  background:var(--navy3);border:1px solid var(--border2);
+  color:var(--text);padding:5px 9px;border-radius:6px;
+  width:80px;font-size:12px;outline:none;
+  font-family:'DM Sans',sans-serif;transition:border-color .15s;
+}
+.threshold-input:focus{border-color:var(--accent)}
+
+/* ═══════════════════════════════════════════════
+   USERS
+═══════════════════════════════════════════════ */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.user-chip{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:14px;cursor:pointer;
+  transition:all .15s;
+}
+.user-chip:hover{background:var(--card2);border-color:var(--border2);transform:translateY(-1px)}
+.uc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.uc-name{font-size:13px;font-weight:700;color:var(--text)}
+.uc-email{font-size:10.5px;color:var(--text3)}
+.uc-badges{display:flex;gap:5px;flex-wrap:wrap}
+.role-badge{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.rb-admin{background:var(--accent-light);color:var(--accent)}
+.rb-kam{background:var(--teal-light);color:var(--teal)}
+.rb-viewer{background:rgba(99,120,153,.15);color:var(--text3)}
+
+/* ═══════════════════════════════════════════════
+   API
+═══════════════════════════════════════════════ */
+.endpoint-list{display:flex;flex-direction:column;gap:6px}
+.endpoint{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;cursor:pointer;
+  transition:border-color .15s;
+}
+.endpoint:hover{border-color:var(--border2)}
+.ep-head{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.method{
+  padding:3px 9px;border-radius:5px;
+  font-size:10px;font-weight:800;letter-spacing:.06em;
+  font-family:'JetBrains Mono',monospace;
+}
+.m-get{background:var(--green-light);color:var(--green)}
+.m-post{background:var(--accent-light);color:var(--accent)}
+.m-put{background:var(--amber-light);color:var(--amber)}
+.m-del{background:var(--red-light);color:var(--red)}
+.ep-path{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text);flex:1}
+.ep-desc{font-size:11px;color:var(--text3)}
+.ep-body{
+  padding:12px 16px;border-top:1px solid var(--border);
+  background:var(--navy3);display:none;
+  font-size:11.5px;font-family:'JetBrains Mono',monospace;
+  color:var(--teal);line-height:1.7;
+}
+.ep-body.open{display:block}
+
+/* ═══════════════════════════════════════════════
+   AUDIT LOG
+═══════════════════════════════════════════════ */
+.log-list{display:flex;flex-direction:column}
+.log-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:11px 16px;border-bottom:1px solid var(--border);
+  transition:background .12s;
+}
+.log-item:last-child{border-bottom:none}
+.log-item:hover{background:var(--card2)}
+.log-icon{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;margin-top:1px;
+}
+.log-body{flex:1;min-width:0}
+.log-action{font-size:12.5px;font-weight:500;color:var(--text)}
+.log-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.log-time{font-size:11px;color:var(--text3);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+
+/* ═══════════════════════════════════════════════
+   INSIGHTS
+═══════════════════════════════════════════════ */
+.exec-summary{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+}
+.exec-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.exec-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--accent-light);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--accent);flex-shrink:0;
+}
+.exec-title{font-size:15px;font-weight:700;color:var(--text)}
+.exec-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.exec-text{font-size:13px;color:var(--text2);line-height:1.75}
+
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.insight-card{
+  background:var(--card);border-radius:10px;padding:14px;
+  border-left:3px solid;
+  transition:transform .15s,box-shadow .15s;cursor:pointer;
+}
+.insight-card:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.insight-card.info{border-left-color:var(--accent)}
+.insight-card.warn{border-left-color:var(--amber)}
+.insight-card.success{border-left-color:var(--green)}
+.insight-card.danger{border-left-color:var(--red)}
+.insight-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:5px}
+.insight-text{font-size:11.5px;color:var(--text2);line-height:1.6}
+.rec-btn{
+  margin-top:10px;display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;cursor:pointer;
+  transition:gap .15s;
+}
+.insight-card.info .rec-btn{color:var(--accent)}
+.insight-card.warn .rec-btn{color:var(--amber)}
+.insight-card.success .rec-btn{color:var(--green)}
+.insight-card.danger .rec-btn{color:var(--red)}
+.rec-btn:hover{gap:8px}
+
+/* ═══════════════════════════════════════════════
+   KANBAN
+═══════════════════════════════════════════════ */
+.kanban-wrap{display:flex;gap:0;overflow-x:auto;padding:4px 0}
+.kanban-wrap::-webkit-scrollbar{height:4px}
+.kanban-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.kanban-col{min-width:160px;flex:1;padding:0 10px;border-right:1px solid var(--border)}
+.kanban-col:last-child{border-right:none}
+.kanban-header{
+  font-size:11px;font-weight:700;
+  margin-bottom:10px;padding-bottom:8px;
+  border-bottom:2px solid;letter-spacing:.04em;
+}
+.kanban-item{
+  background:var(--card2);border-radius:8px;
+  padding:9px 10px;margin-bottom:7px;
+  font-size:11.5px;color:var(--text2);
+  border:1px solid var(--border);
+  cursor:pointer;transition:all .15s;
+}
+.kanban-item:hover{background:var(--navy4);color:var(--text);border-color:var(--border2)}
+
+/* ═══════════════════════════════════════════════
+   SEGMENT BUILDER
+═══════════════════════════════════════════════ */
+.seg-builder{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+}
+.seg-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.seg-op{
+  background:var(--navy3);border:1px solid var(--border2);
+  color:var(--accent);padding:4px 10px;border-radius:6px;
+  font-size:11px;cursor:pointer;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+}
+.seg-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.seg-tag{
+  display:flex;align-items:center;gap:5px;
+  background:var(--accent-light);border:1px solid rgba(45,131,255,.2);
+  color:var(--accent);padding:4px 9px;border-radius:7px;font-size:11px;font-weight:600;
+}
+
+/* ═══════════════════════════════════════════════
+   HISTORICO
+═══════════════════════════════════════════════ */
+.version-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;
+}
+.vb-current{background:var(--green-light);color:var(--green)}
+.vb-old{background:var(--card2);color:var(--text3);border:1px solid var(--border)}
+
+/* ═══════════════════════════════════════════════
+   KEY-VALUE INFO
+═══════════════════════════════════════════════ */
+.info-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+}
+.info-kv{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.info-kv:last-child{border-bottom:none}
+.info-key{font-size:11.5px;color:var(--text3);width:160px;flex-shrink:0}
+.info-val{font-size:12.5px;color:var(--text2);font-weight:500}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--navy3);border:1px solid var(--border2);
+  color:var(--text);padding:11px 18px;border-radius:10px;
+  font-size:12.5px;font-weight:500;z-index:9999;
+  box-shadow:0 6px 24px rgba(0,0,0,.4);
+  animation:slideIn .25s ease;
+}
+@keyframes slideIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:700px){
+  :root{--sidebar-w:54px}
+  .nav-label,.brand-name,.brand-sub,.user-info,.section-title,.nav-badge{display:none}
+  .nav-item{justify-content:center;padding:10px 0}
+  .charts-row{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .metric-grid{grid-template-columns:1fr}
+  .users-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  .h-btn span,.h-btn .ti+*{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">
+      <i class="ti ti-chart-dots" style="font-size:17px;color:#fff"></i>
+    </div>
+    <div>
+      <div class="brand-name">ComercialIQ</div>
+      <div class="brand-sub">Enterprise</div>
+    </div>
+  </div>
+
+  <div class="nav-scroll">
+    <div class="section-title">Principal</div>
+    <div class="nav-item active" onclick="navigate('dashboard',this)">
+      <i class="ti ti-layout-dashboard"></i><span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="navigate('kam',this)">
+      <i class="ti ti-user-star"></i><span class="nav-label">Vista KAM</span>
+    </div>
+    <div class="nav-item" onclick="navigate('insights',this)">
+      <i class="ti ti-brain"></i><span class="nav-label">Insights IA</span>
+      <span class="nav-badge">3</span>
+    </div>
+
+    <div class="section-title">Gestión</div>
+    <div class="nav-item" onclick="navigate('upload',this)">
+      <i class="ti ti-upload"></i><span class="nav-label">Cargar Datos</span>
+    </div>
+    <div class="nav-item" onclick="navigate('segments',this)">
+      <i class="ti ti-filter"></i><span class="nav-label">Segmentos</span>
+    </div>
+    <div class="nav-item" onclick="navigate('historico',this)">
+      <i class="ti ti-history"></i><span class="nav-label">Histórico</span>
+    </div>
+
+    <div class="section-title">Configuración</div>
+    <div class="nav-item" onclick="navigate('metricas',this)">
+      <i class="ti ti-adjustments-horizontal"></i><span class="nav-label">Métricas</span>
+    </div>
+    <div class="nav-item" onclick="navigate('usuarios',this)">
+      <i class="ti ti-users"></i><span class="nav-label">Usuarios</span>
+    </div>
+    <div class="nav-item" onclick="navigate('api',this)">
+      <i class="ti ti-api"></i><span class="nav-label">API / CRM</span>
+    </div>
+    <div class="nav-item" onclick="navigate('auditoria',this)">
+      <i class="ti ti-shield-check"></i><span class="nav-label">Auditoría</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="avatar" id="user-av">JR</div>
+    <div class="user-info">
+      <div class="user-name" id="user-name">Jorge Ruiz</div>
+      <div class="user-role-lbl" id="user-role">Administrador</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="header">
+    <button class="h-icon-btn" onclick="toggleSidebar()" title="Menú">
+      <i class="ti ti-menu-2" style="font-size:18px"></i>
+    </button>
+    <div class="breadcrumb">
+      <i class="ti ti-home" style="font-size:13px"></i>
+      <span class="sep">/</span>
+      <span id="bc-label">Dashboard</span>
+    </div>
+    <div class="h-spacer"></div>
+    <!-- Role switcher -->
+    <div class="role-switch">
+      <button class="role-btn active" onclick="switchRole('admin',this)">Admin</button>
+      <button class="role-btn" onclick="switchRole('kam',this)">KAM</button>
+    </div>
+    <!-- Export buttons -->
+    <div class="h-actions">
+      <button class="h-btn" onclick="exportReport('pdf')">
+        <i class="ti ti-file-type-pdf"></i><span>PDF</span>
+      </button>
+      <button class="h-btn" onclick="exportReport('xlsx')">
+        <i class="ti ti-file-spreadsheet"></i><span>XLSX</span>
+      </button>
+      <button class="h-btn primary" onclick="navigate('upload',null)">
+        <i class="ti ti-upload"></i><span>Importar</span>
+      </button>
+      <button class="h-icon-btn notif-btn" onclick="navigate('auditoria',null)" title="Notificaciones">
+        <i class="ti ti-bell" style="font-size:17px"></i>
+        <div class="notif-dot"></div>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="panel active" id="panel-dashboard">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <i class="ti ti-calendar" style="color:var(--text3);font-size:14px"></i>
+          <span class="filter-label">Periodo</span>
+          <select class="filter-select" onchange="refreshKPIs()">
+            <option>Q1 2025</option><option selected>Q2 2025</option>
+            <option>Q3 2025</option><option>Anual 2025</option>
+          </select>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group">
+          <span class="filter-label">Adm. Comercial</span>
+          <select class="filter-select" onchange="refreshKPIs()">
+            <option>Todos</option><option>J. Ruiz</option>
+            <option>M. López</option><option>C. Torres</option>
+          </select>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group">
+          <span class="filter-label">Segmento</span>
+          <select class="filter-select" onchange="refreshKPIs()">
+            <option>Todos</option><option>Enterprise</option>
+            <option>PyME</option><option>Gobierno</option>
+          </select>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="saved-filter">
+          <i class="ti ti-star"></i>North Region Q2
+        </div>
+        <div class="saved-filter">
+          <i class="ti ti-star"></i>Enterprise YTD
+        </div>
+        <button class="h-btn" style="margin-left:auto" onclick="saveFilter()">
+          <i class="ti ti-device-floppy"></i>Guardar filtro
+        </button>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Ventas por Mes — 2025</span>
+            <span class="card-action" onclick="showToast('Abriendo detalle de ventas...')">Ver detalle →</span>
+          </div>
+          <div class="bar-chart-area" id="bar-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title">Distribución por Segmento</span>
+            <span class="card-action" onclick="showToast('Abriendo análisis de segmentos...')">Ver detalle →</span>
+          </div>
+          <div class="donut-section">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="44" fill="none" stroke="var(--navy4)" stroke-width="18"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#2D83FF" stroke-width="18"
+                stroke-dasharray="124 152" stroke-dashoffset="-3" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#00D4A8" stroke-width="18"
+                stroke-dasharray="86 190" stroke-dashoffset="-127" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#F7B731" stroke-width="18"
+                stroke-dasharray="48 228" stroke-dashoffset="-213" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#637899" stroke-width="18"
+                stroke-dasharray="18 258" stroke-dashoffset="-261" transform="rotate(-90 60 60)"/>
+              <text x="60" y="54" text-anchor="middle" font-size="17" font-weight="700"
+                fill="var(--text)" font-family="DM Sans,sans-serif">$4.2M</text>
+              <text x="60" y="70" text-anchor="middle" font-size="9"
+                fill="var(--text3)" font-family="DM Sans,sans-serif">Total Q2</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item">
+                <div class="leg-dot" style="background:#2D83FF"></div>
+                <span>Enterprise</span><span class="leg-pct">45%</span>
+              </div>
+              <div class="legend-item">
+                <div class="leg-dot" style="background:#00D4A8"></div>
+                <span>PyME</span><span class="leg-pct">31%</span>
+              </div>
+              <div class="legend-item">
+                <div class="leg-dot" style="background:#F7B731"></div>
+                <span>Gobierno</span><span class="leg-pct">17%</span>
+              </div>
+              <div class="legend-item">
+                <div class="leg-dot" style="background:#637899"></div>
+                <span>Otros</span><span class="leg-pct">7%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <span class="card-title">Top Clientes — Q2 2025</span>
+          <div class="table-tools">
+            <button class="h-btn"><i class="ti ti-search"></i>Buscar</button>
+            <button class="h-btn"><i class="ti ti-sort-ascending"></i>Ordenar</button>
+            <button class="h-btn"><i class="ti ti-filter"></i>Filtrar</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Sector</th><th>KAM</th>
+                <th>Ventas Q2</th><th>Norte</th><th>Cumplimiento</th><th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="clients-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ KAM ═══ -->
+    <div class="panel" id="panel-kam">
+      <div class="kpi-grid" id="kpi-kam"></div>
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">Pipeline — Jorge Ruiz</span>
+          <span class="card-action">Ver todas las oportunidades →</span>
+        </div>
+        <div class="kanban-wrap" id="kanban"></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <span class="card-title">Mis Cuentas Asignadas</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th><th>Segmento</th><th>Facturación YTD</th>
+                <th>Norte Anual</th><th>Prob. Renovación</th><th>Última Actividad</th>
+              </tr>
+            </thead>
+            <tbody id="kam-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ UPLOAD ═══ -->
+    <div class="panel" id="panel-upload">
+      <div class="upload-zone" id="dropzone"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)"
+        onclick="document.getElementById('file-input').click()">
+        <i class="ti ti-cloud-upload"></i>
+        <div class="upload-title">Arrastra archivos aquí o haz clic para cargar</div>
+        <div class="upload-sub">Motor ETL con detección automática de columnas, duplicados y validación</div>
+        <div class="file-types">
+          <span class="file-badge">CSV</span>
+          <span class="file-badge">XLSX</span>
+          <span class="file-badge">XML</span>
+          <span class="file-badge">PDF</span>
+          <span class="file-badge">DOCX</span>
+        </div>
+        <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this.files)">
+      </div>
+
+      <div class="upload-list" id="upload-list"></div>
+
+      <div class="table-card" id="mapping-preview" style="display:none">
+        <div class="table-header">
+          <span class="card-title">Mapeo Automático de Columnas</span>
+          <span style="font-size:11px;color:var(--green);font-weight:600">
+            <i class="ti ti-check"></i> 12 / 14 columnas mapeadas correctamente
+          </span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Col. Origen</th><th>Tipo Detectado</th><th>Campo Destino</th><th>Calidad</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">fecha_venta</code></td><td><span class="status-pill sp-blue">DATE</span></td><td>Fecha Transacción</td><td style="color:var(--green)">✓ 100%</td></tr>
+              <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">cliente_id</code></td><td><span class="status-pill sp-blue">ID</span></td><td>ID Cliente</td><td style="color:var(--green)">✓ 99.8%</td></tr>
+              <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">monto_total</code></td><td><span class="status-pill sp-green">CURRENCY</span></td><td>Ventas Netas</td><td style="color:var(--green)">✓ 98.2%</td></tr>
+              <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">region_comercial</code></td><td><span class="status-pill sp-amber">STRING</span></td><td>Zona Norte — Mapear</td><td style="color:var(--amber)">⚠ 87%</td></tr>
+              <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">dup_registro</code></td><td><span class="status-pill sp-red">DUPLICATE</span></td><td>— Omitir —</td><td style="color:var(--red)">✗ 23 duplicados</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SEGMENTS ═══ -->
+    <div class="panel" id="panel-segments">
+      <div class="charts-row" style="align-items:start">
+        <div class="seg-builder">
+          <div class="card-header" style="margin-bottom:14px">
+            <span class="card-title">Constructor de Segmentos</span>
+          </div>
+          <div class="seg-row">
+            <select class="filter-select">
+              <option>Sector</option><option>Región</option>
+              <option>Facturación</option><option>KAM</option>
+            </select>
+            <span class="seg-op">=</span>
+            <select class="filter-select">
+              <option>Enterprise</option><option>PyME</option><option>Gobierno</option>
+            </select>
+            <button class="h-btn" onclick="addSegmentTag('Sector = Enterprise')">
+              <i class="ti ti-plus"></i>Agregar
+            </button>
+          </div>
+          <div class="seg-row">
+            <select class="filter-select">
+              <option>Y además</option><option>O también</option><option>Excepto</option>
+            </select>
+            <select class="filter-select">
+              <option>Ventas &gt; $500K</option><option>Ventas &gt; $1M</option>
+              <option>Norte &gt; 80%</option>
+            </select>
+            <button class="h-btn" onclick="addSegmentTag('Norte > 80%')">
+              <i class="ti ti-plus"></i>Agregar
+            </button>
+          </div>
+          <div class="seg-tags" id="seg-tags">
+            <div class="seg-tag">
+              <i class="ti ti-tag" style="font-size:11px"></i>Sector = Enterprise
+              <i class="ti ti-x" style="font-size:10px;cursor:pointer" onclick="this.parentElement.remove()"></i>
+            </div>
+            <div class="seg-tag">
+              <i class="ti ti-tag" style="font-size:11px"></i>Norte &gt; 80%
+              <i class="ti ti-x" style="font-size:10px;cursor:pointer" onclick="this.parentElement.remove()"></i>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <input type="text" id="seg-name-input"
+              style="flex:1;background:var(--navy3);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:7px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif"
+              placeholder="Nombre del segmento...">
+            <button class="h-btn primary" onclick="saveSegment()">
+              <i class="ti ti-device-floppy"></i>Guardar
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="card-header" style="margin-bottom:8px">
+            <span class="card-title">Segmentos Guardados</span>
+          </div>
+          <div id="saved-segs" style="display:flex;flex-direction:column;gap:7px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HISTORICO ═══ -->
+    <div class="panel" id="panel-historico">
+      <div class="table-card">
+        <div class="table-header">
+          <span class="card-title">Versiones del Dataset</span>
+          <button class="h-btn primary" onclick="showToast('Subiendo archivo de actualización...')">
+            <i class="ti ti-upload"></i>Subir actualización
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Versión</th><th>Fecha Carga</th><th>Archivo Fuente</th>
+                <th>Filas</th><th>Cambios</th><th>Usuario</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="version-badge vb-current">v4.2 — actual</span></td>
+                <td>2025-05-06 14:23</td><td>ventas_q2_2025.xlsx</td>
+                <td>14,892</td><td style="color:var(--green)">+342 filas</td>
+                <td>J. Ruiz</td>
+                <td><button class="h-btn"><i class="ti ti-eye"></i>Ver</button></td>
+              </tr>
+              <tr>
+                <td><span class="version-badge vb-old">v4.1</span></td>
+                <td>2025-04-28 09:10</td><td>ventas_update_abr.csv</td>
+                <td>14,550</td><td style="color:var(--green)">+127 filas</td>
+                <td>M. López</td>
+                <td><button class="h-btn" onclick="showToast('Restaurando versión v4.1...')"><i class="ti ti-restore"></i>Restaurar</button></td>
+              </tr>
+              <tr>
+                <td><span class="version-badge vb-old">v4.0</span></td>
+                <td>2025-04-01 08:00</td><td>base_q1_2025.xlsx</td>
+                <td>14,423</td><td>Base Q1</td>
+                <td>J. Ruiz</td>
+                <td><button class="h-btn" onclick="showToast('Restaurando versión v4.0...')"><i class="ti ti-restore"></i>Restaurar</button></td>
+              </tr>
+              <tr>
+                <td><span class="version-badge vb-old">v3.8</span></td>
+                <td>2025-01-15 10:30</td><td>historico_2024.xlsx</td>
+                <td>52,100</td><td>Año completo 2024</td>
+                <td>Admin</td>
+                <td><button class="h-btn" onclick="showToast('Restaurando versión v3.8...')"><i class="ti ti-restore"></i>Restaurar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MÉTRICAS ═══ -->
+    <div class="panel" id="panel-metricas">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:700">Configuración de Métricas y Fórmulas</span>
+        <button class="h-btn primary"><i class="ti ti-plus"></i>Nueva Métrica</button>
+      </div>
+      <div class="metric-grid" id="metrics-cfg"></div>
+    </div>
+
+    <!-- ═══ USUARIOS ═══ -->
+    <div class="panel" id="panel-usuarios">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;font-weight:700">Gestión de Usuarios</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">RBAC · SSO · 2FA habilitado</div>
+        </div>
+        <button class="h-btn primary" onclick="showToast('Abriendo formulario de nuevo usuario...')">
+          <i class="ti ti-user-plus"></i>Nuevo Usuario
+        </button>
+      </div>
+      <div class="users-grid" id="users-grid"></div>
+    </div>
+
+    <!-- ═══ API ═══ -->
+    <div class="panel" id="panel-api">
+      <div class="info-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:42px;height:42px;border-radius:10px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="ti ti-lock" style="font-size:20px;color:var(--teal)"></i>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700">API Key Activa — Producción</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">
+              Última rotación: 2025-04-01 · Scopes: read, write, etl, admin
+            </div>
+          </div>
+          <button class="h-btn" style="margin-left:auto" onclick="showToast('Rotando API Key...')">
+            <i class="ti ti-refresh"></i>Rotar Key
+          </button>
+        </div>
+        <div style="background:var(--navy3);border-radius:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);border:1px solid var(--border2)">
+          ck_live_••••••••••••••••••••••••••••••••••••••••••••••••••••••
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;margin-top:4px">Endpoints Disponibles</div>
+      <div class="endpoint-list" id="endpoint-list"></div>
+    </div>
+
+    <!-- ═══ AUDITORÍA ═══ -->
+    <div class="panel" id="panel-auditoria">
+      <div class="table-card">
+        <div class="table-header">
+          <span class="card-title">Log de Auditoría y Cambios</span>
+          <div style="display:flex;gap:6px">
+            <select class="filter-select">
+              <option>Últimas 24h</option><option>Última semana</option><option>Último mes</option>
+            </select>
+            <button class="h-btn" onclick="exportReport('pdf')">
+              <i class="ti ti-download"></i>Exportar
+            </button>
+          </div>
+        </div>
+        <div class="log-list" id="audit-log"></div>
+      </div>
+    </div>
+
+    <!-- ═══ INSIGHTS ═══ -->
+    <div class="panel" id="panel-insights">
+      <div class="exec-summary">
+        <div class="exec-header">
+          <div class="exec-icon"><i class="ti ti-brain"></i></div>
+          <div>
+            <div class="exec-title">Resumen Ejecutivo — Q2 2025</div>
+            <div class="exec-sub">Generado el 07 May 2025 · Dataset v4.2 · Modelo: ComercialIQ Analytics v2.1</div>
+          </div>
+        </div>
+        <p class="exec-text">
+          Las ventas totales del trimestre alcanzaron <strong style="color:var(--text)">$4.2M USD</strong>,
+          superando el norte en un <strong style="color:var(--green)">+7.3%</strong>
+          respecto al objetivo de $3.9M. El segmento Enterprise lidera con el <strong style="color:var(--text)">45%</strong>
+          del volumen total. Se identifican <strong style="color:var(--amber)">3 cuentas de riesgo</strong>
+          con inactividad superior a 60 días y potencial de churn estimado en $940K. El ticket promedio creció
+          <strong style="color:var(--green)">+12% YoY</strong> hasta $16.9K, impulsado por campañas de upsell en Enterprise.
+          La tasa de renovación se mantiene en <strong style="color:var(--text)">91.4%</strong>,
+          +2.1pp vs Q1 2025.
+        </p>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-top:4px">
+        Insights y Recomendaciones Accionables
+      </div>
+      <div class="insight-grid" id="insight-cards"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+/* ══════════════════════════
+   DATA
+══════════════════════════ */
+const kpiData = [
+  {label:'Ventas Totales',icon:'ti-currency-dollar',val:'$4.2M',delta:'+7.3%',up:true,
+    sub:'vs $3.9M norte',color:'var(--accent)',bg:'var(--accent-light)',
+    sparks:[55,70,62,80,74,90,83,95,88,100]},
+  {label:'Norte Cumplido',icon:'ti-target',val:'107%',delta:'+7pp',up:true,
+    sub:'Objetivo: 100%',color:'var(--green)',bg:'var(--green-light)',
+    sparks:[80,82,78,85,88,91,89,95,98,107]},
+  {label:'Clientes Activos',icon:'ti-users',val:'248',delta:'-3',up:false,
+    sub:'vs 251 Q1',color:'var(--red)',bg:'var(--red-light)',
+    sparks:[260,258,255,252,255,251,250,249,248,248]},
+  {label:'Ticket Promedio',icon:'ti-receipt',val:'$16.9K',delta:'+12%',up:true,
+    sub:'+$1.8K vs Q1',color:'var(--teal)',bg:'var(--teal-light)',
+    sparks:[14,14.5,15,14.8,15.5,16,15.8,16.5,16.9,16.9]},
+  {label:'Tasa Renovación',icon:'ti-refresh',val:'91.4%',delta:'+2.1pp',up:true,
+    sub:'+2.1pp vs Q1',color:'var(--green)',bg:'var(--green-light)',
+    sparks:[85,86,87,87,88,89,90,91,91,91.4]},
+  {label:'NPS Promedio',icon:'ti-star',val:'68',delta:'+4',up:true,
+    sub:'Benchmark: 60',color:'var(--amber)',bg:'var(--amber-light)',
+    sparks:[60,61,62,63,63,65,66,67,68,68]},
+];
+
+const clients = [
+  ['Bancolombia S.A.','Financiero','J. Ruiz','$820K','115%','ok'],
+  ['Ecopetrol S.A.','Energía','M. López','$640K','98%','warn'],
+  ['Grupo Éxito','Retail','C. Torres','$510K','122%','ok'],
+  ['Avianca Holdings','Transporte','J. Ruiz','$390K','76%','risk'],
+  ['ISA – Interconex.','Energía','M. López','$310K','104%','ok'],
+  ['Cemex Colombia','Industrial','C. Torres','$280K','89%','warn'],
+  ['Davivienda','Financiero','M. López','$240K','63%','risk'],
+  ['Postobón S.A.','Consumo','J. Ruiz','$210K','101%','ok'],
+];
+
+const kamKPIs = [
+  {label:'Mi Cuota Anual',icon:'ti-target',val:'$1.8M',delta:'+9.1%',up:true,
+    sub:'Asignada 2025',color:'var(--teal)',bg:'var(--teal-light)',
+    sparks:[70,75,80,82,85,88,90,93,97,100]},
+  {label:'Facturado YTD',icon:'ti-currency-dollar',val:'$1.96M',delta:'109%',up:true,
+    sub:'de $1.8M cuota',color:'var(--green)',bg:'var(--green-light)',
+    sparks:[60,70,78,85,90,95,98,100,105,109]},
+  {label:'Cuentas Clave',icon:'ti-briefcase',val:'18',delta:'0',up:true,
+    sub:'Sin cambios',color:'var(--accent)',bg:'var(--accent-light)',
+    sparks:[18,18,18,18,18,18,18,18,18,18]},
+  {label:'Deals Activos',icon:'ti-chart-arrows',val:'7',delta:'+2',up:true,
+    sub:'Pipeline abierto',color:'var(--amber)',bg:'var(--amber-light)',
+    sparks:[3,4,4,5,5,6,6,7,7,7]},
+];
+
+const kanbanData = [
+  {col:'Prospección',color:'#2D83FF',
+    items:['Nutresa – $120K','Cine Colombia – $80K','Alpina – $95K']},
+  {col:'Propuesta',color:'#00D4A8',
+    items:['ETB – $210K','Davivienda – $340K']},
+  {col:'Negociación',color:'#F7B731',
+    items:['Postobón – $190K']},
+  {col:'Cierre',color:'#1EC97E',
+    items:['Argos S.A. – $450K','GEB – $280K']},
+];
+
+const kamClients = [
+  ['Bancolombia S.A.','Enterprise','$820K','$715K','96%','Hace 2 días'],
+  ['Avianca Holdings','Enterprise','$390K','$512K','72%','Hace 12 días'],
+  ['ETB S.A.','PyME','$210K','$200K','88%','Hoy'],
+  ['Postobón S.A.','Industrial','$190K','$220K','94%','Hace 5 días'],
+  ['Argos S.A.','Enterprise','$450K','$400K','99%','Ayer'],
+];
+
+const metricsConfig = [
+  {name:'Cumplimiento Norte',formula:'(Ventas_Reales / Cuota_Norte) * 100',
+    thresh:80,unit:'%',color:'var(--green)',active:true},
+  {name:'Ticket Promedio',formula:'Ventas_Netas / Num_Transacciones',
+    thresh:15000,unit:'$',color:'var(--accent)',active:true},
+  {name:'Tasa de Churn',formula:'(Clientes_Perdidos / Clientes_Inicio) * 100',
+    thresh:5,unit:'%',color:'var(--red)',active:true},
+  {name:'CAC (Costo Adquisición)',formula:'Costo_Total_Ventas / Clientes_Nuevos',
+    thresh:5000,unit:'$',color:'var(--amber)',active:true},
+  {name:'LTV Estimado',formula:'Ticket_Promedio * Frecuencia_Anual * Años_Retención',
+    thresh:50000,unit:'$',color:'var(--teal)',active:false},
+  {name:'NPS Segmentado',formula:'(%Promotores - %Detractores) * 100',
+    thresh:60,unit:'pts',color:'var(--green)',active:true},
+];
+
+const usersData = [
+  {name:'Jorge Ruiz',email:'j.ruiz@empresa.co',role:'admin',av:'JR'},
+  {name:'María López',email:'m.lopez@empresa.co',role:'kam',av:'ML'},
+  {name:'Carlos Torres',email:'c.torres@empresa.co',role:'kam',av:'CT'},
+  {name:'Ana Gómez',email:'a.gomez@empresa.co',role:'viewer',av:'AG'},
+  {name:'Lucía Vargas',email:'l.vargas@empresa.co',role:'kam',av:'LV'},
+  {name:'Roberto Díaz',email:'r.diaz@empresa.co',role:'admin',av:'RD'},
+  {name:'Sandra Mejía',email:'s.mejia@empresa.co',role:'kam',av:'SM'},
+  {name:'Felipe Mora',email:'f.mora@empresa.co',role:'viewer',av:'FM'},
+];
+
+const endpoints = [
+  {m:'GET',path:'/api/v1/ventas',desc:'Listar ventas con filtros',
+    body:'Query: ?fecha_desde=2025-01-01&segmento=Enterprise&limit=100\nResponse: { data: [...], total: 842, pages: 9, filtros_aplicados: {...} }'},
+  {m:'POST',path:'/api/v1/upload',desc:'Cargar archivo ETL',
+    body:'Body: multipart/form-data { file: <binary>, type: "xlsx", mapping: "auto" }\nResponse: { job_id: "etl_abc123", status: "processing", estimated_ms: 3400 }'},
+  {m:'GET',path:'/api/v1/kpis',desc:'KPIs consolidados por rol',
+    body:'Query: ?rol=KAM&usuario=j.ruiz&periodo=Q2-2025\nResponse: { ventas: 4200000, norte_pct: 107, clientes: 248, ticket_prom: 16900 }'},
+  {m:'POST',path:'/api/v1/segmentos',desc:'Crear / guardar segmento',
+    body:'Body: { nombre: "Enterprise Norte", reglas: [{ campo: "sector", op: "=", val: "Enterprise" }] }\nResponse: { id: "seg_001", count: 48, created_at: "2025-05-07T14:23Z" }'},
+  {m:'GET',path:'/api/v1/historico/versiones',desc:'Versiones del dataset',
+    body:'Response: [{ version: "v4.2", fecha: "2025-05-06", filas: 14892, usuario: "j.ruiz" }, ...]'},
+  {m:'PUT',path:'/api/v1/metricas/:id',desc:'Actualizar fórmula / umbral',
+    body:'Body: { formula: "(Ventas/Norte)*100", umbral: 85 }\nResponse: { updated: true, recalculado: true, kpis_afectados: 3 }'},
+  {m:'GET',path:'/api/v1/auditoria',desc:'Log de cambios y accesos',
+    body:'Query: ?desde=2025-05-01&usuario=all&tipo=upload\nResponse: [{ accion: "upload", usuario: "j.ruiz", ts: "2025-05-06T14:23:11Z" }, ...]'},
+  {m:'POST',path:'/api/v1/auth/2fa/verify',desc:'Verificar token 2FA (TOTP)',
+    body:'Body: { usuario: "j.ruiz", token: "123456" }\nResponse: { valid: true, session_token: "jwt_...", expires_in: 3600 }'},
+];
+
+const auditLog = [
+  {icon:'ti-upload',color:'var(--accent)',bg:'rgba(45,131,255,.12)',
+    action:'Archivo cargado y procesado: ventas_q2_2025.xlsx',
+    meta:'J. Ruiz · ETL completado en 3.2s · +342 filas · 23 duplicados omitidos',time:'14:23'},
+  {icon:'ti-filter',color:'var(--teal)',bg:'rgba(0,212,168,.12)',
+    action:'Segmento creado: "Enterprise Norte"',
+    meta:'M. López · 48 cuentas incluidas · Aplicado a 2 reportes',time:'13:50'},
+  {icon:'ti-user-plus',color:'var(--green)',bg:'var(--green-light)',
+    action:'Usuario creado: l.vargas@empresa.co',
+    meta:'Admin (R. Díaz) · Rol: KAM · 2FA activado · IP: 181.132.xx.xx',time:'11:02'},
+  {icon:'ti-file-type-pdf',color:'var(--amber)',bg:'var(--amber-light)',
+    action:'Reporte exportado: Resumen_Ejecutivo_Q2_2025.pdf',
+    meta:'C. Torres · 4.2 MB · Descargado 1 vez',time:'10:34'},
+  {icon:'ti-adjustments',color:'var(--red)',bg:'var(--red-light)',
+    action:'Métrica modificada: Umbral "Cumplimiento Norte" → 85%',
+    meta:'Admin (J. Ruiz) · KPIs recalculados automáticamente',time:'09:15'},
+  {icon:'ti-login',color:'var(--text3)',bg:'rgba(99,120,153,.12)',
+    action:'Inicio de sesión exitoso con 2FA (TOTP)',
+    meta:'M. López · IP: 181.132.xx.xx · Device: Chrome 124 / macOS',time:'08:57'},
+  {icon:'ti-database',color:'var(--teal)',bg:'rgba(0,212,168,.12)',
+    action:'Versión del dataset restaurada: v4.1 → v4.2',
+    meta:'Admin · KPIs recalculados · 342 filas re-integradas',time:'08:20'},
+];
+
+const insightCards = [
+  {type:'danger',title:'⚠ Riesgo de Churn — 3 Cuentas Clave',
+    text:'Avianca, Davivienda y ETB no registran actividad en +60 días. Pérdida potencial estimada: $940K para Q3.',
+    rec:'Activar protocolo de retención'},
+  {type:'success',title:'✓ Oportunidad de Upsell — Enterprise',
+    text:'El segmento Enterprise superó su cuota Q2 en +22%. Se identificaron 8 cuentas con alta propensión a incrementar contrato.',
+    rec:'Ver cuentas con upsell potencial'},
+  {type:'warn',title:'↑ Estacionalidad — Julio en Riesgo',
+    text:'El modelo detecta patrón histórico de caída del 18% en julio. Se recomienda adelantar cierres a junio.',
+    rec:'Ver análisis estacional'},
+  {type:'info',title:'Nuevo Cluster de Alto Valor Detectado',
+    text:'El modelo identificó 12 PyMEs con perfil y comportamiento de compra similar al segmento Enterprise Top-20.',
+    rec:'Explorar nuevo segmento'},
+];
+
+const savedSegments = [
+  {name:'Enterprise Norte',count:48,tags:'Sector=Enterprise, Norte>80%'},
+  {name:'PyME Alto Valor',count:31,tags:'Sector=PyME, Facturación>$500K'},
+  {name:'Top 20 Clientes',count:20,tags:'Ranking top 20 por ventas YTD'},
+  {name:'Riesgo de Churn',count:8,tags:'Inactividad>60d, Norte<75%'},
+];
+
+/* ══════════════════════════
+   BUILDERS
+══════════════════════════ */
+function buildKPIs(containerId, data) {
+  const g = document.getElementById(containerId);
+  if (!g) return;
+  g.innerHTML = '';
+  data.forEach(k => {
+    const maxV = Math.max(...k.sparks);
+    const bars = k.sparks.map(v => {
+      const h = Math.round((v / maxV) * 100);
+      const op = 0.35 + (v / maxV) * 0.65;
+      return `<div class="spark-bar" style="height:${h}%;background:${k.color};opacity:${op.toFixed(2)}"></div>`;
+    }).join('');
+    g.innerHTML += `
+      <div class="kpi-card">
+        <div class="kpi-icon-row">
+          <div class="kpi-icon" style="background:${k.bg}">
+            <i class="ti ${k.icon}" style="color:${k.color}"></i>
+          </div>
+        </div>
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-val">${k.val}</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta ${k.up ? 'up' : 'down'}">${k.up ? '▲' : '▼'} ${k.delta}</span>
+          <span class="kpi-sub">${k.sub}</span>
+        </div>
+        <div class="kpi-sparkline">${bars}</div>
+      </div>`;
+  });
+}
+
+function buildBarChart() {
+  const months = ['Ene','Feb','Mar','Abr','May','Jun'];
+  const vals   = [58, 72, 65, 80, 74, 91];
+  const colors = ['rgba(45,131,255,0.4)','rgba(45,131,255,0.45)','rgba(45,131,255,0.5)',
+                  'rgba(45,131,255,0.55)','rgba(45,131,255,0.6)','#2D83FF'];
+  const max = Math.max(...vals);
+  const c = document.getElementById('bar-chart');
+  if (!c) return;
+  c.innerHTML = months.map((m,i) => `
+    <div class="bar-col">
+      <span class="bar-val">$${vals[i]}K</span>
+      <div class="bar-wrap">
+        <div class="bar" style="height:${Math.round((vals[i]/max)*100)}%;background:${colors[i]}"></div>
+      </div>
+      <span class="bar-lbl">${m}</span>
+    </div>`).join('');
+}
+
+function buildClientsTable() {
+  const t = document.getElementById('clients-table');
+  if (!t) return;
+  const stateMap = {
+    ok:  ['sp-green','✓ OK'],
+    warn:['sp-amber','⚠ Atención'],
+    risk:['sp-red','✗ Riesgo'],
+  };
+  t.innerHTML = clients.map(c => {
+    const [cls, lbl] = stateMap[c[5]];
+    return `<tr>
+      <td><strong style="color:var(--text)">${c[0]}</strong></td>
+      <td>${c[1]}</td><td>${c[2]}</td>
+      <td style="color:var(--text);font-weight:600">${c[3]}</td>
+      <td>${c[4]}</td>
+      <td><span class="status-pill sp-blue">${c[4]}</span></td>
+      <td><span class="status-pill ${cls}">${lbl}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildKAM() {
+  buildKPIs('kpi-kam', kamKPIs);
+  const kb = document.getElementById('kanban');
+  if (!kb) return;
+  kb.innerHTML = kanbanData.map(col => `
+    <div class="kanban-col">
+      <div class="kanban-header" style="color:${col.color};border-color:${col.color}">${col.col}</div>
+      ${col.items.map(i => `<div class="kanban-item">${i}</div>`).join('')}
+    </div>`).join('');
+  const kt = document.getElementById('kam-table');
+  if (!kt) return;
+  kt.innerHTML = kamClients.map(r => {
+    const pct = parseFloat(r[4]);
+    const clr = pct >= 90 ? 'var(--green)' : pct >= 80 ? 'var(--amber)' : 'var(--red)';
+    return `<tr>
+      <td><strong style="color:var(--text)">${r[0]}</strong></td>
+      <td><span class="status-pill ${r[1]==='Enterprise'?'sp-blue':'sp-amber'}">${r[1]}</span></td>
+      <td style="font-weight:600;color:var(--text)">${r[2]}</td>
+      <td>${r[3]}</td>
+      <td style="font-weight:700;color:${clr}">${r[4]}</td>
+      <td>${r[5]}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildMetrics() {
+  const g = document.getElementById('metrics-cfg');
+  if (!g) return;
+  g.innerHTML = metricsConfig.map(m => `
+    <div class="metric-card">
+      <div class="metric-head">
+        <span class="metric-name">${m.name}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:${m.active?'var(--green)':'var(--text3)'};font-weight:600">
+            ${m.active ? '● Activa' : '○ Inactiva'}
+          </span>
+          <button class="h-btn" style="height:26px;font-size:11px" onclick="showToast('Editando métrica: ${m.name}...')">
+            <i class="ti ti-edit"></i>
+          </button>
+        </div>
+      </div>
+      <div class="formula-box">${m.formula}</div>
+      <div class="threshold-row">
+        <span style="color:var(--text3)">Umbral alerta:</span>
+        <input class="threshold-input" type="number" value="${m.thresh}" onchange="showToast('Umbral actualizado y KPIs recalculados')">
+        <span style="color:var(--text3)">${m.unit}</span>
+        <div style="margin-left:auto;width:60px;height:4px;background:${m.color};border-radius:2px;opacity:.5"></div>
+      </div>
+    </div>`).join('');
+}
+
+function buildUsers() {
+  const g = document.getElementById('users-grid');
+  if (!g) return;
+  g.innerHTML = usersData.map(u => `
+    <div class="user-chip">
+      <div class="uc-top">
+        <div class="avatar" style="background:${u.role==='admin'?'linear-gradient(135deg,var(--accent),#0052CC)':u.role==='kam'?'linear-gradient(135deg,var(--teal),#006B5A)':'var(--navy4)'};font-size:11px">
+          ${u.av}
+        </div>
+        <div>
+          <div class="uc-name">${u.name}</div>
+          <div class="uc-email">${u.email}</div>
+        </div>
+      </div>
+      <div class="uc-badges">
+        <span class="role-badge ${u.role==='admin'?'rb-admin':u.role==='kam'?'rb-kam':'rb-viewer'}">
+          ${u.role==='admin'?'Admin':u.role==='kam'?'KAM':'Viewer'}
+        </span>
+        <span class="role-badge rb-viewer">2FA ✓</span>
+        <span class="role-badge rb-viewer">SSO</span>
+      </div>
+    </div>`).join('');
+}
+
+function buildAPI() {
+  const el = document.getElementById('endpoint-list');
+  if (!el) return;
+  el.innerHTML = endpoints.map((e,i) => `
+    <div class="endpoint" onclick="toggleEP(${i})">
+      <div class="ep-head">
+        <span class="method m-${e.m.toLowerCase()}">${e.m}</span>
+        <span class="ep-path">${e.path}</span>
+        <span class="ep-desc">${e.desc}</span>
+        <i class="ti ti-chevron-down" style="font-size:13px;color:var(--text3);margin-left:8px;flex-shrink:0"></i>
+      </div>
+      <div class="ep-body" id="ep-${i}">${e.body}</div>
+    </div>`).join('');
+}
+
+function buildAudit() {
+  const el = document.getElementById('audit-log');
+  if (!el) return;
+  el.innerHTML = auditLog.map(l => `
+    <div class="log-item">
+      <div class="log-icon" style="background:${l.bg};color:${l.color}">
+        <i class="ti ${l.icon}"></i>
+      </div>
+      <div class="log-body">
+        <div class="log-action">${l.action}</div>
+        <div class="log-meta">${l.meta}</div>
+      </div>
+      <div class="log-time">${l.time}</div>
+    </div>`).join('');
+}
+
+function buildInsights() {
+  const el = document.getElementById('insight-cards');
+  if (!el) return;
+  el.innerHTML = insightCards.map(c => `
+    <div class="insight-card ${c.type}" onclick="showToast('Abriendo análisis detallado...')">
+      <div class="insight-title">${c.title}</div>
+      <div class="insight-text">${c.text}</div>
+      <div class="rec-btn">
+        <i class="ti ti-arrow-right" style="font-size:12px"></i>${c.rec}
+      </div>
+    </div>`).join('');
+}
+
+function buildSegments() {
+  const el = document.getElementById('saved-segs');
+  if (!el) return;
+  el.innerHTML = savedSegments.map(s => `
+    <div style="display:flex;align-items:center;gap:8px;padding:9px;background:var(--card2);border-radius:8px;cursor:pointer;border:1px solid var(--border);transition:all .15s"
+      onmouseover="this.style.borderColor='var(--border2)'"
+      onmouseout="this.style.borderColor='var(--border)'"
+      onclick="showToast('Aplicando segmento: ${s.name}...')">
+      <i class="ti ti-filter" style="font-size:14px;color:var(--accent);flex-shrink:0"></i>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:700;color:var(--text)">
+          ${s.name} <span style="color:var(--text3);font-weight:400;font-size:11px">(${s.count})</span>
+        </div>
+        <div style="font-size:10.5px;color:var(--text3)">${s.tags}</div>
+      </div>
+      <i class="ti ti-player-play" style="font-size:14px;color:var(--teal);flex-shrink:0"></i>
+    </div>`).join('');
+}
+
+/* ══════════════════════════
+   NAVIGATION & UI
+══════════════════════════ */
+const panelLabels = {
+  dashboard:'Dashboard', kam:'Vista KAM', insights:'Insights IA',
+  upload:'Cargar Datos', segments:'Segmentos', historico:'Histórico',
+  metricas:'Config. Métricas', usuarios:'Usuarios',
+  api:'API / CRM', auditoria:'Auditoría',
+};
+
+function navigate(panel, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('panel-' + panel);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('bc-label').textContent = panelLabels[panel] || panel;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function switchRole(role, btn) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('user-role').textContent = role === 'kam' ? 'KAM' : 'Administrador';
+  showToast(role === 'kam' ? '👤 Vista KAM activada' : '🔑 Vista Administrador activada');
+}
+
+function toggleEP(i) {
+  const b = document.getElementById('ep-' + i);
+  if (b) b.classList.toggle('open');
+}
+
+function addSegmentTag(tag) {
+  const t = document.getElementById('seg-tags');
+  if (!t) return;
+  const d = document.createElement('div');
+  d.className = 'seg-tag';
+  d.innerHTML = `<i class="ti ti-tag" style="font-size:11px"></i>${tag}<i class="ti ti-x" style="font-size:10px;cursor:pointer" onclick="this.parentElement.remove()"></i>`;
+  t.appendChild(d);
+}
+
+function saveSegment() {
+  const inp = document.getElementById('seg-name-input');
+  const name = inp ? inp.value.trim() : '';
+  if (name) {
+    showToast(`✓ Segmento "${name}" guardado`);
+    if (inp) inp.value = '';
+  } else {
+    showToast('⚠ Ingresa un nombre para el segmento');
+  }
+}
+
+function exportReport(type) {
+  showToast(type === 'pdf' ? '📄 Generando PDF...' : '📊 Generando XLSX...');
+  setTimeout(() => showToast(`✓ Reporte ${type.toUpperCase()} listo para descargar`), 1800);
+}
+
+function saveFilter() {
+  showToast('✓ Filtro guardado exitosamente');
+}
+
+function refreshKPIs() {
+  buildKPIs('kpi-grid', kpiData);
+  buildBarChart();
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2200);
+  setTimeout(() => t.remove(), 2600);
+}
+
+/* ══════════════════════════
+   FILE UPLOAD
+══════════════════════════ */
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files) {
+  const list = document.getElementById('upload-list');
+  const iconMap = {CSV:'ti-file-type-csv',XLSX:'ti-file-spreadsheet',
+                   PDF:'ti-file-type-pdf',XML:'ti-file-code',DOCX:'ti-file-word'};
+  const colorMap = {CSV:'var(--green)',XLSX:'var(--green)',
+                    PDF:'var(--red)',XML:'var(--amber)',DOCX:'var(--accent)'};
+  Array.from(files).forEach((f, i) => {
+    const ext = f.name.split('.').pop().toUpperCase();
+    const ic = iconMap[ext] || 'ti-file';
+    const cl = colorMap[ext] || 'var(--accent)';
+    const id = 'pf-' + Date.now() + '-' + i;
+    const div = document.createElement('div');
+    div.className = 'upload-item';
+    div.innerHTML = `
+      <i class="ti ${ic}" style="color:${cl}"></i>
+      <div class="upload-info">
+        <div class="upload-name">${f.name}</div>
+        <div class="upload-meta">${(f.size/1024).toFixed(0)} KB · Procesando ETL...</div>
+        <div class="progress-bar"><div class="progress-fill" id="${id}" style="width:0%"></div></div>
+      </div>
+      <span class="status-pill sp-amber" id="st-${id}">⏳ Procesando</span>`;
+    list.appendChild(div);
+    let w = 0;
+    const iv = setInterval(() => {
+      w = Math.min(w + Math.random() * 18 + 5, 100);
+      const pf = document.getElementById(id);
+      if (pf) pf.style.width = Math.round(w) + '%';
+      if (w >= 100) {
+        clearInterval(iv);
+        const st = document.getElementById('st-' + id);
+        if (st) { st.className = 'status-pill sp-green'; st.textContent = '✓ Listo'; }
+        const meta = div.querySelector('.upload-meta');
+        if (meta) meta.textContent = `${(f.size/1024).toFixed(0)} KB · ${(Math.random()*8000+1000).toFixed(0)} filas detectadas`;
+        document.getElementById('mapping-preview').style.display = 'block';
+      }
+    }, 200);
+  });
+}
+
+/* ══════════════════════════
+   INIT
+══════════════════════════ */
+buildKPIs('kpi-grid', kpiData);
+buildBarChart();
+buildClientsTable();
+buildKAM();
+buildMetrics();
+buildUsers();
+buildAPI();
+buildAudit();
+buildInsights();
+buildSegments();
+</script>
+</body>
+</html>
