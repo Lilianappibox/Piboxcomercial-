@@ -240,6 +240,48 @@
   #toast.show { opacity: 1; transform: translateY(0); }
   #toast .ti { font-size: 17px; }
 
+  /* ─── USERS & ROLES ─── */
+  .users-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .user-stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; text-align: center; }
+  .user-stat-number { font-size: 28px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .user-stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .role-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+  .role-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .role-card-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .role-card-desc { font-size: 12px; color: var(--text3); margin-bottom: 14px; line-height: 1.5; }
+  .perms-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .perm-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .perm-tag.allowed { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,200,122,0.2); }
+  .perm-tag.denied { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); text-decoration: line-through; opacity: 0.5; }
+  .user-table-avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; margin-right: 8px; vertical-align: middle; }
+  .login-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 500; align-items: center; justify-content: center; flex-direction: column; }
+  .login-overlay.active { display: flex; }
+  .login-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 36px; width: 400px; max-width: 90vw; }
+  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; justify-content: center; }
+  .login-title { font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: var(--text3); text-align: center; margin-bottom: 24px; }
+  .login-error { background: var(--red-bg); color: var(--red); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin-bottom: 12px; display: none; }
+  .login-error.show { display: block; }
+
+  /* ─── PROFILE ─── */
+  .profile-container { max-width: 640px; }
+  .profile-header { display: flex; align-items: center; gap: 24px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; }
+  .profile-avatar-wrap { position: relative; flex-shrink: 0; }
+  .profile-avatar { width: 88px; height: 88px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 600; color: #fff; overflow: hidden; border: 3px solid var(--border2); }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-avatar-edit { position: absolute; bottom: 2px; right: 2px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; }
+  .profile-avatar-edit:hover { background: var(--accent2); }
+  .profile-avatar-edit .ti { font-size: 13px; color: #fff; }
+  .profile-header-info { flex: 1; }
+  .profile-header-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .profile-header-email { font-size: 13px; color: var(--text3); margin-bottom: 8px; }
+  .profile-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+  .profile-card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .profile-field { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .profile-field:last-child { border-bottom: none; }
+  .profile-field-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500; }
+  .profile-field-value { font-size: 14px; color: var(--text); }
+
   /* ─── SCROLLBAR ─── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -304,14 +346,20 @@
     <a class="nav-item" href="#/auditoria">
       <i class="ti ti-clipboard-list"></i> Auditoría
     </a>
+    <a class="nav-item" href="#/usuarios-roles">
+      <i class="ti ti-users-group"></i> Usuarios y Roles
+    </a>
+    <a class="nav-item" href="#/mi-perfil">
+      <i class="ti ti-user-circle"></i> Mi Perfil
+    </a>
   </nav>
-  <div class="sidebar-user">
-    <div class="avatar">JN</div>
+  <div class="sidebar-user" style="cursor:pointer;" onclick="location.hash='#/mi-perfil'">
+    <div class="avatar" id="sidebar-avatar">JN</div>
     <div class="user-info">
       <div class="user-name">Johana Navarrete</div>
       <div class="user-role">Administrador</div>
     </div>
-    <i class="ti ti-dots-vertical" style="color:var(--text3);cursor:pointer;font-size:16px;"></i>
+    <i class="ti ti-logout" style="color:var(--text3);cursor:pointer;font-size:16px;" onclick="event.stopPropagation();doLogout()"></i>
   </div>
 </aside>
 
@@ -826,6 +874,230 @@
     </div>
   </div>
 
+  <!-- ────────────────── USUARIOS Y ROLES VIEW ────────────────── -->
+  <div class="view" id="view-usuarios">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Usuarios y Roles</div>
+        <div class="section-sub">Gestión de accesos · Permisos por rol · Control de usuarios</div>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('user-modal')"><i class="ti ti-user-plus"></i> Nuevo usuario</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="users-stats">
+      <div class="user-stat-card">
+        <div class="user-stat-number" style="color:var(--accent)" id="stat-total-users">4</div>
+        <div class="user-stat-label">Usuarios totales</div>
+      </div>
+      <div class="user-stat-card">
+        <div class="user-stat-number" style="color:var(--green)" id="stat-active-users">3</div>
+        <div class="user-stat-label">Activos</div>
+      </div>
+      <div class="user-stat-card">
+        <div class="user-stat-number" style="color:var(--amber)">3</div>
+        <div class="user-stat-label">Roles definidos</div>
+      </div>
+      <div class="user-stat-card">
+        <div class="user-stat-number" style="color:var(--teal)">1</div>
+        <div class="user-stat-label">Administradores</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('usr','list')">Usuarios</div>
+      <div class="tab" onclick="switchTab('usr','roles')">Roles y Permisos</div>
+    </div>
+
+    <!-- Users List -->
+    <div id="usr-list">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Usuarios registrados</div>
+          <div style="display:flex;gap:8px;">
+            <select class="filter-select" id="filter-role" onchange="filterUsers()">
+              <option value="all">Todos los roles</option>
+              <option value="administrativo">Administrativo</option>
+              <option value="comercial">Comercial</option>
+              <option value="visualizador">Visualizador</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Último acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Roles Detail -->
+    <div id="usr-roles" style="display:none">
+      <!-- Visualizador -->
+      <div class="role-card">
+        <div class="role-card-head">
+          <div class="role-card-title">
+            <i class="ti ti-eye" style="color:var(--accent2)"></i> Visualizador
+          </div>
+          <span class="tag tag-blue">Básico</span>
+        </div>
+        <div class="role-card-desc">Acceso de solo lectura. Puede consultar datos y usar filtros en los módulos de Dashboard, KAMs y Clientes. No puede descargar informes ni gestionar usuarios.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Permisos</div>
+        <div class="perms-grid">
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Resumen Ejecutivo</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Metas Comerciales</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Desempeño KAM</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Clientes</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Usar filtros</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Descargar informes</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Comportamiento Operativo</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Pipeline CRM</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Cargar Datos</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Configurar Métricas</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
+        </div>
+      </div>
+
+      <!-- Comercial -->
+      <div class="role-card">
+        <div class="role-card-head">
+          <div class="role-card-title">
+            <i class="ti ti-briefcase" style="color:var(--green)"></i> Comercial
+          </div>
+          <span class="tag tag-green">Intermedio</span>
+        </div>
+        <div class="role-card-desc">Mismos permisos del Visualizador más la capacidad de descargar informes (PDF, XLSX) desde los módulos de Dashboard, KAMs y Clientes.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Permisos</div>
+        <div class="perms-grid">
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Resumen Ejecutivo</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Metas Comerciales</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Desempeño KAM</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Clientes</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Usar filtros</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Descargar informes</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Comportamiento Operativo</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Pipeline CRM</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Cargar Datos</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Configurar Métricas</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
+        </div>
+      </div>
+
+      <!-- Administrativo -->
+      <div class="role-card">
+        <div class="role-card-head">
+          <div class="role-card-title">
+            <i class="ti ti-shield-check" style="color:var(--amber)"></i> Administrativo
+          </div>
+          <span class="tag tag-amber">Completo</span>
+        </div>
+        <div class="role-card-desc">Acceso total a todos los módulos del tablero. Puede crear, editar y eliminar usuarios. Es el único rol con acceso a la gestión de usuarios, carga de datos, configuración de métricas y auditoría.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Permisos</div>
+        <div class="perms-grid">
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Resumen Ejecutivo</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Metas Comerciales</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Desempeño KAM</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Ver Clientes</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Usar filtros</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Descargar informes</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Comportamiento Operativo</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Pipeline CRM</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Cargar Datos</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Configurar Métricas</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Auditoría</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Gestionar Usuarios</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── MI PERFIL VIEW ────────────────── -->
+  <div class="view" id="view-perfil">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Mi Perfil</div>
+        <div class="section-sub">Configura tu información personal y foto de perfil</div>
+      </div>
+    </div>
+
+    <div class="profile-container">
+      <!-- Profile Header with Avatar -->
+      <div class="profile-header">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profile-avatar-display">JN</div>
+          <div class="profile-avatar-edit" onclick="document.getElementById('profile-photo-input').click()">
+            <i class="ti ti-camera"></i>
+          </div>
+          <input type="file" id="profile-photo-input" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none" onchange="handleProfilePhoto(event)">
+        </div>
+        <div class="profile-header-info">
+          <div class="profile-header-name" id="profile-display-name">Johana Navarrete</div>
+          <div class="profile-header-email" id="profile-display-email">admin@pibox.co</div>
+          <span class="tag tag-amber" id="profile-display-role-tag">Administrativo</span>
+        </div>
+      </div>
+
+      <!-- Personal Info Card -->
+      <div class="profile-card">
+        <div class="profile-card-title"><i class="ti ti-user" style="color:var(--accent2)"></i> Información Personal</div>
+        <div class="form-group">
+          <label class="form-label">Nombre completo</label>
+          <input class="form-input" id="profile-name" placeholder="Tu nombre completo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input class="form-input" id="profile-email" type="email" placeholder="tu@pibox.co">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Foto de perfil</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="profile-avatar" id="profile-avatar-preview" style="width:48px;height:48px;font-size:16px;">JN</div>
+            <div>
+              <button class="btn btn-ghost" onclick="document.getElementById('profile-photo-input').click()" style="font-size:12px;"><i class="ti ti-upload"></i> Subir foto</button>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px;">PNG, JPG, GIF o WebP · Máximo 2MB</div>
+            </div>
+            <button class="btn btn-ghost" id="profile-remove-photo-btn" onclick="removeProfilePhoto()" style="font-size:11px;padding:4px 8px;color:var(--red);display:none;"><i class="ti ti-trash" style="font-size:12px"></i> Quitar</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-primary" onclick="saveProfile()"><i class="ti ti-check"></i> Guardar cambios</button>
+        </div>
+      </div>
+
+      <!-- Role Info Card (read-only) -->
+      <div class="profile-card">
+        <div class="profile-card-title"><i class="ti ti-shield-check" style="color:var(--amber)"></i> Rol Asignado</div>
+        <div class="profile-field">
+          <div class="profile-field-label">Rol actual</div>
+          <div class="profile-field-value"><span class="tag" id="profile-role-tag">Administrativo</span></div>
+        </div>
+        <div class="profile-field">
+          <div class="profile-field-label">Permisos</div>
+          <div class="profile-field-value" id="profile-perm-summary" style="font-size:12px;color:var(--text2);">Acceso completo</div>
+        </div>
+        <div class="profile-field">
+          <div class="profile-field-label">Último acceso</div>
+          <div class="profile-field-value" id="profile-last-access" style="font-size:12px;color:var(--text3);">—</div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:var(--radius-sm);font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-info-circle" style="font-size:14px;color:var(--accent2)"></i>
+          Tu rol es asignado por el administrador. Contacta a un administrador si necesitas cambiar tus permisos.
+        </div>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app -->
@@ -892,6 +1164,52 @@
   </div>
 </div>
 
+<!-- User Create/Edit Modal -->
+<div class="modal-overlay" id="user-modal" onclick="closeModal('user-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title" id="user-modal-title">Nuevo Usuario</div><span class="modal-close" onclick="closeModal('user-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="usr-name" placeholder="Nombre completo"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="usr-email" type="email" placeholder="usuario@pibox.co"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Rol</label>
+        <select class="form-select" id="usr-role">
+          <option value="visualizador">Visualizador</option>
+          <option value="comercial">Comercial</option>
+          <option value="administrativo">Administrativo</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="usr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('user-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()"><i class="ti ti-check"></i> Guardar usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Screen -->
+<div class="login-overlay active" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark" style="width:40px;height:40px;font-size:16px;">PB</div>
+      <div>
+        <div class="logo-text" style="font-size:18px;">Pibox</div>
+        <div class="logo-sub">Comercial BI</div>
+      </div>
+    </div>
+    <div class="login-title">Iniciar sesión</div>
+    <div class="login-sub">Ingresa tus credenciales para acceder al tablero</div>
+    <div class="login-error" id="login-error">Email o contraseña incorrectos</div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="usuario@pibox.co"></div>
+    <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="login-pass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px;margin-top:8px;" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text3);">Contacta al administrador si no tienes acceso</div>
+  </div>
+</div>
+
 <div id="toast"><i class="ti ti-check" style="color:var(--green)"></i><span id="toast-msg">Acción completada</span></div>
 
 <script>
@@ -936,13 +1254,24 @@ const ROUTES = {
   '/pipeline-crm':        {view:'crm',        title:'Pipeline CRM'},
   '/cargar-datos':        {view:'upload',     title:'Cargar Datos (ETL)'},
   '/configurar-metricas': {view:'metricas',   title:'Configuración de Métricas'},
-  '/auditoria':           {view:'auditoria',  title:'Auditoría'}
+  '/auditoria':           {view:'auditoria',  title:'Auditoría'},
+  '/usuarios-roles':      {view:'usuarios',   title:'Usuarios y Roles'},
+  '/mi-perfil':           {view:'perfil',     title:'Mi Perfil'}
 };
 
 function navigateTo(hash){
   const route = ROUTES[hash];
   if(!route) return navigateTo('/resumen-ejecutivo');
   const id = route.view;
+
+  // RBAC: check if current user has access to this view
+  if(currentUser){
+    const perms = ROLE_PERMISSIONS[currentUser.role];
+    if(!perms.views.includes(id)){
+      toast('No tienes permisos para acceder a esta sección');
+      return navigateTo('/resumen-ejecutivo');
+    }
+  }
 
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
@@ -958,6 +1287,8 @@ function navigateTo(hash){
   if(id==='metas') setTimeout(initMetasChart,100);
   if(id==='kam') setTimeout(initKamCharts,100);
   if(id==='clientes') setTimeout(initClienteCharts,100);
+  if(id==='usuarios') setTimeout(renderUsersTable,100);
+  if(id==='perfil') setTimeout(loadProfileView,100);
 }
 
 function onHashChange(){
@@ -967,7 +1298,7 @@ function onHashChange(){
 
 // Keep legacy showView working for any inline calls
 function showView(id){
-  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria'};
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil'};
   location.hash = viewToRoute[id] || '/resumen-ejecutivo';
 }
 
@@ -1211,11 +1542,337 @@ function checkMobile(){
   else { btn.style.display='none'; document.getElementById('sidebar').classList.remove('open'); }
 }
 
+// ─── USERS & ROLES (RBAC) ───
+const ROLE_PERMISSIONS = {
+  visualizador: {
+    views: ['overview','metas','kam','clientes','perfil'],
+    canExport: false,
+    canManageUsers: false,
+    label: 'Visualizador'
+  },
+  comercial: {
+    views: ['overview','metas','kam','clientes','perfil'],
+    canExport: true,
+    canManageUsers: false,
+    label: 'Comercial'
+  },
+  administrativo: {
+    views: ['overview','metas','kam','clientes','operativo','crm','upload','metricas','auditoria','usuarios','perfil'],
+    canExport: true,
+    canManageUsers: true,
+    label: 'Administrativo'
+  }
+};
+
+let usersDB = JSON.parse(localStorage.getItem('pibox_users') || 'null') || [
+  {id:1, name:'Johana Navarrete', email:'admin@pibox.co', role:'administrativo', password:'admin123', active:true, lastAccess:'2026-05-13 09:14'},
+  {id:2, name:'Juliana Rojas', email:'juliana@pibox.co', role:'comercial', password:'comercial123', active:true, lastAccess:'2026-05-12 17:30'},
+  {id:3, name:'Nathy Olivera', email:'nathy@pibox.co', role:'visualizador', password:'viewer123', active:true, lastAccess:'2026-05-11 14:22'},
+  {id:4, name:'Pipe Pibox', email:'pipe@pibox.co', role:'visualizador', password:'viewer123', active:false, lastAccess:'2026-04-28 10:05'}
+];
+
+let currentUser = JSON.parse(sessionStorage.getItem('pibox_current_user') || 'null');
+
+function saveUsersDB(){ localStorage.setItem('pibox_users', JSON.stringify(usersDB)); }
+
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+
+  const user = usersDB.find(u => u.email === email && u.password === pass && u.active);
+  if(!user){
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+  user.lastAccess = new Date().toISOString().slice(0,16).replace('T',' ');
+  saveUsersDB();
+  currentUser = user;
+  sessionStorage.setItem('pibox_current_user', JSON.stringify(user));
+  document.getElementById('login-screen').classList.remove('active');
+  applyRoleRestrictions();
+  onHashChange();
+}
+
+function doLogout(){
+  currentUser = null;
+  sessionStorage.removeItem('pibox_current_user');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+function applyRoleRestrictions(){
+  if(!currentUser) return;
+  const perms = ROLE_PERMISSIONS[currentUser.role];
+
+  // Update sidebar user info
+  const nameEl = document.querySelector('.user-name');
+  const roleEl = document.querySelector('.user-role');
+  const avatarEl = document.getElementById('sidebar-avatar');
+  if(nameEl) nameEl.textContent = currentUser.name;
+  if(roleEl) roleEl.textContent = perms.label;
+  if(avatarEl){
+    const photo = getUserPhoto(currentUser.id);
+    if(photo){
+      avatarEl.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      avatarEl.innerHTML = '';
+      avatarEl.textContent = currentUser.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    }
+  }
+
+  // Update topbar role badge
+  const roleBadge = document.querySelector('.role-badge');
+  if(roleBadge) roleBadge.innerHTML = `<i class="ti ti-shield-check" style="font-size:11px;"></i> ${perms.label}`;
+
+  // Show/hide nav items based on role
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil'};
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if(!href) return;
+    const route = href.replace('#','');
+    const viewKey = Object.keys(viewToRoute).find(k => viewToRoute[k] === route);
+    if(viewKey){
+      item.style.display = perms.views.includes(viewKey) ? '' : 'none';
+    }
+  });
+
+  // Show/hide export buttons based on role
+  document.querySelectorAll('.btn-success, .btn[onclick*="exportReport"], .btn-icon[onclick*="exportReport"]').forEach(btn => {
+    btn.style.display = perms.canExport ? '' : 'none';
+  });
+
+  // Show/hide "Nuevo usuario" button
+  const newUserBtn = document.querySelector('[onclick="showModal(\'user-modal\')"]');
+  if(newUserBtn) newUserBtn.style.display = perms.canManageUsers ? '' : 'none';
+
+  // Add logout button to sidebar
+  const sidebarUser = document.querySelector('.sidebar-user');
+  const dotsIcon = sidebarUser.querySelector('.ti-dots-vertical');
+  if(dotsIcon) dotsIcon.parentElement.setAttribute('onclick', 'doLogout()');
+  if(dotsIcon) dotsIcon.className = 'ti ti-logout';
+}
+
+function renderUsersTable(){
+  const tbody = document.getElementById('users-table-body');
+  if(!tbody) return;
+  const filterRole = document.getElementById('filter-role')?.value || 'all';
+  const filtered = filterRole === 'all' ? usersDB : usersDB.filter(u => u.role === filterRole);
+
+  const colors = {administrativo:'var(--amber)', comercial:'var(--green)', visualizador:'var(--accent)'};
+  const roleTags = {administrativo:'tag-amber', comercial:'tag-green', visualizador:'tag-blue'};
+
+  tbody.innerHTML = filtered.map(u => {
+    const photo = getUserPhoto(u.id);
+    const initials = u.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const avatarContent = photo
+      ? `<span class="user-table-avatar" style="overflow:hidden"><img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></span>`
+      : `<span class="user-table-avatar" style="background:${colors[u.role]}">${initials}</span>`;
+    return `
+    <tr>
+      <td>
+        ${avatarContent}
+        <span class="bold">${u.name}</span>
+      </td>
+      <td style="color:var(--text2)">${u.email}</td>
+      <td><span class="tag ${roleTags[u.role]}">${ROLE_PERMISSIONS[u.role].label}</span></td>
+      <td><span class="tag ${u.active?'tag-green':'tag-red'}">${u.active?'Activo':'Inactivo'}</span></td>
+      <td style="color:var(--text3);font-size:12px">${u.lastAccess}</td>
+      <td>
+        ${currentUser && currentUser.role==='administrativo' ? `
+          <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="toggleUserActive(${u.id})">${u.active?'Desactivar':'Activar'}</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--red)" onclick="deleteUser(${u.id})"><i class="ti ti-trash" style="font-size:12px"></i></button>
+        ` : '—'}
+      </td>
+    </tr>`;}).join('');
+}
+
+function filterUsers(){ renderUsersTable(); }
+
+function saveUser(){
+  const name = document.getElementById('usr-name').value.trim();
+  const email = document.getElementById('usr-email').value.trim();
+  const role = document.getElementById('usr-role').value;
+  const pass = document.getElementById('usr-pass').value;
+
+  if(!name || !email || !pass || pass.length < 6){
+    toast('Completa todos los campos (contraseña mín. 6 caracteres)');
+    return;
+  }
+  if(usersDB.find(u => u.email === email)){
+    toast('Ya existe un usuario con ese email');
+    return;
+  }
+  const newId = Math.max(...usersDB.map(u=>u.id)) + 1;
+  usersDB.push({id:newId, name, email, role, password:pass, active:true, lastAccess:'—'});
+  saveUsersDB();
+  closeModal('user-modal');
+  document.getElementById('usr-name').value = '';
+  document.getElementById('usr-email').value = '';
+  document.getElementById('usr-pass').value = '';
+  renderUsersTable();
+  toast('Usuario creado exitosamente');
+}
+
+function toggleUserActive(id){
+  const user = usersDB.find(u => u.id === id);
+  if(user){ user.active = !user.active; saveUsersDB(); renderUsersTable(); toast(user.active?'Usuario activado':'Usuario desactivado'); }
+}
+
+function deleteUser(id){
+  if(currentUser && id === currentUser.id){ toast('No puedes eliminar tu propio usuario'); return; }
+  usersDB = usersDB.filter(u => u.id !== id);
+  saveUsersDB();
+  renderUsersTable();
+  toast('Usuario eliminado');
+}
+
+// ─── PROFILE ───
+function getUserPhoto(userId){
+  return localStorage.getItem('pibox_photo_' + userId) || null;
+}
+
+function setUserPhoto(userId, dataUrl){
+  localStorage.setItem('pibox_photo_' + userId, dataUrl);
+}
+
+function removeUserPhoto(userId){
+  localStorage.removeItem('pibox_photo_' + userId);
+}
+
+function handleProfilePhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const validTypes = ['image/png','image/jpeg','image/gif','image/webp'];
+  if(!validTypes.includes(file.type)){
+    toast('Formato no soportado. Usa PNG, JPG, GIF o WebP');
+    return;
+  }
+  if(file.size > 2 * 1024 * 1024){
+    toast('La imagen supera los 2MB permitidos');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const dataUrl = ev.target.result;
+    if(!currentUser) return;
+    setUserPhoto(currentUser.id, dataUrl);
+    updateAllAvatars(dataUrl);
+    toast('Foto de perfil actualizada');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function removeProfilePhoto(){
+  if(!currentUser) return;
+  removeUserPhoto(currentUser.id);
+  updateAllAvatars(null);
+  toast('Foto de perfil eliminada');
+}
+
+function updateAllAvatars(photoUrl){
+  if(!currentUser) return;
+  const initials = currentUser.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  const imgHtml = photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : '';
+
+  // Sidebar avatar
+  const sidebarAv = document.getElementById('sidebar-avatar');
+  if(sidebarAv){ sidebarAv.innerHTML = photoUrl ? imgHtml : ''; if(!photoUrl) sidebarAv.textContent = initials; }
+
+  // Profile page avatars
+  const profileAv = document.getElementById('profile-avatar-display');
+  if(profileAv){ profileAv.innerHTML = photoUrl ? `<img src="${photoUrl}">` : ''; if(!photoUrl) profileAv.textContent = initials; }
+
+  const previewAv = document.getElementById('profile-avatar-preview');
+  if(previewAv){ previewAv.innerHTML = photoUrl ? `<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : ''; if(!photoUrl) previewAv.textContent = initials; }
+
+  // Remove photo button
+  const removeBtn = document.getElementById('profile-remove-photo-btn');
+  if(removeBtn) removeBtn.style.display = photoUrl ? '' : 'none';
+}
+
+function loadProfileView(){
+  if(!currentUser) return;
+  const perms = ROLE_PERMISSIONS[currentUser.role];
+  const roleTags = {administrativo:'tag-amber', comercial:'tag-green', visualizador:'tag-blue'};
+  const permSummaries = {
+    administrativo: 'Acceso completo a todos los módulos',
+    comercial: 'Dashboard, KAMs, Clientes + Descargar informes',
+    visualizador: 'Dashboard, KAMs, Clientes (solo lectura)'
+  };
+
+  // Fill form fields
+  document.getElementById('profile-name').value = currentUser.name;
+  document.getElementById('profile-email').value = currentUser.email;
+
+  // Display header
+  document.getElementById('profile-display-name').textContent = currentUser.name;
+  document.getElementById('profile-display-email').textContent = currentUser.email;
+  const roleTag = document.getElementById('profile-display-role-tag');
+  roleTag.textContent = perms.label;
+  roleTag.className = `tag ${roleTags[currentUser.role]}`;
+
+  // Role info card
+  const roleInfoTag = document.getElementById('profile-role-tag');
+  roleInfoTag.textContent = perms.label;
+  roleInfoTag.className = `tag ${roleTags[currentUser.role]}`;
+  document.getElementById('profile-perm-summary').textContent = permSummaries[currentUser.role];
+  document.getElementById('profile-last-access').textContent = currentUser.lastAccess || '—';
+
+  // Photo
+  const photo = getUserPhoto(currentUser.id);
+  updateAllAvatars(photo);
+}
+
+function saveProfile(){
+  if(!currentUser) return;
+  const newName = document.getElementById('profile-name').value.trim();
+  const newEmail = document.getElementById('profile-email').value.trim();
+
+  if(!newName || !newEmail){
+    toast('Nombre y correo son obligatorios');
+    return;
+  }
+
+  // Check email uniqueness (excluding current user)
+  const dup = usersDB.find(u => u.email === newEmail && u.id !== currentUser.id);
+  if(dup){
+    toast('Ese correo ya está en uso por otro usuario');
+    return;
+  }
+
+  // Update in usersDB
+  const user = usersDB.find(u => u.id === currentUser.id);
+  if(user){
+    user.name = newName;
+    user.email = newEmail;
+    saveUsersDB();
+  }
+
+  // Update current session
+  currentUser.name = newName;
+  currentUser.email = newEmail;
+  sessionStorage.setItem('pibox_current_user', JSON.stringify(currentUser));
+
+  // Refresh UI
+  applyRoleRestrictions();
+  loadProfileView();
+  toast('Perfil actualizado correctamente');
+}
+
 // ─── INIT ───
 window.addEventListener('resize', checkMobile);
 window.addEventListener('hashchange', onHashChange);
 document.addEventListener('DOMContentLoaded',()=>{
   checkMobile();
+  // Check if user is logged in
+  if(currentUser){
+    document.getElementById('login-screen').classList.remove('active');
+    applyRoleRestrictions();
+  }
   setTimeout(initMainCharts, 150);
   onHashChange();
 });
