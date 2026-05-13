@@ -859,18 +859,74 @@
 
   <!-- ────────────────── AUDITORÍA VIEW ────────────────── -->
   <div class="view" id="view-auditoria">
-    <div class="section-head"><div><div class="section-title">Auditoría & Log de cambios</div><div class="section-sub">Registro completo de acciones · RBAC · Versiones</div></div><button class="btn btn-ghost" onclick="toast('Exportando log...')"><i class="ti ti-download"></i> Exportar log</button></div>
-    <div class="table-card">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
-        <div id="audit-log">
-          <div class="audit-item"><div class="audit-dot" style="background:var(--green)"></div><div class="audit-body"><div class="audit-action">Archivo <strong>sesos_tablero_.xlsx</strong> cargado exitosamente · 1,838 registros procesados</div><div class="audit-meta">admin@pibox.co · 2026-05-01 09:14:32 · IP 190.24.xxx.xxx</div></div></div>
-          <div class="audit-item"><div class="audit-dot" style="background:var(--accent)"></div><div class="audit-body"><div class="audit-action">Dashboard exportado a PDF por Johana Navarrete</div><div class="audit-meta">johana@pibox.co · 2026-04-30 17:52:11</div></div></div>
-          <div class="audit-item"><div class="audit-dot" style="background:var(--amber)"></div><div class="audit-body"><div class="audit-action">Segmento "Enterprise Q2" creado por Juliana Rojas</div><div class="audit-meta">juliana@pibox.co · 2026-04-28 11:23:44</div></div></div>
-          <div class="audit-item"><div class="audit-dot" style="background:var(--red)"></div><div class="audit-body"><div class="audit-action">Intento de acceso fallido — usuario desconocido</div><div class="audit-meta">unknown · 2026-04-25 03:11:09 · IP 45.xxx.xxx.xxx · Bloqueado por 2FA</div></div></div>
-          <div class="audit-item"><div class="audit-dot" style="background:var(--green)"></div><div class="audit-body"><div class="audit-action">Meta de mayo configurada: $1,700M por administrador</div><div class="audit-meta">admin@pibox.co · 2026-04-22 14:08:55</div></div></div>
-          <div class="audit-item"><div class="audit-dot" style="background:var(--teal)"></div><div class="audit-body"><div class="audit-action">Métrica "Tasa de Retención" activada en modo prueba</div><div class="audit-meta">admin@pibox.co · 2026-04-20 10:30:00</div></div></div>
-        </div>
+    <div class="section-head">
+      <div>
+        <div class="section-title">Auditoría & Log de cambios</div>
+        <div class="section-sub">Registro en tiempo real de todas las acciones del sistema</div>
       </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="clearAuditLog()"><i class="ti ti-trash"></i> Limpiar log</button>
+        <button class="btn btn-ghost" onclick="exportAuditLog()"><i class="ti ti-download"></i> Exportar log</button>
+      </div>
+    </div>
+
+    <!-- Audit KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><i class="ti ti-list-check"></i> Total eventos</div>
+        <div class="kpi-value" id="audit-kpi-total">0</div>
+        <div class="kpi-sub">Registrados</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><i class="ti ti-login"></i> Sesiones</div>
+        <div class="kpi-value" id="audit-kpi-sessions">0</div>
+        <div class="kpi-sub">Login / Logout</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label"><i class="ti ti-edit"></i> Cambios</div>
+        <div class="kpi-value" id="audit-kpi-changes">0</div>
+        <div class="kpi-sub">Datos modificados</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><i class="ti ti-alert-triangle"></i> Alertas</div>
+        <div class="kpi-value" id="audit-kpi-alerts">0</div>
+        <div class="kpi-sub">Errores y denegaciones</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Categoría</span>
+        <select class="filter-select" id="audit-filter-cat" onchange="renderAuditLog()">
+          <option value="all">Todas</option>
+          <option value="auth">Autenticación</option>
+          <option value="nav">Navegación</option>
+          <option value="data">Datos y exportación</option>
+          <option value="users">Usuarios</option>
+          <option value="profile">Perfil</option>
+          <option value="config">Configuración</option>
+          <option value="security">Seguridad</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Nivel</span>
+        <select class="filter-select" id="audit-filter-level" onchange="renderAuditLog()">
+          <option value="all">Todos</option>
+          <option value="info">Info</option>
+          <option value="success">Éxito</option>
+          <option value="warning">Advertencia</option>
+          <option value="error">Error</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <span style="font-size:11px;color:var(--text3);" id="audit-count-label">0 registros</span>
+      </div>
+    </div>
+
+    <!-- Log List -->
+    <div class="table-card">
+      <div style="padding:16px 20px;" id="audit-log"></div>
     </div>
   </div>
 
@@ -1269,6 +1325,7 @@ function navigateTo(hash){
     const perms = ROLE_PERMISSIONS[currentUser.role];
     if(!perms.views.includes(id)){
       toast('No tienes permisos para acceder a esta sección');
+      auditLog(`Acceso denegado a <strong>${route.title}</strong>`,'security','warning','Rol insuficiente: '+perms.label);
       return navigateTo('/resumen-ejecutivo');
     }
   }
@@ -1289,6 +1346,12 @@ function navigateTo(hash){
   if(id==='clientes') setTimeout(initClienteCharts,100);
   if(id==='usuarios') setTimeout(renderUsersTable,100);
   if(id==='perfil') setTimeout(loadProfileView,100);
+  if(id==='auditoria') setTimeout(renderAuditLog,100);
+
+  // Log navigation (skip audit view to avoid recursion)
+  if(currentUser && id!=='auditoria'){
+    auditLog(`Navegó a <strong>${route.title}</strong>`,'nav','info','Ruta: '+hash);
+  }
 }
 
 function onHashChange(){
@@ -1312,10 +1375,118 @@ function switchTab(group, id){
   if(group==='kam'&&id==='juliana') setTimeout(()=>initKamChart('jul'),50);
 }
 
+// ─── AUDIT LOG SYSTEM ───
+let auditLogs = JSON.parse(localStorage.getItem('pibox_audit_logs') || '[]');
+
+function auditLog(action, category, level, details){
+  const now = new Date();
+  const entry = {
+    id: Date.now() + Math.random().toString(36).slice(2,6),
+    timestamp: now.toISOString(),
+    display_time: now.toLocaleString('es-CO',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    user: currentUser ? currentUser.name : 'Anónimo',
+    email: currentUser ? currentUser.email : '—',
+    role: currentUser ? ROLE_PERMISSIONS[currentUser.role].label : '—',
+    action: action,
+    category: category,   // auth, nav, data, users, profile, config, security
+    level: level,         // info, success, warning, error
+    details: details || ''
+  };
+  auditLogs.unshift(entry);
+  if(auditLogs.length > 500) auditLogs = auditLogs.slice(0, 500);
+  localStorage.setItem('pibox_audit_logs', JSON.stringify(auditLogs));
+
+  // If audit view is active, refresh it
+  const auditView = document.getElementById('view-auditoria');
+  if(auditView && auditView.classList.contains('active')) renderAuditLog();
+}
+
+function renderAuditLog(){
+  const container = document.getElementById('audit-log');
+  if(!container) return;
+
+  const catFilter = document.getElementById('audit-filter-cat')?.value || 'all';
+  const levelFilter = document.getElementById('audit-filter-level')?.value || 'all';
+
+  let filtered = auditLogs;
+  if(catFilter !== 'all') filtered = filtered.filter(e => e.category === catFilter);
+  if(levelFilter !== 'all') filtered = filtered.filter(e => e.level === levelFilter);
+
+  // Update KPIs
+  const totalEl = document.getElementById('audit-kpi-total');
+  const sessEl = document.getElementById('audit-kpi-sessions');
+  const chgEl = document.getElementById('audit-kpi-changes');
+  const alertEl = document.getElementById('audit-kpi-alerts');
+  if(totalEl) totalEl.textContent = auditLogs.length;
+  if(sessEl) sessEl.textContent = auditLogs.filter(e => e.category === 'auth').length;
+  if(chgEl) chgEl.textContent = auditLogs.filter(e => ['data','users','profile','config'].includes(e.category)).length;
+  if(alertEl) alertEl.textContent = auditLogs.filter(e => e.level === 'error' || e.level === 'warning').length;
+
+  // Count label
+  const countLabel = document.getElementById('audit-count-label');
+  if(countLabel) countLabel.textContent = `${filtered.length} registros`;
+
+  const levelColors = {info:'var(--accent)', success:'var(--green)', warning:'var(--amber)', error:'var(--red)'};
+  const catIcons = {auth:'ti-login', nav:'ti-compass', data:'ti-database', users:'ti-users', profile:'ti-user-circle', config:'ti-settings', security:'ti-shield-lock'};
+  const catLabels = {auth:'Autenticación', nav:'Navegación', data:'Datos', users:'Usuarios', profile:'Perfil', config:'Configuración', security:'Seguridad'};
+
+  if(filtered.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;"><i class="ti ti-clipboard-list" style="font-size:32px;display:block;margin-bottom:8px;"></i>No hay registros de auditoría</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.slice(0, 100).map(e => `
+    <div class="audit-item">
+      <div class="audit-dot" style="background:${levelColors[e.level] || 'var(--text3)'}"></div>
+      <div class="audit-body">
+        <div class="audit-action">${e.action}</div>
+        <div class="audit-meta">
+          <span class="tag" style="font-size:10px;padding:1px 6px;background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-right:6px;">
+            <i class="${catIcons[e.category] || 'ti-point'}" style="font-size:10px;margin-right:2px;"></i> ${catLabels[e.category] || e.category}
+          </span>
+          ${e.email} · ${e.role} · ${e.display_time}${e.details ? ' · '+e.details : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function clearAuditLog(){
+  if(!currentUser || currentUser.role !== 'administrativo'){
+    toast('Solo un administrador puede limpiar el log');
+    return;
+  }
+  auditLog('Log de auditoría limpiado por administrador','config','warning','Se eliminaron '+auditLogs.length+' registros previos');
+  const lastEntry = auditLogs[0];
+  auditLogs = [lastEntry];
+  localStorage.setItem('pibox_audit_logs', JSON.stringify(auditLogs));
+  renderAuditLog();
+  toast('Log de auditoría limpiado');
+}
+
+function exportAuditLog(){
+  const csv = ['Fecha,Usuario,Email,Rol,Acción,Categoría,Nivel,Detalles'];
+  auditLogs.forEach(e => {
+    csv.push(`"${e.display_time}","${e.user}","${e.email}","${e.role}","${e.action.replace(/<[^>]*>/g,'')}","${e.category}","${e.level}","${e.details}"`);
+  });
+  const blob = new Blob([csv.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'auditoria_pibox_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  auditLog('Log de auditoría exportado a CSV','data','info',auditLogs.length+' registros');
+  toast('Log exportado como CSV');
+}
+
 // ─── MODALS ───
 function showModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function saveForm(id,msg){ closeModal(id); toast(msg); }
+function saveForm(id,msg){
+  closeModal(id);
+  toast(msg);
+  const formNames = {'meta-modal':'Nueva meta comercial','metric-modal':'Nueva métrica','seg-modal':'Nuevo segmento de clientes','crm-modal':'Nuevo negocio CRM'};
+  auditLog(`<strong>${formNames[id]||'Formulario'}</strong> guardado`,'config','success','Modal: '+id);
+}
 
 // ─── TOAST ───
 function toast(msg){
@@ -1326,9 +1497,21 @@ function toast(msg){
 }
 
 // ─── EXPORT ───
-function exportReport(type){ toast(`Exportando informe como ${type.toUpperCase()}...`); }
-function refreshInsights(){ toast('Insights actualizados con IA'); }
-function applyFilters(){ toast('Filtros aplicados'); }
+function exportReport(type){
+  toast(`Exportando informe como ${type.toUpperCase()}...`);
+  const viewName = document.getElementById('page-title')?.textContent || 'Dashboard';
+  auditLog(`Informe exportado como <strong>${type.toUpperCase()}</strong> desde ${viewName}`,'data','info','Formato: '+type.toUpperCase());
+}
+function refreshInsights(){
+  toast('Insights actualizados con IA');
+  auditLog('Insights de IA actualizados manualmente','data','info','');
+}
+function applyFilters(){
+  toast('Filtros aplicados');
+  const period = document.getElementById('f-period')?.value || '—';
+  const kam = document.getElementById('f-kam')?.value || '—';
+  auditLog('Filtros aplicados en dashboard','nav','info','Período: '+period+' · KAM: '+kam);
+}
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 
 // ─── FILE UPLOAD ───
@@ -1340,19 +1523,27 @@ function handleDrop(e){
 }
 function handleFiles(e){
   const list = document.getElementById('upload-list');
+  const fileNames = [];
   Array.from(e.target.files).forEach(f=>{
+    fileNames.push(f.name);
     const div = document.createElement('div');
     div.className = 'upload-item';
     div.innerHTML = `<i class="ti ti-file-spreadsheet"></i><span class="upload-item-name">${f.name}</span><span class="upload-item-size">${(f.size/1024).toFixed(0)} KB</span><span class="upload-status tag tag-amber">Pendiente</span>`;
     list.appendChild(div);
   });
+  if(fileNames.length > 0){
+    auditLog(`Archivo(s) cargados para procesamiento: <strong>${fileNames.join(', ')}</strong>`,'data','info',fileNames.length+' archivo(s)');
+  }
 }
 function runETL(){
-  document.querySelectorAll('.upload-status').forEach(el=>{
+  const pending = document.querySelectorAll('.upload-status');
+  const count = pending.length;
+  pending.forEach(el=>{
     el.className='upload-status tag tag-green';
     el.textContent='Procesado';
   });
   toast('ETL completado · KPIs recalculados');
+  auditLog(`ETL ejecutado exitosamente · <strong>${count} archivo(s)</strong> procesados · KPIs recalculados`,'data','success','Registros procesados');
 }
 
 // ─── TOP CLIENTS TABLE ───
@@ -1583,6 +1774,11 @@ function doLogin(){
   const user = usersDB.find(u => u.email === email && u.password === pass && u.active);
   if(!user){
     errEl.classList.add('show');
+    // Log failed attempt even without a session
+    const tempUser = currentUser;
+    currentUser = {name:'Desconocido',email:email||'—',role:'visualizador'};
+    auditLog(`Intento de inicio de sesión fallido para <strong>${email||'(vacío)'}</strong>`,'security','error','Credenciales inválidas o usuario inactivo');
+    currentUser = tempUser;
     return;
   }
   errEl.classList.remove('show');
@@ -1592,10 +1788,12 @@ function doLogin(){
   sessionStorage.setItem('pibox_current_user', JSON.stringify(user));
   document.getElementById('login-screen').classList.remove('active');
   applyRoleRestrictions();
+  auditLog(`Inicio de sesión exitoso — <strong>${user.name}</strong>`,'auth','success','Rol: '+ROLE_PERMISSIONS[user.role].label);
   onHashChange();
 }
 
 function doLogout(){
+  auditLog(`Cierre de sesión — <strong>${currentUser?currentUser.name:'—'}</strong>`,'auth','info','Sesión finalizada');
   currentUser = null;
   sessionStorage.removeItem('pibox_current_user');
   document.getElementById('login-screen').classList.add('active');
@@ -1714,19 +1912,29 @@ function saveUser(){
   document.getElementById('usr-pass').value = '';
   renderUsersTable();
   toast('Usuario creado exitosamente');
+  auditLog(`Usuario creado: <strong>${name}</strong> (${email}) con rol <strong>${ROLE_PERMISSIONS[role].label}</strong>`,'users','success','');
 }
 
 function toggleUserActive(id){
   const user = usersDB.find(u => u.id === id);
-  if(user){ user.active = !user.active; saveUsersDB(); renderUsersTable(); toast(user.active?'Usuario activado':'Usuario desactivado'); }
+  if(user){
+    user.active = !user.active;
+    saveUsersDB();
+    renderUsersTable();
+    const status = user.active ? 'activado' : 'desactivado';
+    toast('Usuario ' + status);
+    auditLog(`Usuario <strong>${status}</strong>: <strong>${user.name}</strong> (${user.email})`,'users',user.active?'success':'warning','');
+  }
 }
 
 function deleteUser(id){
   if(currentUser && id === currentUser.id){ toast('No puedes eliminar tu propio usuario'); return; }
+  const deleted = usersDB.find(u => u.id === id);
   usersDB = usersDB.filter(u => u.id !== id);
   saveUsersDB();
   renderUsersTable();
   toast('Usuario eliminado');
+  if(deleted) auditLog(`Usuario eliminado: <strong>${deleted.name}</strong> (${deleted.email})`,'users','error','Rol: '+ROLE_PERMISSIONS[deleted.role].label);
 }
 
 // ─── PROFILE ───
@@ -1761,6 +1969,7 @@ function handleProfilePhoto(e){
     setUserPhoto(currentUser.id, dataUrl);
     updateAllAvatars(dataUrl);
     toast('Foto de perfil actualizada');
+    auditLog(`Foto de perfil actualizada — <strong>${file.name}</strong>`,'profile','success','Tamaño: '+(file.size/1024).toFixed(0)+' KB · Tipo: '+file.type);
   };
   reader.readAsDataURL(file);
   e.target.value = '';
@@ -1771,6 +1980,7 @@ function removeProfilePhoto(){
   removeUserPhoto(currentUser.id);
   updateAllAvatars(null);
   toast('Foto de perfil eliminada');
+  auditLog('Foto de perfil eliminada','profile','info','');
 }
 
 function updateAllAvatars(photoUrl){
@@ -1844,6 +2054,9 @@ function saveProfile(){
     return;
   }
 
+  const oldName = currentUser.name;
+  const oldEmail = currentUser.email;
+
   // Update in usersDB
   const user = usersDB.find(u => u.id === currentUser.id);
   if(user){
@@ -1857,10 +2070,16 @@ function saveProfile(){
   currentUser.email = newEmail;
   sessionStorage.setItem('pibox_current_user', JSON.stringify(currentUser));
 
+  // Build change details
+  const changes = [];
+  if(newName !== oldName) changes.push('Nombre: '+oldName+' → '+newName);
+  if(newEmail !== oldEmail) changes.push('Email: '+oldEmail+' → '+newEmail);
+
   // Refresh UI
   applyRoleRestrictions();
   loadProfileView();
   toast('Perfil actualizado correctamente');
+  auditLog(`Perfil actualizado: <strong>${newName}</strong>`,'profile','success',changes.join(' · ') || 'Sin cambios');
 }
 
 // ─── INIT ───
