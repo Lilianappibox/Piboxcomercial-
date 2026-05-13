@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pibox — Dashboard Comercial</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0f14;
+    --bg2: #14171e;
+    --bg3: #1c2030;
+    --bg4: #252a38;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f2f7;
+    --text2: #8b92a8;
+    --text3: #555d74;
+    --accent: #4f6ef7;
+    --accent2: #6b84f8;
+    --accent-bg: rgba(79,110,247,0.12);
+    --green: #22c87a;
+    --green-bg: rgba(34,200,122,0.1);
+    --red: #f0545a;
+    --red-bg: rgba(240,84,90,0.1);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+    --teal: #00cdb8;
+    --teal-bg: rgba(0,205,184,0.1);
+    --sidebar-w: 240px;
+    --header-h: 56px;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; font-size: 14px; }
+
+  /* ─── LAYOUT ─── */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; height: 100vh; z-index: 100; transition: transform 0.25s; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { height: var(--header-h); background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; position: sticky; top: 0; z-index: 50; }
+  .content { padding: 28px 28px 48px; flex: 1; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar-logo { padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .logo-mark { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .logo-text { font-weight: 600; font-size: 15px; letter-spacing: -0.2px; }
+  .logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; }
+  .nav { padding: 12px 12px; flex: 1; overflow-y: auto; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 8px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text2); font-size: 13.5px; transition: all 0.15s; margin-bottom: 1px; text-decoration: none; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-bg); color: var(--accent2); }
+  .nav-item .ti { font-size: 17px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: #fff; border-radius: 20px; font-size: 10px; padding: 1px 6px; font-weight: 600; }
+  .sidebar-user { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* ─── TOPBAR ─── */
+  .topbar-title { font-weight: 500; font-size: 15px; flex: 1; }
+  .topbar-search { display: flex; align-items: center; gap: 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; width: 240px; }
+  .topbar-search input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; width: 100%; font-family: inherit; }
+  .topbar-search input::placeholder { color: var(--text3); }
+  .topbar-search .ti { color: var(--text3); font-size: 15px; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .btn-icon { width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg3); color: var(--text2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+  .btn-icon:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .btn-icon .ti { font-size: 17px; }
+  .dot-badge { position: relative; }
+  .dot-badge::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--bg2); }
+  .role-badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: var(--accent-bg); color: var(--accent2); font-weight: 500; border: 1px solid rgba(79,110,247,0.2); }
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar { display: flex; align-items: center; gap: 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .filter-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; font-family: inherit; outline: none; cursor: pointer; transition: all 0.15s; }
+  .filter-select:hover, .filter-select:focus { border-color: var(--border2); color: var(--text); }
+  .filter-actions { margin-left: auto; display: flex; gap: 8px; }
+  .btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; font-weight: 500; transition: all 0.15s; border: 1px solid transparent; }
+  .btn-ghost { background: var(--bg3); border-color: var(--border); color: var(--text2); }
+  .btn-ghost:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-success { background: var(--green-bg); color: var(--green); border-color: rgba(34,200,122,0.2); }
+  .btn-success:hover { background: rgba(34,200,122,0.2); }
+
+  /* ─── SECTION HEADER ─── */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; }
+  .section-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* ─── METRIC CARDS ─── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: var(--radius) var(--radius) 0 0; }
+  .kpi-card.blue::before { background: var(--accent); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.teal::before { background: var(--teal); }
+  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+  .kpi-sub { font-size: 12px; color: var(--text3); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .delta-up { color: var(--green); }
+  .delta-down { color: var(--red); }
+  .delta-neutral { color: var(--text3); }
+  .kpi-sparkline { margin-top: 12px; height: 36px; }
+
+  /* ─── CHARTS GRID ─── */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .charts-grid.triple { grid-template-columns: 2fr 1fr 1fr; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: var(--text3); margin-bottom: 16px; }
+  .chart-canvas-wrap { position: relative; width: 100%; }
+
+  /* ─── TABLE ─── */
+  .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .table-header-title { font-size: 13px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody td { padding: 11px 16px; color: var(--text2); }
+  tbody td.bold { color: var(--text); font-weight: 500; }
+  .progress-bar { width: 80px; height: 5px; background: var(--bg4); border-radius: 10px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .progress-fill { height: 100%; border-radius: 10px; background: var(--accent); }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.amber { background: var(--amber); }
+  .progress-fill.red { background: var(--red); }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-red { background: var(--red-bg); color: var(--red); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber); }
+  .tag-blue { background: var(--accent-bg); color: var(--accent2); }
+  .tag-teal { background: var(--teal-bg); color: var(--teal); }
+
+  /* ─── INSIGHTS PANEL ─── */
+  .insight-panel { background: linear-gradient(135deg, rgba(79,110,247,0.08) 0%, rgba(0,205,184,0.05) 100%); border: 1px solid rgba(79,110,247,0.2); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
+  .insight-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .insight-head .ti { font-size: 18px; color: var(--accent2); }
+  .insight-head-text { font-size: 13px; font-weight: 600; }
+  .insight-head-sub { font-size: 11px; color: var(--text3); }
+  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .insight-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .insight-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .insight-type.warning { color: var(--amber); }
+  .insight-type.opportunity { color: var(--green); }
+  .insight-type.critical { color: var(--red); }
+  .insight-type.info { color: var(--accent2); }
+  .insight-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .insight-meta { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  /* ─── METAS SECTION ─── */
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .meta-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .meta-month { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .meta-values { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .meta-real { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; }
+  .meta-target { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .meta-pct { font-size: 20px; font-weight: 700; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .meta-bar { height: 6px; background: var(--bg4); border-radius: 10px; overflow: hidden; }
+  .meta-bar-fill { height: 100%; border-radius: 10px; background: var(--accent); transition: width 0.5s ease; }
+
+  /* ─── PAGE VIEWS ─── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ─── MODALS / PANELS ─── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 28px; width: 540px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-close { cursor: pointer; color: var(--text3); font-size: 20px; }
+  .modal-close:hover { color: var(--text); }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ─── UPLOAD ZONE ─── */
+  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-bg); }
+  .upload-icon { font-size: 36px; color: var(--text3); margin-bottom: 12px; }
+  .upload-text { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
+  .upload-sub { font-size: 12px; color: var(--text3); }
+  .upload-formats { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
+  .upload-list { margin-top: 16px; }
+  .upload-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
+  .upload-item .ti { font-size: 18px; color: var(--accent2); }
+  .upload-item-name { flex: 1; font-size: 13px; }
+  .upload-item-size { font-size: 11px; color: var(--text3); }
+  .upload-status { font-size: 11px; }
+
+  /* ─── AUDIT LOG ─── */
+  .audit-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .audit-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .audit-body { flex: 1; }
+  .audit-action { font-size: 13px; color: var(--text); }
+  .audit-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ─── CONFIG METRICS ─── */
+  .metric-def { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+  .metric-def-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .metric-def-name { font-size: 13px; font-weight: 500; }
+  .metric-def-formula { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--teal); background: var(--bg2); padding: 3px 8px; border-radius: 4px; margin-top: 4px; display: block; }
+  .metric-def-threshold { font-size: 12px; color: var(--text3); margin-top: 6px; }
+
+  /* ─── TABS ─── */
+  .tabs { display: flex; gap: 2px; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 20px; width: fit-content; }
+  .tab { padding: 7px 16px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+  /* ─── NOTIFICATIONS ─── */
+  .notif-item { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .notif-item.unread { background: rgba(79,110,247,0.04); }
+  .notif-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .notif-body { flex: 1; }
+  .notif-title { font-size: 13px; font-weight: 500; }
+  .notif-sub { font-size: 12px; color: var(--text3); margin-top: 2px; line-height: 1.5; }
+  .notif-time { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+  /* ─── TOAST ─── */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius); padding: 12px 16px; font-size: 13px; display: flex; align-items: center; gap: 10px; z-index: 300; opacity: 0; transform: translateY(10px); transition: all 0.25s; pointer-events: none; }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast .ti { font-size: 17px; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">PB</div>
+    <div>
+      <div class="logo-text">Pibox</div>
+      <div class="logo-sub">Comercial BI</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <a class="nav-item active" href="#/resumen-ejecutivo">
+      <i class="ti ti-layout-dashboard"></i> Resumen Ejecutivo
+    </a>
+    <a class="nav-item" href="#/metas-comerciales">
+      <i class="ti ti-target"></i> Metas Comerciales
+    </a>
+    <a class="nav-item" href="#/desempeno-kam">
+      <i class="ti ti-users"></i> Desempeño KAM
+    </a>
+    <a class="nav-item" href="#/clientes">
+      <i class="ti ti-building-store"></i> Clientes
+    </a>
+    <div class="nav-label">Operaciones</div>
+    <a class="nav-item" href="#/comportamiento-operativo">
+      <i class="ti ti-truck"></i> Comportamiento Operativo
+    </a>
+    <a class="nav-item" href="#/pipeline-crm">
+      <i class="ti ti-radar"></i> Pipeline CRM
+    </a>
+    <div class="nav-label">Configuración</div>
+    <a class="nav-item" href="#/cargar-datos">
+      <i class="ti ti-file-upload"></i> Cargar Datos <span class="nav-badge">ETL</span>
+    </a>
+    <a class="nav-item" href="#/configurar-metricas">
+      <i class="ti ti-settings-2"></i> Configurar Métricas
+    </a>
+    <a class="nav-item" href="#/auditoria">
+      <i class="ti ti-clipboard-list"></i> Auditoría
+    </a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="avatar">JN</div>
+    <div class="user-info">
+      <div class="user-name">Johana Navarrete</div>
+      <div class="user-role">Administrador</div>
+    </div>
+    <i class="ti ti-dots-vertical" style="color:var(--text3);cursor:pointer;font-size:16px;"></i>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+  <header class="topbar">
+    <button class="btn-icon" onclick="toggleSidebar()" style="display:none" id="menu-btn"><i class="ti ti-menu-2"></i></button>
+    <div class="topbar-title" id="page-title">Resumen Ejecutivo</div>
+    <div class="topbar-search">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Buscar cliente, KAM, período...">
+    </div>
+    <div class="topbar-actions">
+      <span class="role-badge"><i class="ti ti-shield-check" style="font-size:11px;"></i> Admin</span>
+      <button class="btn-icon dot-badge" onclick="showModal('notif-modal')"><i class="ti ti-bell"></i></button>
+      <button class="btn-icon" onclick="exportReport('pdf')"><i class="ti ti-file-export"></i></button>
+    </div>
+  </header>
+
+  <div class="content">
+
+  <!-- ────────────────── OVERVIEW VIEW ────────────────── -->
+  <div class="view active" id="view-overview">
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Período</span>
+        <select class="filter-select" id="f-period" onchange="applyFilters()">
+          <option value="all">Todo el año</option>
+          <option value="q1">Q1 2026</option>
+          <option value="q2" selected>Q2 2026</option>
+          <option value="2025">2025</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">KAM</span>
+        <select class="filter-select" id="f-kam" onchange="applyFilters()">
+          <option value="all">Todos</option>
+          <option>Johana Navarrete</option>
+          <option>Nathy Olivera</option>
+          <option>Pipe Pibox</option>
+          <option>Juliana Rojas Corp</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Segmento</span>
+        <select class="filter-select">
+          <option>Todos</option>
+          <option>Enterprise</option>
+          <option>Mid-Market</option>
+          <option>SMB</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-ghost" onclick="toast('Filtros guardados')"><i class="ti ti-bookmark"></i> Guardar filtro</button>
+        <button class="btn btn-success" onclick="exportReport('xlsx')"><i class="ti ti-table-export"></i> Exportar XLSX</button>
+        <button class="btn btn-primary" onclick="exportReport('pdf')"><i class="ti ti-file-text"></i> Exportar PDF</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="section-head">
+      <div>
+        <div class="section-title">KPIs Principales — 2026</div>
+        <div class="section-sub">Datos consolidados · Actualizado Mayo 2026</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total</div>
+        <div class="kpi-value" id="kpi-gmv">$5.38B</div>
+        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +12.4%</span> vs. año anterior</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
+        <div class="kpi-value" id="kpi-nuevos">109</div>
+        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +23</span> vs. mes anterior</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><i class="ti ti-user-minus"></i> Clientes Perdidos</div>
+        <div class="kpi-value" id="kpi-perdidos">82</div>
+        <div class="kpi-sub"><span class="delta-down"><i class="ti ti-trending-down" style="font-size:12px"></i> -15</span> tasa de churn</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label"><i class="ti ti-check"></i> Efectividad Ops</div>
+        <div class="kpi-value" id="kpi-efect">97.7%</div>
+        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +0.5pp</span> vs. mes anterior</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label"><i class="ti ti-package"></i> Bookings (May)</div>
+        <div class="kpi-value">7,639</div>
+        <div class="kpi-sub"><span class="delta-neutral">Parcial</span> · Cierra 31 may</div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="insight-panel">
+      <div class="insight-head">
+        <i class="ti ti-sparkles"></i>
+        <div>
+          <div class="insight-head-text">Resumen Ejecutivo — IA Insights</div>
+          <div class="insight-head-sub">Generado automáticamente · Mayo 2026</div>
+        </div>
+        <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;" onclick="refreshInsights()"><i class="ti ti-refresh"></i> Actualizar</button>
+      </div>
+      <div class="insights-grid">
+        <div class="insight-item">
+          <div class="insight-type critical">🔴 Crítico</div>
+          <div class="insight-text">Cumplimiento de metas por debajo del 85% en todos los meses de 2026. El mejor mes fue marzo (82.9%). Se requiere revisión del target.</div>
+          <div class="insight-meta">Fuente: METAS COMERCIALES · Confianza 94%</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-type opportunity">🟢 Oportunidad</div>
+          <div class="insight-text">Johana Navarrete lidera con $1.62B GMV (+6.3% sobre Nathy Olivera). Alta concentración en 1 KAM — riesgo de dependencia.</div>
+          <div class="insight-meta">Fuente: GMV por KAM · Confianza 91%</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-type warning">🟡 Atención</div>
+          <div class="insight-text">Clientes nuevos en mayo solo generaron $3.5M GMV vs. $14.5M en abril — posible estacionalidad o pipeline débil de cierre.</div>
+          <div class="insight-meta">Fuente: Clientes Nuevos · Confianza 88%</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-type info">🔵 Positivo</div>
+          <div class="insight-text">Efectividad operativa en 97.7% en abril 2026 — máximo histórico del dataset. Top 3 clientes mantienen >98% de efectividad.</div>
+          <div class="insight-meta">Fuente: Comportamiento Operativo · Confianza 97%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">GMV Mensual Operativo</div>
+        <div class="chart-sub">Enero 2025 — Mayo 2026 · Todos los KAMs</div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chart-gmv-trend" role="img" aria-label="GMV mensual de enero 2025 a mayo 2026"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">GMV por KAM</div>
+        <div class="chart-sub">Distribución acumulada 2026</div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chart-gmv-kam" role="img" aria-label="GMV por KAM en 2026"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Efectividad Operativa</div>
+        <div class="chart-sub">% entregas completadas por mes</div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chart-efect" role="img" aria-label="Efectividad operativa por mes"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Clientes Nuevos vs Perdidos</div>
+        <div class="chart-sub">Enero — Mayo 2026</div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chart-churn" role="img" aria-label="Clientes nuevos vs perdidos 2026"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Clients Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-header-title">Top 10 Clientes por GMV</div>
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="toast('Exportando tabla...')"><i class="ti ti-download"></i> Exportar</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>GMV</th>
+            <th>Bookings</th>
+            <th>Efectividad</th>
+            <th>Tendencia</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="top-clients-body"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /view-overview -->
+
+  <!-- ────────────────── METAS VIEW ────────────────── -->
+  <div class="view" id="view-metas">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Metas Comerciales 2026</div>
+        <div class="section-sub">Seguimiento mensual de cumplimiento vs objetivo</div>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('meta-modal')"><i class="ti ti-plus"></i> Nueva meta</button>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-card">
+        <div class="meta-month">Enero 2026</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--text)">$1,311M</div>
+          <div class="meta-target">/ $1,550M</div>
+        </div>
+        <div class="meta-pct" style="color:var(--amber)">84.6%</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:84.6%;background:var(--amber)"></div></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-month">Febrero 2026</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--text)">$1,245M</div>
+          <div class="meta-target">/ $1,580M</div>
+        </div>
+        <div class="meta-pct" style="color:var(--red)">78.8%</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:78.8%;background:var(--red)"></div></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-month">Marzo 2026</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--text)">$1,326M</div>
+          <div class="meta-target">/ $1,600M</div>
+        </div>
+        <div class="meta-pct" style="color:var(--amber)">82.9%</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:82.9%;background:var(--amber)"></div></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-month">Abril 2026</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--text)">$1,291M</div>
+          <div class="meta-target">/ $1,654M</div>
+        </div>
+        <div class="meta-pct" style="color:var(--red)">78.0%</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:78%;background:var(--red)"></div></div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-month">Mayo 2026</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--accent2)">$235M</div>
+          <div class="meta-target">/ $1,700M</div>
+        </div>
+        <div class="meta-pct" style="color:var(--text3)">Parcial</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:13.8%;background:var(--accent)"></div></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Meta vs Cumplimiento Acumulado</div>
+      <div class="chart-sub">Evolución mensual · Metas de equipo</div>
+      <div class="chart-canvas-wrap" style="height:260px;">
+        <canvas id="chart-metas" role="img" aria-label="Metas vs cumplimiento mensual"></canvas>
+      </div>
+    </div>
+
+    <!-- KAM Breakdown table -->
+    <div class="table-card" style="margin-top:20px">
+      <div class="table-header"><div class="table-header-title">Cumplimiento por KAM</div></div>
+      <table>
+        <thead><tr><th>KAM</th><th>GMV Acumulado</th><th>% del Total</th><th>Clientes Activos</th><th>Rank</th></tr></thead>
+        <tbody>
+          <tr><td class="bold">Johana Navarrete</td><td class="bold" style="color:var(--green)">$1,623.7M</td><td>30.2%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill green" style="width:100%"></div></div></td><td>189</td><td><span class="tag tag-green">🥇 #1</span></td></tr>
+          <tr><td class="bold">Nathy Olivera</td><td class="bold">$1,526.6M</td><td>28.4%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill green" style="width:94%"></div></div></td><td>177</td><td><span class="tag tag-blue">#2</span></td></tr>
+          <tr><td class="bold">Pipe Pibox</td><td class="bold">$1,246.3M</td><td>23.2%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill" style="width:77%"></div></div></td><td>156</td><td><span class="tag tag-blue">#3</span></td></tr>
+          <tr><td class="bold">Juliana Rojas Corp</td><td class="bold">$715.4M</td><td>13.3%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill amber" style="width:44%"></div></div></td><td>98</td><td><span class="tag tag-amber">#4</span></td></tr>
+          <tr><td class="bold">Pibox</td><td class="bold">$270.1M</td><td>5.0%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill red" style="width:17%"></div></div></td><td>32</td><td><span class="tag tag-amber">#5</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ────────────────── KAM VIEW ────────────────── -->
+  <div class="view" id="view-kam">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Desempeño KAM</div>
+        <div class="section-sub">Indicadores individuales · Prospección, activación, retención</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('kam','juliana')">Juliana Rojas</div>
+      <div class="tab" onclick="switchTab('kam','johana')">Johana Navarrete</div>
+    </div>
+    <div id="kam-juliana">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Prospectos Propios</div><div class="kpi-value">53</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Prospectos MKT</div><div class="kpi-value">53</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Prospectos Referidos</div><div class="kpi-value">22</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">GMV KAM</div><div class="kpi-value">$715M</div><div class="kpi-sub">Acumulado 2026</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Prospección mensual — Juliana Rojas</div>
+      <div class="chart-sub">Propios · Referidos · MKT</div>
+      <div class="chart-canvas-wrap" style="height:220px;">
+        <canvas id="chart-kam-jul" role="img" aria-label="Prospección mensual Juliana Rojas"></canvas>
+      </div>
+    </div>
+    </div>
+    <div id="kam-johana" style="display:none">
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Prospectos Propios</div><div class="kpi-value">13</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Prospectos MKT</div><div class="kpi-value">15</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Prospectos Referidos</div><div class="kpi-value">32</div><div class="kpi-sub">Ene–Mar 2026</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">GMV KAM</div><div class="kpi-value">$1,624M</div><div class="kpi-sub">Acumulado 2026</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Prospección mensual — Johana Navarrete</div>
+      <div class="chart-sub">Propios · Referidos · MKT</div>
+      <div class="chart-canvas-wrap" style="height:220px;">
+        <canvas id="chart-kam-joh" role="img" aria-label="Prospección mensual Johana Navarrete"></canvas>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── CLIENTES VIEW ────────────────── -->
+  <div class="view" id="view-clientes">
+    <div class="section-head">
+      <div><div class="section-title">Gestión de Clientes</div><div class="section-sub">Nuevos · Activos · Perdidos · Segmentación</div></div>
+      <button class="btn btn-primary" onclick="showModal('seg-modal')"><i class="ti ti-filter-cog"></i> Crear segmento</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('cli','nuevos')">Nuevos</div>
+      <div class="tab" onclick="switchTab('cli','perdidos')">Perdidos</div>
+      <div class="tab" onclick="switchTab('cli','top')">Top Clientes</div>
+    </div>
+    <div id="cli-nuevos">
+      <div class="chart-card" style="margin-bottom:16px">
+        <div class="chart-title">GMV Clientes Nuevos por Mes</div>
+        <div class="chart-sub">Enero — Mayo 2026</div>
+        <div class="chart-canvas-wrap" style="height:200px">
+          <canvas id="chart-nuevos" role="img" aria-label="GMV clientes nuevos por mes 2026"></canvas>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-header-title">Clientes nuevos recientes</div></div>
+        <table>
+          <thead><tr><th>Mes</th><th>Cliente</th><th>KAM</th><th>1er Servicio</th><th>GMV</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-blue">Abr 2026</span></td><td class="bold">Hell of the north store</td><td>Juliana Rojas</td><td>Ene 2026</td><td style="color:var(--green);font-family:'DM Mono',monospace">$2.58M</td></tr>
+            <tr><td><span class="tag tag-teal">Mar 2026</span></td><td class="bold">Hell of the north store</td><td>Juliana Rojas</td><td>Ene 2026</td><td style="color:var(--green);font-family:'DM Mono',monospace">$3.55M</td></tr>
+            <tr><td><span class="tag tag-teal">Mar 2026</span></td><td class="bold">— Más clientes —</td><td>Varios</td><td>—</td><td style="color:var(--text3)">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="cli-perdidos" style="display:none">
+      <div class="kpi-grid">
+        <div class="kpi-card red"><div class="kpi-label">Ene 2026</div><div class="kpi-value">$1.57M</div><div class="kpi-sub">GMV perdido</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Feb 2026</div><div class="kpi-value">$0.41M</div><div class="kpi-sub">GMV perdido</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Mar 2026</div><div class="kpi-value">$3.76M</div><div class="kpi-sub">GMV perdido</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Abr 2026</div><div class="kpi-value">$2.13M</div><div class="kpi-sub">GMV perdido</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><div class="table-header-title">Clientes perdidos</div></div>
+        <table>
+          <thead><tr><th>Mes</th><th>Cliente</th><th>País</th><th>KAM</th><th>GMV Anterior</th></tr></thead>
+          <tbody>
+            <tr><td>Ene 2026</td><td class="bold">GRUPO DE INVERSIONES COLOMBIANO SAS</td><td>CO</td><td>Pibox</td><td style="color:var(--red)">$754K</td></tr>
+            <tr><td>Ene 2026</td><td class="bold">Cigarrillos Ancied</td><td>CO</td><td>Pibox</td><td style="color:var(--red)">$215K</td></tr>
+            <tr><td>Ene 2026</td><td class="bold">Atabares</td><td>CO</td><td>Pibox</td><td style="color:var(--red)">$167K</td></tr>
+            <tr><td>Mar 2026</td><td class="bold">Varios</td><td>—</td><td>—</td><td style="color:var(--red)">$3.76M</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="cli-top" style="display:none">
+      <div class="table-card">
+        <div class="table-header"><div class="table-header-title">Top 10 Clientes — GMV + Efectividad</div></div>
+        <table>
+          <thead><tr><th>#</th><th>Cliente</th><th>Completados</th><th>Cancelados</th><th>Total Bookings</th><th>GMV</th><th>Efectividad</th></tr></thead>
+          <tbody id="top10-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── OPERATIVO VIEW ────────────────── -->
+  <div class="view" id="view-operativo">
+    <div class="section-head"><div><div class="section-title">Comportamiento Operativo</div><div class="section-sub">Efectividad · Bookings · Packages · GMV mensual</div></div></div>
+    <div class="kpi-grid">
+      <div class="kpi-card teal"><div class="kpi-label">Efectividad Promedio 2025</div><div class="kpi-value">96.1%</div><div class="kpi-sub">Sobre 12 meses</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Bookings Totales 2025</div><div class="kpi-value">638K</div><div class="kpi-sub">Suma anual</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Packages 2025</div><div class="kpi-value">1.43M</div><div class="kpi-sub">Total entregado</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Mejor mes</div><div class="kpi-value">Dic 2025</div><div class="kpi-sub">$1,765M GMV</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Bookings & Packages mensuales</div>
+        <div class="chart-sub">Ene 2025 — May 2026</div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chart-ops-vol" role="img" aria-label="Bookings y packages mensuales"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top 10 Clientes — Cancelaciones</div>
+        <div class="chart-sub">Por tipo de cancelación</div>
+        <div class="chart-canvas-wrap" style="height:220px">
+          <canvas id="chart-cancel" role="img" aria-label="Cancelaciones por tipo y cliente"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── CRM VIEW ────────────────── -->
+  <div class="view" id="view-crm">
+    <div class="section-head"><div><div class="section-title">Pipeline CRM</div><div class="section-sub">Negocios MKT y propios · Estado del funnel</div></div><button class="btn btn-primary" onclick="showModal('crm-modal')"><i class="ti ti-plus"></i> Nuevo negocio</button></div>
+    <div class="kpi-grid">
+      <div class="kpi-card blue"><div class="kpi-label">Negocios MKT</div><div class="kpi-value">143</div><div class="kpi-sub">Total en pipeline</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Negocios Propios</div><div class="kpi-value">18</div><div class="kpi-sub">Total en pipeline</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Por calificar</div><div class="kpi-value">67</div><div class="kpi-sub">Negocios pendientes</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Cierres ganados</div><div class="kpi-value">15</div><div class="kpi-sub">Año en curso</div></div>
+    </div>
+    <div class="table-card">
+      <div class="table-header"><div class="table-header-title">Negocios recientes — CRM</div></div>
+      <table>
+        <thead><tr><th>ID</th><th>Negocio</th><th>Etapa</th><th>KAM</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">60077512478</td><td class="bold">Trading de Colombia</td><td><span class="tag tag-amber">Reunión cliente</span></td><td>Johana Navarrete</td><td><span class="tag tag-blue">MKT</span></td></tr>
+          <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">60077237026</td><td class="bold">MCDO LIBRE MKT COL</td><td><span class="tag tag-teal">Por calificar</span></td><td>Johana Navarrete</td><td><span class="tag tag-blue">MKT</span></td></tr>
+          <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">60058231736</td><td class="bold">Truchicol SAS</td><td><span class="tag tag-teal">Por calificar</span></td><td>Liliana Andrea Peña</td><td><span class="tag tag-blue">MKT</span></td></tr>
+          <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">59814951487</td><td class="bold">Guias y Valvulas SAS</td><td><span class="tag tag-green">Cierre ganado</span></td><td>Juliana Rojas</td><td><span class="tag tag-green">Propio</span></td></tr>
+          <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">59814891176</td><td class="bold">Colegio Gran Bretaña</td><td><span class="tag tag-green">Cierre ganado</span></td><td>Juliana Rojas</td><td><span class="tag tag-green">Propio</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ────────────────── UPLOAD VIEW ────────────────── -->
+  <div class="view" id="view-upload">
+    <div class="section-head"><div><div class="section-title">Cargar & Actualizar Datos</div><div class="section-sub">ETL · Validación · Normalización · Detección de duplicados</div></div></div>
+    <div class="charts-grid">
+      <div class="chart-card" style="grid-column:1/-1">
+        <div class="chart-title" style="margin-bottom:16px">Zona de carga de archivos</div>
+        <div class="upload-zone" id="drop-zone" ondragover="handleDrag(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon"><i class="ti ti-file-upload"></i></div>
+          <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+          <div class="upload-sub">Soporta: CSV, XLSX, XML, PDF, DOCX · Máximo 50MB por archivo</div>
+          <div class="upload-formats">
+            <span class="tag tag-green">CSV</span>
+            <span class="tag tag-blue">XLSX</span>
+            <span class="tag tag-amber">XML</span>
+            <span class="tag tag-teal">PDF</span>
+            <span class="tag tag-blue">DOCX</span>
+          </div>
+        </div>
+        <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xml,.pdf,.docx" style="display:none" onchange="handleFiles(event)">
+        <div class="upload-list" id="upload-list"></div>
+        <div style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="runETL()"><i class="ti ti-cpu"></i> Ejecutar ETL y Validar</button>
+          <button class="btn btn-ghost"><i class="ti ti-map"></i> Mapeo de columnas</button>
+          <button class="btn btn-ghost"><i class="ti ti-copy-check"></i> Detectar duplicados</button>
+        </div>
+      </div>
+    </div>
+    <!-- ETL Status -->
+    <div class="table-card" style="margin-top:0">
+      <div class="table-header"><div class="table-header-title">Historial de cargas</div></div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Duplicados</th><th>Errores</th><th>Estado</th><th>Acción</th></tr></thead>
+        <tbody>
+          <tr><td>2026-05-01</td><td class="bold">sesos_tablero_.xlsx</td><td>1,838</td><td>0</td><td>0</td><td><span class="tag tag-green"><i class="ti ti-check" style="font-size:11px"></i> OK</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="toast('Versión restaurada')">Restaurar</button></td></tr>
+          <tr><td>2026-04-15</td><td class="bold">gmv_abril.csv</td><td>632</td><td>3</td><td>1</td><td><span class="tag tag-amber"><i class="ti ti-alert-triangle" style="font-size:11px"></i> Advertencias</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px">Ver log</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ────────────────── MÉTRICAS CONFIG VIEW ────────────────── -->
+  <div class="view" id="view-metricas">
+    <div class="section-head"><div><div class="section-title">Configuración de Métricas</div><div class="section-sub">Define fórmulas, umbrales y alertas para cada KPI</div></div><button class="btn btn-primary" onclick="showModal('metric-modal')"><i class="ti ti-plus"></i> Nueva métrica</button></div>
+    <div id="metric-list">
+      <div class="metric-def">
+        <div class="metric-def-head"><span class="metric-def-name">GMV Total</span><span class="tag tag-green">Activa</span></div>
+        <code class="metric-def-formula">SUM(GMV) por período y KAM</code>
+        <div class="metric-def-threshold">🎯 Umbral: &gt;$1,500M mensual · Alerta: &lt;80% cumplimiento</div>
+      </div>
+      <div class="metric-def">
+        <div class="metric-def-head"><span class="metric-def-name">Efectividad Operativa</span><span class="tag tag-green">Activa</span></div>
+        <code class="metric-def-formula">Completados / Total_Bookings × 100</code>
+        <div class="metric-def-threshold">🎯 Umbral: &gt;96% · Alerta crítica: &lt;94%</div>
+      </div>
+      <div class="metric-def">
+        <div class="metric-def-head"><span class="metric-def-name">Tasa de Retención</span><span class="tag tag-blue">En prueba</span></div>
+        <code class="metric-def-formula">(Clientes_final - Clientes_nuevos) / Clientes_inicial × 100</code>
+        <div class="metric-def-threshold">🎯 Umbral: &gt;85% mensual</div>
+      </div>
+      <div class="metric-def">
+        <div class="metric-def-head"><span class="metric-def-name">Ticket Promedio</span><span class="tag tag-green">Activa</span></div>
+        <code class="metric-def-formula">GMV / Total_Bookings</code>
+        <div class="metric-def-threshold">🎯 Umbral: &gt;$22,000 COP por booking</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── AUDITORÍA VIEW ────────────────── -->
+  <div class="view" id="view-auditoria">
+    <div class="section-head"><div><div class="section-title">Auditoría & Log de cambios</div><div class="section-sub">Registro completo de acciones · RBAC · Versiones</div></div><button class="btn btn-ghost" onclick="toast('Exportando log...')"><i class="ti ti-download"></i> Exportar log</button></div>
+    <div class="table-card">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div id="audit-log">
+          <div class="audit-item"><div class="audit-dot" style="background:var(--green)"></div><div class="audit-body"><div class="audit-action">Archivo <strong>sesos_tablero_.xlsx</strong> cargado exitosamente · 1,838 registros procesados</div><div class="audit-meta">admin@pibox.co · 2026-05-01 09:14:32 · IP 190.24.xxx.xxx</div></div></div>
+          <div class="audit-item"><div class="audit-dot" style="background:var(--accent)"></div><div class="audit-body"><div class="audit-action">Dashboard exportado a PDF por Johana Navarrete</div><div class="audit-meta">johana@pibox.co · 2026-04-30 17:52:11</div></div></div>
+          <div class="audit-item"><div class="audit-dot" style="background:var(--amber)"></div><div class="audit-body"><div class="audit-action">Segmento "Enterprise Q2" creado por Juliana Rojas</div><div class="audit-meta">juliana@pibox.co · 2026-04-28 11:23:44</div></div></div>
+          <div class="audit-item"><div class="audit-dot" style="background:var(--red)"></div><div class="audit-body"><div class="audit-action">Intento de acceso fallido — usuario desconocido</div><div class="audit-meta">unknown · 2026-04-25 03:11:09 · IP 45.xxx.xxx.xxx · Bloqueado por 2FA</div></div></div>
+          <div class="audit-item"><div class="audit-dot" style="background:var(--green)"></div><div class="audit-body"><div class="audit-action">Meta de mayo configurada: $1,700M por administrador</div><div class="audit-meta">admin@pibox.co · 2026-04-22 14:08:55</div></div></div>
+          <div class="audit-item"><div class="audit-dot" style="background:var(--teal)"></div><div class="audit-body"><div class="audit-action">Métrica "Tasa de Retención" activada en modo prueba</div><div class="audit-meta">admin@pibox.co · 2026-04-20 10:30:00</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ─── MODALS ─── -->
+<div class="modal-overlay" id="notif-modal" onclick="closeModal('notif-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Notificaciones</div><span class="modal-close" onclick="closeModal('notif-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="notif-item unread"><div class="notif-icon" style="background:var(--red-bg);color:var(--red)"><i class="ti ti-alert-circle"></i></div><div class="notif-body"><div class="notif-title">Meta de febrero no alcanzada</div><div class="notif-sub">Cumplimiento 78.8% — por debajo del umbral crítico de 80%</div></div><div class="notif-time">Hace 2d</div></div>
+    <div class="notif-item unread"><div class="notif-icon" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-trending-down"></i></div><div class="notif-body"><div class="notif-title">Clientes perdidos en marzo</div><div class="notif-sub">$3.76M de GMV en riesgo — se recomienda análisis de causas</div></div><div class="notif-time">Hace 4d</div></div>
+    <div class="notif-item"><div class="notif-icon" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-check-circle"></i></div><div class="notif-body"><div class="notif-title">ETL completado exitosamente</div><div class="notif-sub">sesos_tablero_.xlsx procesado · 0 errores · KPIs recalculados</div></div><div class="notif-time">Hace 12d</div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="meta-modal" onclick="closeModal('meta-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Nueva Meta Comercial</div><span class="modal-close" onclick="closeModal('meta-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-group"><label class="form-label">Período</label><select class="form-select"><option>Junio 2026</option><option>Julio 2026</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Meta (COP)</label><input class="form-input" type="number" placeholder="1700000000"></div>
+      <div class="form-group"><label class="form-label">KAM (opcional)</label><select class="form-select"><option>Equipo completo</option><option>Johana Navarrete</option><option>Nathy Olivera</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Umbral de alerta (%)</label><input class="form-input" type="number" value="80" placeholder="80"></div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('meta-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveForm('meta-modal','Meta guardada')">Guardar meta</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="metric-modal" onclick="closeModal('metric-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Nueva Métrica</div><span class="modal-close" onclick="closeModal('metric-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" placeholder="ej: Tasa de activación"></div>
+    <div class="form-group"><label class="form-label">Fórmula (SQL / expresión)</label><textarea class="form-textarea" rows="3" placeholder="SUM(GMV) WHERE status='active' / COUNT(clients)"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Umbral objetivo</label><input class="form-input" placeholder="> 0.85"></div>
+      <div class="form-group"><label class="form-label">Alerta crítica</label><input class="form-input" placeholder="< 0.70"></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('metric-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveForm('metric-modal','Métrica creada')">Crear métrica</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="seg-modal" onclick="closeModal('seg-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Crear Segmento</div><span class="modal-close" onclick="closeModal('seg-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-group"><label class="form-label">Nombre del segmento</label><input class="form-input" placeholder="ej: Enterprise Q2 2026"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">GMV mínimo</label><input class="form-input" type="number" placeholder="50000000"></div>
+      <div class="form-group"><label class="form-label">Sector</label><select class="form-select"><option>Todos</option><option>Pharma</option><option>Retail</option><option>Food</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">KAM asignado</label><select class="form-select"><option>Todos</option><option>Johana Navarrete</option><option>Nathy Olivera</option></select></div>
+    <div class="form-group"><label class="form-label">Efectividad mínima (%)</label><input class="form-input" type="number" placeholder="95"></div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('seg-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveForm('seg-modal','Segmento guardado')">Guardar segmento</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="crm-modal" onclick="closeModal('crm-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Nuevo Negocio CRM</div><span class="modal-close" onclick="closeModal('crm-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-group"><label class="form-label">Nombre del negocio</label><input class="form-input" placeholder="ej: [COL] Empresa SA"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">KAM</label><select class="form-select"><option>Johana Navarrete</option><option>Nathy Olivera</option><option>Juliana Rojas</option></select></div>
+      <div class="form-group"><label class="form-label">Etapa</label><select class="form-select"><option>Por calificar</option><option>Contacto inicial</option><option>Propuesta enviada</option><option>Cierre</option></select></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('crm-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveForm('crm-modal','Negocio registrado')">Registrar</button></div>
+  </div>
+</div>
+
+<div id="toast"><i class="ti ti-check" style="color:var(--green)"></i><span id="toast-msg">Acción completada</span></div>
+
+<script>
+// ─── DATA ───
+const DATA = {
+  ops: {
+    labels: ['Ene25','Feb25','Mar25','Abr25','May25','Jun25','Jul25','Ago25','Sep25','Oct25','Nov25','Dic25','Ene26','Feb26','Mar26','Abr26','May26'],
+    gmv: [1201914698,1195805469,1348109585,1310516436,1456794651,1367139572,1595604072,1543415578,1426171979,1413384857,1489506405,1765460744,1301592891,1236711990,1318575524,1291401190,235470949],
+    efect: [97.04,97.14,96.68,97.05,96.24,96.27,96.28,96.16,96.26,95.64,94.54,93.97,96.48,97.05,97.60,97.68,96.69],
+    bookings: [51798,51434,55913,51650,57063,50417,59174,55534,56132,55805,54307,57427,45329,44557,46355,43545,7639],
+    packages: [106498,110323,118357,106431,123387,114223,143646,136433,129281,124287,122023,127582,103675,91703,95909,94799,16867]
+  },
+  topClients: [
+    {name:'TADA MG Viernes - Domingo', gmv:256601009, completed:2145, canceled:29, total:2268, eff:0.9298},
+    {name:'Cruz Verde Mostrador Nac.', gmv:141863650, completed:10054, canceled:969, total:11023, eff:0.9770},
+    {name:'TADA MG Lunes-Jueves ⚡', gmv:121084375, completed:1173, canceled:31, total:1226, eff:0.9871},
+    {name:'Cruz Verde Integración', gmv:100333444, completed:null, canceled:null, total:null, eff:0.9844},
+    {name:'Dislicores', gmv:86091816, completed:null, canceled:null, total:null, eff:0.9906},
+    {name:'Drogueria Cutis SA', gmv:80261600, completed:null, canceled:null, total:null, eff:0.9914},
+    {name:'FUXION', gmv:69957100, completed:null, canceled:null, total:null, eff:1.0},
+    {name:'Calypso', gmv:45567600, completed:null, canceled:null, total:null, eff:0.9228},
+    {name:'HORTIFRUT COLOMBIA', gmv:43740950, completed:null, canceled:null, total:null, eff:0.9927},
+    {name:'Colanta', gmv:39064950, completed:null, canceled:null, total:null, eff:0.8864}
+  ],
+  kamGMV: {labels:['Johana Navarrete','Nathy Olivera','Pipe Pibox','Juliana Rojas','Pibox'], data:[1623720138,1526571107,1246344507,715353919,270133899]},
+  nuevos: {labels:['Ene','Feb','Mar','Abr','May'], data:[2769950,7061800,12599600,14523100,3541800]},
+  metas: {labels:['Ene','Feb','Mar','Abr'], meta:[1550000000,1580000000,1600000000,1654000000], real:[1310990287,1245169273,1325916657,1290610319]},
+  kamJul: {labels:['Ene','Feb','Mar'], propios:[29,6,24], referidos:[6,7,9], mkt:[14,21,18]},
+  kamJoh: {labels:['Ene','Feb','Mar'], propios:[10,2,1], referidos:[2,8,22], mkt:[0,0,15]}
+};
+
+function fmt(n){ return (n/1e9).toFixed(2)+'B'; }
+function fmtM(n){ return '$'+(n/1e6).toFixed(1)+'M'; }
+
+// ─── ROUTES ───
+const ROUTES = {
+  '/resumen-ejecutivo':   {view:'overview',  title:'Resumen Ejecutivo'},
+  '/metas-comerciales':   {view:'metas',     title:'Metas Comerciales'},
+  '/desempeno-kam':       {view:'kam',        title:'Desempeño KAM'},
+  '/clientes':            {view:'clientes',   title:'Gestión de Clientes'},
+  '/comportamiento-operativo': {view:'operativo', title:'Comportamiento Operativo'},
+  '/pipeline-crm':        {view:'crm',        title:'Pipeline CRM'},
+  '/cargar-datos':        {view:'upload',     title:'Cargar Datos (ETL)'},
+  '/configurar-metricas': {view:'metricas',   title:'Configuración de Métricas'},
+  '/auditoria':           {view:'auditoria',  title:'Auditoría'}
+};
+
+function navigateTo(hash){
+  const route = ROUTES[hash];
+  if(!route) return navigateTo('/resumen-ejecutivo');
+  const id = route.view;
+
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.getAttribute('href') === '#'+hash);
+  });
+
+  document.getElementById('page-title').textContent = route.title;
+  document.title = 'Pibox — ' + route.title;
+
+  if(id==='operativo') setTimeout(initOpsCharts,100);
+  if(id==='metas') setTimeout(initMetasChart,100);
+  if(id==='kam') setTimeout(initKamCharts,100);
+  if(id==='clientes') setTimeout(initClienteCharts,100);
+}
+
+function onHashChange(){
+  const hash = location.hash.slice(1) || '/resumen-ejecutivo';
+  navigateTo(hash);
+}
+
+// Keep legacy showView working for any inline calls
+function showView(id){
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria'};
+  location.hash = viewToRoute[id] || '/resumen-ejecutivo';
+}
+
+function switchTab(group, id){
+  event.currentTarget.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(el=>el.style.display='none');
+  document.getElementById(`${group}-${id}`).style.display='block';
+  if(group==='cli'&&id==='top') populateTop10();
+  if(group==='kam'&&id==='johana') setTimeout(()=>initKamChart('joh'),50);
+  if(group==='kam'&&id==='juliana') setTimeout(()=>initKamChart('jul'),50);
+}
+
+// ─── MODALS ───
+function showModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function saveForm(id,msg){ closeModal(id); toast(msg); }
+
+// ─── TOAST ───
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ─── EXPORT ───
+function exportReport(type){ toast(`Exportando informe como ${type.toUpperCase()}...`); }
+function refreshInsights(){ toast('Insights actualizados con IA'); }
+function applyFilters(){ toast('Filtros aplicados'); }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+// ─── FILE UPLOAD ───
+function handleDrag(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  handleFiles({target:{files:e.dataTransfer.files}});
+}
+function handleFiles(e){
+  const list = document.getElementById('upload-list');
+  Array.from(e.target.files).forEach(f=>{
+    const div = document.createElement('div');
+    div.className = 'upload-item';
+    div.innerHTML = `<i class="ti ti-file-spreadsheet"></i><span class="upload-item-name">${f.name}</span><span class="upload-item-size">${(f.size/1024).toFixed(0)} KB</span><span class="upload-status tag tag-amber">Pendiente</span>`;
+    list.appendChild(div);
+  });
+}
+function runETL(){
+  document.querySelectorAll('.upload-status').forEach(el=>{
+    el.className='upload-status tag tag-green';
+    el.textContent='Procesado';
+  });
+  toast('ETL completado · KPIs recalculados');
+}
+
+// ─── TOP CLIENTS TABLE ───
+function populateTopClients(){
+  const tbody = document.getElementById('top-clients-body');
+  if(!tbody) return;
+  tbody.innerHTML = DATA.topClients.map((c,i)=>`
+    <tr>
+      <td style="color:var(--text3);font-weight:600">${i+1}</td>
+      <td class="bold">${c.name}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green)">${fmtM(c.gmv)}</td>
+      <td style="color:var(--text3)">${c.total?c.total.toLocaleString():'—'}</td>
+      <td>
+        <span style="margin-right:6px">${(c.eff*100).toFixed(1)}%</span>
+        <div class="progress-bar" style="display:inline-block;width:60px"><div class="progress-fill ${c.eff>0.97?'green':c.eff>0.93?'':'amber'}" style="width:${c.eff*100}%"></div></div>
+      </td>
+      <td><span style="font-size:16px">${c.eff>0.98?'📈':c.eff>0.95?'➡️':'📉'}</span></td>
+      <td><span class="tag ${c.eff>0.97?'tag-green':c.eff>0.92?'tag-blue':'tag-amber'}">${c.eff>0.97?'Excelente':c.eff>0.92?'Normal':'Riesgo'}</span></td>
+    </tr>`).join('');
+}
+function populateTop10(){
+  const tbody = document.getElementById('top10-body');
+  if(!tbody) return;
+  tbody.innerHTML = DATA.topClients.map((c,i)=>`
+    <tr>
+      <td style="color:var(--text3);font-weight:600">${i+1}</td>
+      <td class="bold">${c.name}</td>
+      <td>${c.completed?c.completed.toLocaleString():'—'}</td>
+      <td style="color:var(--red)">${c.canceled?c.canceled.toLocaleString():'—'}</td>
+      <td>${c.total?c.total.toLocaleString():'—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green)">${fmtM(c.gmv)}</td>
+      <td><span class="tag ${c.eff>0.97?'tag-green':c.eff>0.92?'tag-blue':'tag-red'}">${(c.eff*100).toFixed(1)}%</span></td>
+    </tr>`).join('');
+}
+
+// ─── CHARTS ───
+let charts = {};
+function destroyChart(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function initMainCharts(){
+  populateTopClients();
+
+  // GMV Trend
+  destroyChart('gmv-trend');
+  const ctx1 = document.getElementById('chart-gmv-trend');
+  if(ctx1) charts['gmv-trend'] = new Chart(ctx1,{
+    type:'line',
+    data:{
+      labels: DATA.ops.labels,
+      datasets:[{
+        label:'GMV',
+        data: DATA.ops.gmv.map(v=>Math.round(v/1e6)),
+        borderColor:'#4f6ef7',fill:true,
+        backgroundColor:'rgba(79,110,247,0.08)',
+        tension:0.4,pointRadius:3,pointBackgroundColor:'#4f6ef7',borderWidth:2
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>`$${c.raw}M`}}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10},callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // GMV by KAM (donut)
+  destroyChart('gmv-kam');
+  const ctx2 = document.getElementById('chart-gmv-kam');
+  if(ctx2) charts['gmv-kam'] = new Chart(ctx2,{
+    type:'doughnut',
+    data:{
+      labels: DATA.kamGMV.labels,
+      datasets:[{data: DATA.kamGMV.data.map(v=>Math.round(v/1e6)), backgroundColor:['#4f6ef7','#22c87a','#f5a623','#00cdb8','#f0545a'], borderColor:'#14171e',borderWidth:2}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>`$${c.raw}M`}}},cutout:'65%'}
+  });
+
+  // Efectividad
+  destroyChart('efect');
+  const ctx3 = document.getElementById('chart-efect');
+  if(ctx3) charts['efect'] = new Chart(ctx3,{
+    type:'line',
+    data:{
+      labels: DATA.ops.labels,
+      datasets:[{label:'Efectividad',data: DATA.ops.efect.map(v=>Math.round(v*100)/100),borderColor:'#00cdb8',backgroundColor:'rgba(0,205,184,0.06)',fill:true,tension:0.4,pointRadius:2,borderWidth:2}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{min:93,max:98,ticks:{color:'#555d74',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // Churn chart
+  destroyChart('churn');
+  const ctx4 = document.getElementById('chart-churn');
+  if(ctx4) charts['churn'] = new Chart(ctx4,{
+    type:'bar',
+    data:{
+      labels:['Ene','Feb','Mar','Abr','May'],
+      datasets:[
+        {label:'Nuevos',data:[null,null,null,null,null].map((_,i)=>[15,22,35,27,10][i]),backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4},
+        {label:'Perdidos',data:[7,4,19,12,0],backgroundColor:'rgba(240,84,90,0.7)',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+function initMetasChart(){
+  destroyChart('metas');
+  const ctx = document.getElementById('chart-metas');
+  if(!ctx) return;
+  charts['metas'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: DATA.metas.labels,
+      datasets:[
+        {label:'Meta',data:DATA.metas.meta.map(v=>Math.round(v/1e6)),backgroundColor:'rgba(79,110,247,0.2)',borderColor:'#4f6ef7',borderWidth:1.5,borderRadius:4},
+        {label:'Real',data:DATA.metas.real.map(v=>Math.round(v/1e6)),backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+function initOpsCharts(){
+  destroyChart('ops-vol');
+  const c1 = document.getElementById('chart-ops-vol');
+  if(c1) charts['ops-vol'] = new Chart(c1,{
+    type:'bar',
+    data:{
+      labels: DATA.ops.labels,
+      datasets:[
+        {label:'Bookings',data:DATA.ops.bookings,backgroundColor:'rgba(79,110,247,0.7)',borderRadius:3},
+        {label:'Packages',data:DATA.ops.packages,backgroundColor:'rgba(0,205,184,0.5)',borderRadius:3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  destroyChart('cancel');
+  const c2 = document.getElementById('chart-cancel');
+  if(c2) charts['cancel'] = new Chart(c2,{
+    type:'bar',
+    data:{
+      labels: DATA.topClients.slice(0,6).map(c=>c.name.split(' ').slice(0,2).join(' ')),
+      datasets:[
+        {label:'Driver',data:[5,117,0,null,null,null],backgroundColor:'rgba(240,84,90,0.7)',borderRadius:3},
+        {label:'Pasajero',data:[14,775,29,null,null,null],backgroundColor:'rgba(245,166,35,0.7)',borderRadius:3},
+        {label:'Ops',data:[10,35,2,null,null,null],backgroundColor:'rgba(79,110,247,0.7)',borderRadius:3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},indexAxis:'y',scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+function initKamCharts(){ initKamChart('jul'); }
+function initKamChart(k){
+  const id = 'kam-'+k;
+  destroyChart(id);
+  const d = k==='jul'?DATA.kamJul:DATA.kamJoh;
+  const ctx = document.getElementById('chart-'+id);
+  if(!ctx) return;
+  charts[id] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: d.labels,
+      datasets:[
+        {label:'Propios',data:d.propios,backgroundColor:'rgba(79,110,247,0.8)',borderRadius:4},
+        {label:'Referidos',data:d.referidos,backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4},
+        {label:'MKT',data:d.mkt,backgroundColor:'rgba(0,205,184,0.6)',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+function initClienteCharts(){
+  destroyChart('nuevos');
+  const ctx = document.getElementById('chart-nuevos');
+  if(ctx) charts['nuevos'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: DATA.nuevos.labels,
+      datasets:[{label:'GMV Nuevos',data:DATA.nuevos.data.map(v=>Math.round(v/1e6)),backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+// ─── RESPONSIVE MENU ───
+function checkMobile(){
+  const btn = document.getElementById('menu-btn');
+  if(window.innerWidth<=900){ btn.style.display='flex'; }
+  else { btn.style.display='none'; document.getElementById('sidebar').classList.remove('open'); }
+}
+
+// ─── INIT ───
+window.addEventListener('resize', checkMobile);
+window.addEventListener('hashchange', onHashChange);
+document.addEventListener('DOMContentLoaded',()=>{
+  checkMobile();
+  setTimeout(initMainCharts, 150);
+  onHashChange();
+});
+</script>
+</body>
+</html>
