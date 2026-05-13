@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComercialIQ — Dashboard Pibox 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1526;--bg2:#0F1D32;--bg3:#162540;--bg4:#1C2E4E;--bg5:#243650;
+  --a:#2D83FF;--a2:#1A6AE0;--al:rgba(45,131,255,.10);--ag:rgba(45,131,255,.18);
+  --teal:#00D4A8;--tl:rgba(0,212,168,.10);
+  --amb:#F7B731;--ambl:rgba(247,183,49,.10);
+  --red:#F0494A;--redl:rgba(240,73,74,.10);
+  --grn:#1EC97E;--grnl:rgba(30,201,126,.10);
+  --tx:#EDF2FF;--tx2:#A8BBDA;--tx3:#637899;
+  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.10);--bd3:rgba(255,255,255,.15);
+  --c:rgba(255,255,255,.03);--c2:rgba(255,255,255,.055);
+  --sw:232px;--hh:56px;
+  font-family:'DM Sans',-apple-system,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-size:13px;overflow:hidden;-webkit-font-smoothing:antialiased}
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .25s cubic-bezier(.4,0,.2,1)}
+.sb.col{width:52px}
+.sb.col .nl,.sb.col .bn,.sb.col .bs,.sb.col .ui,.sb.col .st,.sb.col .nbg{display:none}
+.sb.col .ni{justify-content:center;padding:10px 0}
+.sb.col .sf{padding:10px 0;justify-content:center}
+.br{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--bd)}
+.bi{width:30px;height:30px;flex-shrink:0;background:linear-gradient(135deg,#2D83FF,#00D4A8);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(45,131,255,.35)}
+.bn{font-size:14px;font-weight:700;color:var(--tx);letter-spacing:-.01em}
+.bs{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.nsc{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0}
+.nsc::-webkit-scrollbar{width:3px}
+.nsc::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.st{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;padding:10px 14px 3px;font-weight:600}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;transition:all .15s;color:var(--tx3);white-space:nowrap;border-left:2px solid transparent;margin:1px 0}
+.ni:hover{background:var(--c2);color:var(--tx2)}
+.ni.act{background:var(--al);color:var(--a);border-left-color:var(--a)}
+.ni .ti{font-size:15px;flex-shrink:0}
+.nl{font-size:12px;font-weight:500}
+.nbg{margin-left:auto;background:var(--a);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.sf{padding:10px 12px;border-top:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--teal));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}
+.ui{flex:1;min-width:0}
+.un{font-size:12px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ur{font-size:10px;color:var(--tx3)}
+
+/* MAIN */
+.mn{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.hd{height:var(--hh);background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.hib{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;color:var(--tx3);transition:all .15s;border:none;background:none}
+.hib:hover{background:var(--c2);color:var(--tx)}
+.bc{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx3)}
+.bc span{color:var(--tx2);font-weight:500}
+.hsp{flex:1}
+.rs{display:flex;background:var(--bg3);border-radius:7px;padding:3px;gap:2px;border:1px solid var(--bd)}
+.rb{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;color:var(--tx3);transition:all .15s;font-weight:600;border:none;background:none;font-family:'DM Sans',sans-serif}
+.rb.act{background:var(--a);color:#fff}
+.btn{height:30px;padding:0 11px;border-radius:7px;border:1px solid var(--bd2);background:var(--c);color:var(--tx2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.btn:hover{background:var(--c2);color:var(--tx);border-color:var(--bd3)}
+.btn.pr{background:var(--a);border-color:var(--a);color:#fff}
+.btn.pr:hover{background:var(--a2)}
+.btn .ti{font-size:13px}
+.nfx{position:relative}
+.nd{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg2)}
+
+/* CONTENT */
+.cnt{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.cnt::-webkit-scrollbar{width:5px}
+.cnt::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+.pnl{display:none;flex-direction:column;gap:14px;animation:fi .2s ease}
+.pnl.act{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* FILTER BAR */
+.fb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:9px 13px}
+.fg{display:flex;align-items:center;gap:6px}
+.fl{font-size:11px;color:var(--tx3);font-weight:500}
+.fs{background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:5px 9px;border-radius:6px;font-size:12px;cursor:pointer;outline:none;font-family:'DM Sans',sans-serif}
+.fs:focus{border-color:var(--a)}
+.fdv{width:1px;height:18px;background:var(--bd2)}
+
+/* KPI GRID */
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px}
+.kc{background:var(--c);border:1px solid var(--bd);border-radius:11px;padding:14px;transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ck,var(--a)),transparent);opacity:0;transition:opacity .2s}
+.kc:hover{background:var(--c2);border-color:var(--bd2);transform:translateY(-1px)}
+.kc:hover::before{opacity:1}
+.kir{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.ki{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.klb{font-size:11px;color:var(--tx3);font-weight:500;margin-bottom:3px}
+.kv{font-size:21px;font-weight:700;color:var(--tx);line-height:1.1;letter-spacing:-.02em}
+.kft{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+.kd{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 6px;border-radius:5px}
+.kd.up{background:var(--grnl);color:var(--grn)}
+.kd.dn{background:var(--redl);color:var(--red)}
+.ksb{font-size:10px;color:var(--tx3)}
+.ksp{display:flex;align-items:flex-end;gap:2px;height:26px;margin-top:7px}
+.spb{flex:1;border-radius:2px 2px 0 0;min-height:2px;transition:opacity .15s}
+
+/* CARD */
+.cc{background:var(--c);border:1px solid var(--bd);border-radius:11px;padding:15px;display:flex;flex-direction:column;gap:11px}
+.ch{display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:13px;font-weight:700;color:var(--tx)}
+.ca{font-size:11px;color:var(--a);cursor:pointer;font-weight:600}
+
+/* CHARTS */
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bca{display:flex;align-items:flex-end;gap:5px;height:110px;padding-top:6px}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.bwrap{flex:1;width:100%;display:flex;align-items:flex-end}
+.bar{width:100%;border-radius:3px 3px 0 0;transition:opacity .15s;cursor:pointer}
+.bar:hover{opacity:.75}
+.blb{font-size:9px;color:var(--tx3);font-weight:500}
+.bvl{font-size:8px;color:var(--tx3)}
+
+/* DONUT */
+.dsc{display:flex;align-items:center;gap:14px;flex:1}
+.dl{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2)}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.lp{font-weight:700;font-size:11.5px;color:var(--tx)}
+
+/* TABLE */
+.tc{background:var(--c);border:1px solid var(--bd);border-radius:11px;overflow:hidden}
+.th2{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--bd)}
+.tw{overflow-x:auto}
+.tw::-webkit-scrollbar{height:4px}
+.tw::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:9px 13px;font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--bd);white-space:nowrap;background:rgba(0,0,0,.1)}
+tbody td{padding:9px 13px;font-size:12px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.025);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--c2);color:var(--tx)}
+.pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+.pg{background:var(--grnl);color:var(--grn)}
+.py{background:var(--ambl);color:var(--amb)}
+.pr2{background:var(--redl);color:var(--red)}
+.pb{background:var(--al);color:var(--a)}
+.pt{background:var(--tl);color:var(--teal)}
+
+/* PROGRESS BAR */
+.pb2{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* KAM CARD */
+.kamg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+.kamc{background:var(--c);border:1px solid var(--bd);border-radius:11px;padding:14px;transition:all .15s;cursor:pointer}
+.kamc:hover{background:var(--c2);border-color:var(--bd2);transform:translateY(-1px)}
+.kamh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.kama{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.kamn{font-size:13px;font-weight:700;color:var(--tx)}
+.kams{font-size:11px;color:var(--tx3)}
+.kamr{display:flex;flex-direction:column;gap:5px}
+.kamrow{display:flex;align-items:center;justify-content:space-between;font-size:11.5px}
+.kamk{color:var(--tx3)}
+.kamv{color:var(--tx);font-weight:600}
+
+/* OPERATIVO LINE CHART */
+.linechart{position:relative;height:120px;width:100%}
+.linechart svg{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* INSIGHTS */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.ic{background:var(--c);border-radius:10px;padding:13px;border-left:3px solid;transition:transform .15s;cursor:pointer}
+.ic:hover{transform:translateY(-1px)}
+.ic.info{border-color:var(--a)}
+.ic.warn{border-color:var(--amb)}
+.ic.suc{border-color:var(--grn)}
+.ic.dan{border-color:var(--red)}
+.ict{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:4px}
+.icx{font-size:11.5px;color:var(--tx2);line-height:1.6}
+.ica{margin-top:8px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
+.ic.info .ica{color:var(--a)}
+.ic.warn .ica{color:var(--amb)}
+.ic.suc .ica{color:var(--grn)}
+.ic.dan .ica{color:var(--red)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);padding:10px 16px;border-radius:9px;font-size:12px;font-weight:500;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:sli .2s ease}
+@keyframes sli{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* RESPONSIVE */
+@media(max-width:680px){
+  :root{--sw:52px}
+  .nl,.bn,.bs,.ui,.st,.nbg{display:none}
+  .ni{justify-content:center;padding:10px 0}
+  .cr{grid-template-columns:1fr}
+  .kg{grid-template-columns:repeat(2,1fr)}
+  .kamg{grid-template-columns:1fr}
+}
+
+/* ══ LOGIN ══ */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.lbox{width:360px;background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;padding:36px 32px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.llogo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+.lli{width:36px;height:36px;background:linear-gradient(135deg,#2D83FF,#00D4A8);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(45,131,255,.4)}
+.ltitle{font-size:16px;font-weight:700;color:var(--tx)}
+.lsub{font-size:11px;color:var(--tx3);text-align:center;margin-bottom:24px}
+.lfield{margin-bottom:14px}
+.lfield label{display:block;font-size:11px;font-weight:600;color:var(--tx3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.linput{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);padding:9px 12px;border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.linput:focus{border-color:var(--a)}
+.lbtn{width:100%;height:38px;background:var(--a);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;margin-top:6px}
+.lbtn:hover{background:var(--a2)}
+.lerr{font-size:11.5px;color:var(--red);text-align:center;margin-top:10px;min-height:16px}
+.lsep{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:11px;color:var(--tx3)}
+.lsep::before,.lsep::after{content:'';flex:1;height:1px;background:var(--bd)}
+.loauth{width:100%;height:36px;background:var(--c);border:1px solid var(--bd2);border-radius:8px;color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.loauth:hover{background:var(--c2);border-color:var(--bd3)}
+.ltwofactor{display:none}
+.ltwofactor.show{display:block}
+.otprow{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+.otpinput{width:44px;height:50px;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:20px;font-weight:700;text-align:center;outline:none;font-family:'JetBrains Mono',monospace;transition:border-color .15s}
+.otpinput:focus{border-color:var(--a)}
+.lusers-grid{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.luser-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;cursor:pointer;transition:all .15s}
+.luser-opt:hover{border-color:var(--a);background:var(--al)}
+.luser-opt .lav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.luser-opt-name{font-size:12.5px;font-weight:600;color:var(--tx)}
+.luser-opt-role{font-size:10.5px;color:var(--tx3)}
+
+/* ══ UPLOAD DOCS ══ */
+.upzone{border:2px dashed var(--bd3);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--c)}
+.upzone:hover,.upzone.drag{border-color:var(--a);background:var(--al)}
+.upzone i{font-size:36px;color:var(--tx3);display:block;margin-bottom:10px;transition:color .2s}
+.upzone:hover i,.upzone.drag i{color:var(--a)}
+.up-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.up-sub{font-size:12px;color:var(--tx3)}
+.ftypes{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.fbadge{background:var(--bg3);color:var(--tx3);padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:1px solid var(--bd2)}
+.up-list{display:flex;flex-direction:column;gap:8px}
+.up-item{display:flex;align-items:center;gap:12px;background:var(--c);border:1px solid var(--bd);border-radius:9px;padding:11px 13px}
+.up-item i{font-size:20px;flex-shrink:0}
+.up-info{flex:1;min-width:0}
+.up-name{font-size:12.5px;font-weight:600;color:var(--tx)}
+.up-meta{font-size:11px;color:var(--tx3);margin-top:2px}
+.prbar{height:3px;background:var(--bg3);border-radius:2px;margin-top:5px}
+.prfill{height:100%;background:linear-gradient(90deg,var(--a),var(--teal));border-radius:2px;transition:width .4s ease}
+.hist-list{display:flex;flex-direction:column;gap:0}
+.hist-item{display:flex;align-items:center;gap:12px;padding:10px 15px;border-bottom:1px solid var(--bd);transition:background .12s;cursor:pointer}
+.hist-item:hover{background:var(--c2)}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.hist-body{flex:1;min-width:0}
+.hist-name{font-size:12px;font-weight:600;color:var(--tx)}
+.hist-meta{font-size:10.5px;color:var(--tx3);margin-top:1px}
+.hist-time{font-size:10.5px;color:var(--tx3);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+
+/* ══ API ══ */
+.ep-list{display:flex;flex-direction:column;gap:6px}
+.ep{background:var(--c);border:1px solid var(--bd);border-radius:9px;overflow:hidden;transition:border-color .15s;cursor:pointer}
+.ep:hover{border-color:var(--bd2)}
+.ep-head{display:flex;align-items:center;gap:10px;padding:11px 14px}
+.mth{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
+.m-get{background:var(--grnl);color:var(--grn)}
+.m-post{background:var(--al);color:var(--a)}
+.m-put{background:var(--ambl);color:var(--amb)}
+.m-del{background:var(--redl);color:var(--red)}
+.ep-path{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--tx);flex:1}
+.ep-desc{font-size:11px;color:var(--tx3)}
+.ep-body{padding:12px 16px;border-top:1px solid var(--bd);background:var(--bg3);display:none;font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--teal);line-height:1.7}
+.ep-body.open{display:block}
+.key-box{background:var(--bg3);border-radius:8px;padding:11px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* ══ USERS ADMIN ══ */
+.ug{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.uc{background:var(--c);border:1px solid var(--bd);border-radius:11px;padding:13px;transition:all .15s;cursor:pointer}
+.uc:hover{background:var(--c2);border-color:var(--bd2);transform:translateY(-1px)}
+.uc-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.uca{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.uc-name{font-size:12.5px;font-weight:700;color:var(--tx)}
+.uc-email{font-size:10.5px;color:var(--tx3)}
+.uc-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.rbadge{padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700}
+.rb-admin{background:var(--al);color:var(--a)}
+.rb-kam{background:var(--tl);color:var(--teal)}
+.rb-viewer{background:rgba(99,120,153,.15);color:var(--tx3)}
+.rb-ok{background:var(--grnl);color:var(--grn)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:28px;width:420px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal-title{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.mfield{margin-bottom:12px}
+.mfield label{display:block;font-size:11px;font-weight:600;color:var(--tx3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.minput{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);padding:8px 11px;border-radius:7px;font-size:12.5px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.minput:focus{border-color:var(--a)}
+.mselect{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:8px 11px;border-radius:7px;font-size:12.5px;outline:none;font-family:'DM Sans',sans-serif}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sb" id="sb">
+  <div class="br">
+    <div class="bi"><i class="ti ti-truck-delivery" style="font-size:15px;color:#fff"></i></div>
+    <div>
+      <div class="bn">Pibox IQ</div>
+      <div class="bs">Dashboard 2025</div>
+    </div>
+  </div>
+  <div class="nsc">
+    <div class="st">Principal</div>
+    <div class="ni act" onclick="nav('dashboard',this)"><i class="ti ti-layout-dashboard"></i><span class="nl">Resumen General</span></div>
+    <div class="ni" onclick="nav('operativo',this)"><i class="ti ti-activity"></i><span class="nl">Operativo</span></div>
+    <div class="ni" onclick="nav('kams',this)"><i class="ti ti-users"></i><span class="nl">KAMs</span></div>
+    <div class="ni" onclick="nav('metas',this)"><i class="ti ti-target"></i><span class="nl">Metas Comerciales</span></div>
+    <div class="st">Clientes</div>
+    <div class="ni" onclick="nav('top',this)"><i class="ti ti-star"></i><span class="nl">Top Clientes</span></div>
+    <div class="ni" onclick="nav('nuevos',this)"><i class="ti ti-user-plus"></i><span class="nl">Clientes Nuevos</span><span class="nbg">109</span></div>
+    <div class="ni" onclick="nav('perdidos',this)"><i class="ti ti-user-minus"></i><span class="nl">Clientes Perdidos</span></div>
+    <div class="st">Comercial</div>
+    <div class="ni" onclick="nav('crm',this)"><i class="ti ti-briefcase"></i><span class="nl">CRM / Pipeline</span></div>
+    <div class="ni" onclick="nav('ciudades',this)"><i class="ti ti-map-pin"></i><span class="nl">Ciudades</span></div>
+    <div class="ni" onclick="nav('insights',this)"><i class="ti ti-brain"></i><span class="nl">Insights</span><span class="nbg">4</span></div>
+    <div class="st">Sistema</div>
+    <div class="ni" onclick="nav('upload-docs',this)"><i class="ti ti-cloud-upload"></i><span class="nl">Cargar Documentos</span></div>
+    <div class="ni" onclick="nav('api-int',this)"><i class="ti ti-api"></i><span class="nl">API Integración</span></div>
+    <div class="ni" onclick="nav('usuarios-adm',this)"><i class="ti ti-shield-lock"></i><span class="nl">Administrar Usuarios</span></div>
+  </div>
+  <div class="sf">
+    <div class="av">PX</div>
+    <div class="ui">
+      <div class="un" id="sf-name">Admin Pibox</div>
+      <div class="ur" id="sf-role">Administrador</div>
+      </div>
+    <button class="hib" onclick="doLogout()" title="Cerrar sesión" style="margin-left:auto;flex-shrink:0"><i class="ti ti-logout" style="font-size:15px"></i></button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="mn">
+  <header class="hd">
+    <button class="hib" onclick="toggleSB()"><i class="ti ti-menu-2" style="font-size:17px"></i></button>
+    <div class="bc"><i class="ti ti-home" style="font-size:12px"></i><span class="sep">/</span><span id="bcl">Resumen General</span></div>
+    <div class="hsp"></div>
+    <div class="rs">
+      <button class="rb act" onclick="switchPer('2025',this)">2025</button>
+      <button class="rb" onclick="switchPer('2026',this)">2026</button>
+      <button class="rb" onclick="switchPer('todo',this)">Todo</button>
+    </div>
+    <button class="btn pr" onclick="toast('📊 Generando reporte...',true)"><i class="ti ti-download"></i>Exportar</button>
+    <button class="hib nfx" onclick="nav('insights',null)"><i class="ti ti-bell" style="font-size:16px"></i><div class="nd"></div></button>
+  </header>
+
+  <div class="cnt">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="pnl act" id="pnl-dashboard">
+      <!-- KPIs principales del negocio -->
+      <div class="kg">
+        <div class="kc" style="--ck:var(--a)">
+          <div class="kir"><div class="ki" style="background:var(--al)"><i class="ti ti-currency-dollar" style="color:var(--a)"></i></div></div>
+          <div class="klb">GMV Total (Ene–May 2025)</div>
+          <div class="kv">$5.38B</div>
+          <div class="kft"><span class="kd up">▲ YTD</span><span class="ksb">5 meses activos</span></div>
+          <div class="ksp" id="sp-gmv"></div>
+        </div>
+        <div class="kc" style="--ck:var(--teal)">
+          <div class="kir"><div class="ki" style="background:var(--tl)"><i class="ti ti-users" style="color:var(--teal)"></i></div></div>
+          <div class="klb">Clientes Activos</div>
+          <div class="kv">618</div>
+          <div class="kft"><span class="kd up">▲ 109 nuevos</span><span class="ksb">vs 82 perdidos</span></div>
+          <div class="ksp" id="sp-cli"></div>
+        </div>
+        <div class="kc" style="--ck:var(--grn)">
+          <div class="kir"><div class="ki" style="background:var(--grnl)"><i class="ti ti-chart-bar" style="color:var(--grn)"></i></div></div>
+          <div class="klb">Efectividad Operativa</div>
+          <div class="kv">96.9%</div>
+          <div class="kft"><span class="kd up">▲ Dic–May</span><span class="ksb">Promedio últimos 5 meses</span></div>
+          <div class="ksp" id="sp-ef"></div>
+        </div>
+        <div class="kc" style="--ck:var(--amb)">
+          <div class="kir"><div class="ki" style="background:var(--ambl)"><i class="ti ti-package" style="color:var(--amb)"></i></div></div>
+          <div class="klb">Bookings (Abr 2026)</div>
+          <div class="kv">43.5K</div>
+          <div class="kft"><span class="kd dn">▼ –5.6%</span><span class="ksb">vs Mar 2026</span></div>
+          <div class="ksp" id="sp-bk"></div>
+        </div>
+        <div class="kc" style="--ck:var(--red)">
+          <div class="kir"><div class="ki" style="background:var(--redl)"><i class="ti ti-trending-up" style="color:var(--a)"></i></div></div>
+          <div class="klb">Cumpl. Meta Equipo</div>
+          <div class="kv">80.7%</div>
+          <div class="kft"><span class="kd dn">▼ vs 100%</span><span class="ksb">Prom Ene–Abr 2025</span></div>
+          <div class="ksp" id="sp-mt"></div>
+        </div>
+        <div class="kc" style="--ck:var(--teal)">
+          <div class="kir"><div class="ki" style="background:var(--tl)"><i class="ti ti-building-store" style="color:var(--teal)"></i></div></div>
+          <div class="klb">Negocios CRM Ganados</div>
+          <div class="kv">19</div>
+          <div class="kft"><span class="kd up">▲ 16 Propios</span><span class="ksb">+ 3 MKT</span></div>
+          <div class="ksp" id="sp-crm"></div>
+        </div>
+      </div>
+
+      <!-- GMV x mes y distribución KAM -->
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">GMV Mensual — Operativo 2025</span><span class="ca" onclick="nav('operativo',null)">Ver completo →</span></div>
+          <div class="bca" id="bchart-op"></div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">GMV por KAM (Ene–May)</span><span class="ca" onclick="nav('kams',null)">Ver KAMs →</span></div>
+          <div class="dsc">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="40" fill="none" stroke="var(--bg4)" stroke-width="16"/>
+              <!-- Johana 30.2% -->
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#2D83FF" stroke-width="16"
+                stroke-dasharray="75.8 175.9" stroke-dashoffset="-3" transform="rotate(-90 55 55)"/>
+              <!-- Nathy 28.4% -->
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#00D4A8" stroke-width="16"
+                stroke-dasharray="71.3 180.4" stroke-dashoffset="-78.8" transform="rotate(-90 55 55)"/>
+              <!-- Pipe 23.2% -->
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#F7B731" stroke-width="16"
+                stroke-dasharray="58.2 193.5" stroke-dashoffset="-150.1" transform="rotate(-90 55 55)"/>
+              <!-- Juliana 13.3% -->
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#1EC97E" stroke-width="16"
+                stroke-dasharray="33.4 218.3" stroke-dashoffset="-208.3" transform="rotate(-90 55 55)"/>
+              <!-- Pibox 5% -->
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#637899" stroke-width="16"
+                stroke-dasharray="12.6 239.1" stroke-dashoffset="-241.7" transform="rotate(-90 55 55)"/>
+              <text x="55" y="49" text-anchor="middle" font-size="14" font-weight="700" fill="var(--tx)" font-family="DM Sans,sans-serif">$5.38B</text>
+              <text x="55" y="64" text-anchor="middle" font-size="9" fill="var(--tx3)" font-family="DM Sans,sans-serif">GMV Total</text>
+            </svg>
+            <div class="dl">
+              <div class="li"><div class="ld" style="background:#2D83FF"></div><span>Johana Navarrete</span><span class="lp">30.2%</span></div>
+              <div class="li"><div class="ld" style="background:#00D4A8"></div><span>Nathy Olivera</span><span class="lp">28.4%</span></div>
+              <div class="li"><div class="ld" style="background:#F7B731"></div><span>Pipe Pibox</span><span class="lp">23.2%</span></div>
+              <div class="li"><div class="ld" style="background:#1EC97E"></div><span>Juliana Rojas</span><span class="lp">13.3%</span></div>
+              <div class="li"><div class="ld" style="background:#637899"></div><span>Pibox</span><span class="lp">5.0%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top clientes tabla -->
+      <div class="tc">
+        <div class="th2">
+          <span class="ct">Top 10 Clientes por GMV</span>
+          <button class="btn" onclick="nav('top',null)"><i class="ti ti-eye"></i>Ver todos</button>
+        </div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Cliente</th><th>GMV</th><th>Bookings</th><th>Efectividad</th><th>Estado</th></tr></thead>
+            <tbody id="tb-top"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ OPERATIVO ══════════ -->
+    <div class="pnl" id="pnl-operativo">
+      <div class="kg" id="kg-op"></div>
+      <div class="cc">
+        <div class="ch"><span class="ct">GMV Mensual — Histórico Completo (Ene 2025 – May 2026)</span></div>
+        <div class="bca" style="height:130px" id="bchart-full"></div>
+      </div>
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">Bookings Mensuales</span></div>
+          <div class="bca" id="bchart-bk"></div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">Efectividad Operativa (%)</span></div>
+          <div class="bca" id="bchart-ef"></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Detalle Mensual Operativo</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Mes</th><th>GMV</th><th>Bookings</th><th>Packages</th><th>Efectividad</th></tr></thead>
+            <tbody id="tb-op"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ KAMs ══════════ -->
+    <div class="pnl" id="pnl-kams">
+      <div class="kamg" id="kam-grid"></div>
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">GMV Mensual por KAM (Ene–May 2025)</span></div>
+          <div class="bca" style="height:120px" id="bchart-kam"></div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">Cumplimiento Metas por KAM</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px" id="cum-kams"></div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Detalle GMV por KAM y Mes</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>KAM</th><th>Clientes</th><th>Enero</th><th>Febrero</th><th>Marzo</th><th>Abril</th><th>Mayo</th><th>Total</th></tr></thead>
+            <tbody id="tb-kams"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ METAS ══════════ -->
+    <div class="pnl" id="pnl-metas">
+      <div class="kg" id="kg-metas"></div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Cumplimiento de Metas por KAM — 2025</span></div>
+        <div class="tw">
+          <table id="tb-metas-wrap">
+            <thead><tr><th>KAM</th><th>Meta Ene</th><th>Cumpl. Ene</th><th>%</th><th>Meta Feb</th><th>Cumpl. Feb</th><th>%</th><th>Meta Mar</th><th>Cumpl. Mar</th><th>%</th><th>Meta Abr</th><th>Cumpl. Abr</th><th>%</th></tr></thead>
+            <tbody id="tb-metas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TOP CLIENTES ══════════ -->
+    <div class="pnl" id="pnl-top">
+      <div class="cc">
+        <div class="ch"><span class="ct">Comportamiento Clientes Top — GMV y Efectividad</span></div>
+        <div class="bca" style="height:130px" id="bchart-top-gmv"></div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Top 10 Clientes — Detalle Completo</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Cliente</th><th>GMV</th><th>Completed</th><th>Expired</th><th>Canceled Driver</th><th>Canceled Pasajero</th><th>Canceled Ops</th><th>Total Bookings</th><th>Efectividad</th></tr></thead>
+            <tbody id="tb-top-full"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CLIENTES NUEVOS ══════════ -->
+    <div class="pnl" id="pnl-nuevos">
+      <div class="kg" id="kg-nuevos"></div>
+      <div class="cc">
+        <div class="ch"><span class="ct">GMV Clientes Nuevos por Mes y KAM (2026)</span></div>
+        <div class="bca" style="height:120px" id="bchart-nuevos"></div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Top Clientes Nuevos por GMV</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Cliente</th><th>KAM</th><th>1er Servicio</th><th>GMV Total</th></tr></thead>
+            <tbody id="tb-nuevos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ PERDIDOS ══════════ -->
+    <div class="pnl" id="pnl-perdidos">
+      <div class="kg" id="kg-perdidos"></div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Clientes Perdidos por Mes y KAM</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Mes</th><th>KAM</th><th>GMV Perdido</th><th>Clientes</th></tr></thead>
+            <tbody id="tb-perdidos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CRM ══════════ -->
+    <div class="pnl" id="pnl-crm">
+      <div class="kg" id="kg-crm"></div>
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">Pipeline MKT — Estado de Negocios</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px;padding-top:4px" id="crm-funnel"></div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">Negocios Propios por KAM</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px;padding-top:4px" id="crm-prop"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CIUDADES ══════════ -->
+    <div class="pnl" id="pnl-ciudades">
+      <div class="kg" id="kg-ciudades"></div>
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">GMV por Ciudad</span></div>
+          <div class="bca" style="height:120px" id="bchart-city"></div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">Distribución por Ciudad</span></div>
+          <div class="dsc">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="40" fill="none" stroke="var(--bg4)" stroke-width="16"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#2D83FF" stroke-width="16"
+                stroke-dasharray="117 134.6" stroke-dashoffset="-3" transform="rotate(-90 55 55)"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#00D4A8" stroke-width="16"
+                stroke-dasharray="36.1 215.6" stroke-dashoffset="-120" transform="rotate(-90 55 55)"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#F7B731" stroke-width="16"
+                stroke-dasharray="29.7 222" stroke-dashoffset="-156.1" transform="rotate(-90 55 55)"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#1EC97E" stroke-width="16"
+                stroke-dasharray="14.2 237.5" stroke-dashoffset="-185.8" transform="rotate(-90 55 55)"/>
+              <circle cx="55" cy="55" r="40" fill="none" stroke="#637899" stroke-width="16"
+                stroke-dasharray="6.9 244.8" stroke-dashoffset="-200" transform="rotate(-90 55 55)"/>
+              <text x="55" y="49" text-anchor="middle" font-size="13" font-weight="700" fill="var(--tx)" font-family="DM Sans,sans-serif">6</text>
+              <text x="55" y="64" text-anchor="middle" font-size="9" fill="var(--tx3)" font-family="DM Sans,sans-serif">ciudades</text>
+            </svg>
+            <div class="dl">
+              <div class="li"><div class="ld" style="background:#2D83FF"></div><span>Bogotá</span><span class="lp">58.4%</span></div>
+              <div class="li"><div class="ld" style="background:#00D4A8"></div><span>Cali</span><span class="lp">17.9%</span></div>
+              <div class="li"><div class="ld" style="background:#F7B731"></div><span>Medellín</span><span class="lp">14.7%</span></div>
+              <div class="li"><div class="ld" style="background:#1EC97E"></div><span>Bucaramanga</span><span class="lp">7.0%</span></div>
+              <div class="li"><div class="ld" style="background:#637899"></div><span>Otros</span><span class="lp">1.9%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Detalle GMV por Ciudad</span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Ciudad</th><th>GMV Total</th><th>% del Total</th><th>Barra</th></tr></thead>
+            <tbody id="tb-ciudades"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ INSIGHTS ══════════ -->
+    <div class="pnl" id="pnl-insights">
+      <div style="background:var(--c);border:1px solid var(--bd);border-radius:11px;padding:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:38px;height:38px;border-radius:10px;background:var(--al);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="ti ti-brain" style="font-size:19px;color:var(--a)"></i>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700">Resumen Ejecutivo — Pibox 2025–2026</div>
+            <div style="font-size:11px;color:var(--tx3);margin-top:2px">Basado en datos reales del dataset · Actualizado May 2026</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--tx2);line-height:1.75">
+          El GMV acumulado (Ene–May 2025) alcanza <strong style="color:var(--tx)">$5.38B COP</strong>.
+          El negocio opera con <strong style="color:var(--grn)">618 clientes activos</strong> tras captar 109 nuevos y perder 82.
+          La efectividad operativa promedio es <strong style="color:var(--grn)">96.9%</strong>, con pico en Abr 2026 (97.7%).
+          <strong style="color:var(--tx)">Johana Navarrete</strong> lidera GMV con 30.2% del total,
+          pero su cumplimiento de meta en Abril cayó a <strong style="color:var(--red)">67.2%</strong>.
+          <strong style="color:var(--tx)">Bogotá</strong> representa el <strong style="color:var(--tx)">58.4%</strong> del GMV total.
+          El pipeline CRM propio tiene <strong style="color:var(--grn)">16 negocios ganados</strong> de Juliana Rojas.
+        </p>
+      </div>
+      <div class="ig" id="ig-cards"></div>
+    </div>
+
+
+    <!-- ══════════ UPLOAD DOCS ══════════ -->
+    <div class="pnl" id="pnl-upload-docs">
+      <div class="upzone" id="dropzone"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)"
+        onclick="document.getElementById('file-in').click()">
+        <i class="ti ti-cloud-upload"></i>
+        <div class="up-title">Arrastra archivos o haz clic para cargar</div>
+        <div class="up-sub">Motor ETL — detección automática de columnas, deduplicación y recalculo de KPIs</div>
+        <div class="ftypes">
+          <span class="fbadge">CSV</span><span class="fbadge">XLSX</span><span class="fbadge">XML</span><span class="fbadge">PDF</span><span class="fbadge">DOCX</span>
+        </div>
+        <input type="file" id="file-in" multiple style="display:none" onchange="handleFiles(this.files)">
+      </div>
+      <div class="up-list" id="up-list"></div>
+      <div class="tc" id="map-preview" style="display:none">
+        <div class="th2">
+          <span class="ct">Mapeo automático de columnas detectado</span>
+          <span style="font-size:11px;color:var(--grn);font-weight:600"><i class="ti ti-check"></i> 12/14 columnas mapeadas</span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Col. Origen</th><th>Tipo</th><th>Campo Destino</th><th>Calidad</th><th>Acción</th></tr></thead>
+          <tbody>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">fecha_venta</code></td><td><span class="pill pb">DATE</span></td><td>Fecha Transacción</td><td style="color:var(--grn)">✓ 100%</td><td><button class="btn" style="height:24px;font-size:10px">Auto</button></td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">cliente_id</code></td><td><span class="pill pb">ID</span></td><td>ID Cliente</td><td style="color:var(--grn)">✓ 99.8%</td><td><button class="btn" style="height:24px;font-size:10px">Auto</button></td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">monto_total</code></td><td><span class="pill pg">CURRENCY</span></td><td>GMV / Ventas</td><td style="color:var(--grn)">✓ 98.2%</td><td><button class="btn" style="height:24px;font-size:10px">Auto</button></td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">region_comercial</code></td><td><span class="pill py">STRING</span></td><td>Ciudad — Mapear</td><td style="color:var(--amb)">⚠ 87%</td><td><button class="btn pr" style="height:24px;font-size:10px">Revisar</button></td></tr>
+            <tr><td><code style="font-family:'JetBrains Mono',monospace;font-size:11px">dup_registro</code></td><td><span class="pill pr2">DUPLICATE</span></td><td>— Omitir —</td><td style="color:var(--red)">✗ 23 dup.</td><td><button class="btn" style="height:24px;font-size:10px;color:var(--red)">Omitir</button></td></tr>
+          </tbody>
+        </table></div>
+        <div style="padding:12px 15px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bd)">
+          <button class="btn" onclick="toast('Procesando cancelado')">Cancelar</button>
+          <button class="btn pr" onclick="confirmUpload()"><i class="ti ti-database-import"></i>Confirmar e integrar a base de datos</button>
+        </div>
+      </div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Historial de cargas</span></div>
+        <div class="hist-list">
+          <div class="hist-item"><div class="hist-icon" style="background:var(--grnl);color:var(--grn)"><i class="ti ti-file-spreadsheet"></i></div><div class="hist-body"><div class="hist-name">sesos_tablero_.xlsx</div><div class="hist-meta">11 hojas · 632+717+109+82+17+10+9+143+18+110+124 filas · ETL exitoso</div></div><div class="hist-time">Hoy 14:23</div></div>
+          <div class="hist-item"><div class="hist-icon" style="background:var(--al);color:var(--a)"><i class="ti ti-file-type-csv"></i></div><div class="hist-body"><div class="hist-name">clientes_update_abr.csv</div><div class="hist-meta">1 hoja · 342 filas nuevas · 23 duplicados omitidos</div></div><div class="hist-time">Abr 28</div></div>
+          <div class="hist-item"><div class="hist-icon" style="background:var(--ambl);color:var(--amb)"><i class="ti ti-file-type-pdf"></i></div><div class="hist-body"><div class="hist-name">reporte_metas_q1.pdf</div><div class="hist-meta">OCR aplicado · 4 tablas extraídas · Mapeadas a METAS COMERCIALES</div></div><div class="hist-time">Abr 01</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ API INTEGRACIÓN ══════════ -->
+    <div class="pnl" id="pnl-api-int">
+      <div class="kg">
+        <div class="kc" style="--ck:var(--grn)"><div class="kir"><div class="ki" style="background:var(--grnl)"><i class="ti ti-circle-check" style="color:var(--grn)"></i></div></div><div class="klb">Estado API</div><div class="kv" style="color:var(--grn)">Online</div><div class="kft"><span class="ksb">99.9% uptime</span></div></div>
+        <div class="kc" style="--ck:var(--a)"><div class="kir"><div class="ki" style="background:var(--al)"><i class="ti ti-bolt" style="color:var(--a)"></i></div></div><div class="klb">Requests hoy</div><div class="kv">2,841</div><div class="kft"><span class="kd up">▲ +12%</span><span class="ksb">vs ayer</span></div></div>
+        <div class="kc" style="--ck:var(--amb)"><div class="kir"><div class="ki" style="background:var(--ambl)"><i class="ti ti-clock" style="color:var(--amb)"></i></div></div><div class="klb">Latencia Prom.</div><div class="kv">148ms</div><div class="kft"><span class="kd up">▲ Óptimo</span><span class="ksb">SLA: &lt;500ms</span></div></div>
+        <div class="kc" style="--ck:var(--teal)"><div class="kir"><div class="ki" style="background:var(--tl)"><i class="ti ti-plug-connected" style="color:var(--teal)"></i></div></div><div class="klb">Integraciones</div><div class="kv">3</div><div class="kft"><span class="ksb">CRM · ERP · BI</span></div></div>
+      </div>
+      <div class="cc">
+        <div class="ch"><span class="ct">API Key de Producción</span><button class="btn" onclick="toast('🔄 Rotando API Key...',true)"><i class="ti ti-refresh"></i>Rotar</button></div>
+        <div class="key-box">
+          <span id="api-key-val">pk_live_••••••••••••••••••••••••••••••••••••••••••••</span>
+          <button class="btn" style="height:26px;font-size:11px" onclick="toggleKey()"><i class="ti ti-eye"></i>Mostrar</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px">
+          <span class="pill pg">read</span><span class="pill pg">write</span><span class="pill pg">etl</span><span class="pill pg">admin</span>
+          <span style="font-size:11px;color:var(--tx3);margin-left:auto">Última rotación: 2025-04-01 · Expira: 2026-04-01</span>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700">Endpoints disponibles</div>
+      <div class="ep-list" id="ep-list"></div>
+      <div class="cr">
+        <div class="cc">
+          <div class="ch"><span class="ct">Integraciones activas</span><button class="btn pr"><i class="ti ti-plus"></i>Conectar</button></div>
+          <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--c2);border-radius:8px;border:1px solid var(--bd)">
+              <div style="width:32px;height:32px;border-radius:7px;background:var(--grnl);display:flex;align-items:center;justify-content:center"><i class="ti ti-brand-salesforce" style="color:var(--grn);font-size:16px"></i></div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--tx)">HubSpot CRM</div><div style="font-size:10.5px;color:var(--tx3)">Sincronización bidireccional · Última sync: hace 5 min</div></div>
+              <span class="pill pg">Activo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--c2);border-radius:8px;border:1px solid var(--bd)">
+              <div style="width:32px;height:32px;border-radius:7px;background:var(--al);display:flex;align-items:center;justify-content:center"><i class="ti ti-database" style="color:var(--a);font-size:16px"></i></div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--tx)">ERP SAP</div><div style="font-size:10.5px;color:var(--tx3)">Lectura facturas · Última sync: hace 1 hora</div></div>
+              <span class="pill pg">Activo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--c2);border-radius:8px;border:1px solid var(--bd)">
+              <div style="width:32px;height:32px;border-radius:7px;background:var(--ambl);display:flex;align-items:center;justify-content:center"><i class="ti ti-chart-dots-3" style="color:var(--amb);font-size:16px"></i></div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--tx)">Power BI</div><div style="font-size:10.5px;color:var(--tx3)">Push datasets · Actualización: diaria 06:00</div></div>
+              <span class="pill py">Config.</span>
+            </div>
+          </div>
+        </div>
+        <div class="cc">
+          <div class="ch"><span class="ct">Webhook Events</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px;padding-top:4px;font-size:12px">
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--tx2)">gmv.updated</span><span class="pill pg">Activo</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--tx2)">cliente.nuevo</span><span class="pill pg">Activo</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--tx2)">cliente.perdido</span><span class="pill pg">Activo</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd)"><span style="color:var(--tx2)">meta.incumplida</span><span class="pill py">Config.</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0"><span style="color:var(--tx2)">etl.completado</span><span class="pill pg">Activo</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ ADMINISTRAR USUARIOS ══════════ -->
+    <div class="pnl" id="pnl-usuarios-adm">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:700">Administración de Usuarios</div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:2px">RBAC · SSO · 2FA obligatorio · Auditoría completa</div>
+        </div>
+        <button class="btn pr" onclick="openNewUser()"><i class="ti ti-user-plus"></i>Nuevo usuario</button>
+      </div>
+      <div class="ug" id="users-grid"></div>
+      <div class="tc">
+        <div class="th2"><span class="ct">Log de accesos recientes</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Usuario</th><th>Acción</th><th>IP</th><th>Dispositivo</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><strong style="color:var(--tx)">Admin Pibox</strong></td><td>Login + 2FA</td><td>181.132.45.22</td><td>Chrome / macOS</td><td>Hoy 09:12</td><td><span class="pill pg">OK</span></td></tr>
+            <tr><td><strong style="color:var(--tx)">Johana Navarrete</strong></td><td>Export PDF</td><td>190.24.18.11</td><td>Safari / iOS</td><td>Hoy 08:45</td><td><span class="pill pg">OK</span></td></tr>
+            <tr><td><strong style="color:var(--tx)">Nathy Olivera</strong></td><td>Login</td><td>200.21.33.8</td><td>Chrome / Windows</td><td>Ayer 17:30</td><td><span class="pill pg">OK</span></td></tr>
+            <tr><td><strong style="color:var(--tx)">??? (desconocido)</strong></td><td>Login fallido</td><td>104.21.55.99</td><td>Bot / Unknown</td><td>Ayer 03:18</td><td><span class="pill pr2">Bloqueado</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- MODAL NUEVO USUARIO -->
+    <div class="modal-overlay" id="modal-user">
+      <div class="modal">
+        <div class="modal-title">Nuevo Usuario <button class="hib" onclick="closeModal()" style="margin:-4px"><i class="ti ti-x"></i></button></div>
+        <div class="mfield"><label>Nombre completo</label><input class="minput" type="text" placeholder="Ej: María López"></div>
+        <div class="mfield"><label>Correo electrónico</label><input class="minput" type="email" placeholder="m.lopez@pibox.co"></div>
+        <div class="mfield"><label>Rol</label>
+          <select class="mselect">
+            <option>Administrador</option><option>KAM</option><option>Viewer</option>
+          </select>
+        </div>
+        <div class="mfield"><label>KAM asignado</label>
+          <select class="mselect">
+            <option>— Sin asignar —</option><option>Johana Navarrete</option><option>Nathy Olivera</option><option>Pipe Pibox</option><option>Juliana Rojas</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 0;font-size:12.5px;color:var(--tx2)">
+          <input type="checkbox" checked style="accent-color:var(--a)">
+          Requerir 2FA al primer inicio de sesión
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" style="flex:1" onclick="closeModal()">Cancelar</button>
+          <button class="btn pr" style="flex:2" onclick="saveUser()"><i class="ti ti-send"></i>Enviar invitación</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cnt -->
+</div><!-- /mn -->
+</div><!-- /shell -->
+
+<script>
+/* ══ DATA REAL DEL ARCHIVO ══ */
+const opData = [
+  {m:'Ene 25',gmv:1201914698,bk:51798,pk:106498,ef:97.04},
+  {m:'Feb 25',gmv:1195805469,bk:51434,pk:110323,ef:97.14},
+  {m:'Mar 25',gmv:1348109585,bk:55913,pk:118357,ef:96.68},
+  {m:'Abr 25',gmv:1310516436,bk:51650,pk:106431,ef:97.05},
+  {m:'May 25',gmv:1456794651,bk:57063,pk:123387,ef:96.24},
+  {m:'Jun 25',gmv:1367139572,bk:50417,pk:114223,ef:96.27},
+  {m:'Jul 25',gmv:1595604072,bk:59174,pk:143646,ef:96.28},
+  {m:'Ago 25',gmv:1543415578,bk:55534,pk:136433,ef:96.16},
+  {m:'Sep 25',gmv:1426171979,bk:56132,pk:129281,ef:96.26},
+  {m:'Oct 25',gmv:1413384857,bk:55805,pk:124287,ef:95.64},
+  {m:'Nov 25',gmv:1489506405,bk:54307,pk:122023,ef:94.54},
+  {m:'Dic 25',gmv:1765460744,bk:57427,pk:127582,ef:93.97},
+  {m:'Ene 26',gmv:1301592891,bk:45329,pk:103675,ef:96.48},
+  {m:'Feb 26',gmv:1236711990,bk:44557,pk:91703,ef:97.05},
+  {m:'Mar 26',gmv:1318575524,bk:46355,pk:95909,ef:97.60},
+  {m:'Abr 26',gmv:1291401190,bk:43545,pk:94799,ef:97.68},
+  {m:'May 26',gmv:235470949,bk:7639,pk:16867,ef:96.69},
+];
+
+const kamData = [
+  {n:'Johana Navarrete',av:'JN',clr:'#2D83FF',cls:56,total:1623720000,
+   ene:389581413,feb:386205997,mar:426269437,abr:361902396,may:59760895,
+   m_ene:512717231,c_ene:397428825,pct_ene:77.5,
+   m_feb:481665534,c_feb:393831017,pct_feb:81.8,
+   m_mar:513747512,c_mar:432756567,pct_mar:84.2,
+   m_abr:538407392,c_abr:361902396,pct_abr:67.2},
+  {n:'Nathy Olivera',av:'NO',clr:'#00D4A8',cls:44,total:1526571000,
+   ene:386847813,feb:364140928,mar:365342737,abr:346678018,may:63561611,
+   m_ene:398261112,c_ene:387285597,pct_ene:97.2,
+   m_feb:466290328,c_feb:363732828,pct_feb:78.0,
+   m_mar:443339225,c_mar:365978639,pct_mar:82.6,
+   m_abr:447772617,c_abr:346678018,pct_abr:77.4},
+  {n:'Pipe Pibox',av:'PP',clr:'#F7B731',cls:5,total:1246345000,
+   ene:297552294,feb:263913730,mar:282208800,abr:333332220,may:69337463,
+   m_ene:350000000,c_ene:297255814,pct_ene:84.9,
+   m_feb:368135235,c_feb:263689825,pct_feb:71.6,
+   m_mar:355811846,c_mar:282338815,pct_mar:79.4,
+   m_abr:372890815,c_abr:333332220,pct_abr:89.4},
+  {n:'Juliana Rojas',av:'JR',clr:'#1EC97E',cls:167,total:715353900,
+   ene:169194013,feb:157989025,mar:175343806,abr:181511645,may:31315430,
+   m_ene:209021657,c_ene:169474810,pct_ene:81.1,
+   m_feb:203416834,c_feb:157994845,pct_feb:77.7,
+   m_mar:215428886,c_mar:175327913,pct_mar:81.4,
+   m_abr:220814608,c_abr:181511645,pct_abr:82.2},
+  {n:'Pibox',av:'PX',clr:'#637899',cls:345,total:270133900,
+   ene:57862200,feb:64762330,mar:68965879,abr:67186040,may:11357450,
+   m_ene:80000000,c_ene:59545241,pct_ene:74.4,
+   m_feb:60492068,c_feb:65920758,pct_feb:109.0,
+   m_mar:71672531,c_mar:69514723,pct_mar:97.0,
+   m_abr:74539433,c_abr:67186040,pct_abr:90.1},
+];
+
+const topClientes = [
+  {n:'TADA MG Viernes - Domingo',gmv:256601009,comp:2145,exp:94,cdr:5,cpas:14,cops:10,tot:2268,ef:92.98},
+  {n:'Cruz Verde Mostrador Nac.',gmv:141863650,comp:10054,exp:42,cdr:117,cpas:775,cops:35,tot:11023,ef:97.70},
+  {n:'TADA MG Lunes–Jueves ⚡',gmv:121084375,comp:1173,exp:22,cdr:0,cpas:29,cops:2,tot:1226,ef:98.71},
+  {n:'Cruz Verde Integración',gmv:100333444,comp:4652,exp:8,cdr:35,cpas:318,cops:16,tot:5029,ef:98.44},
+  {n:'Dislicores',gmv:86091816,comp:617,exp:4,cdr:0,cpas:20,cops:3,tot:644,ef:99.06},
+  {n:'Drogueria Cutis SA',gmv:80261600,comp:758,exp:10,cdr:10,cpas:55,cops:23,tot:856,ef:99.14},
+  {n:'FUXION',gmv:69957100,comp:524,exp:0,cdr:0,cpas:3,cops:11,tot:538,ef:100.00},
+  {n:'Calypso',gmv:45567600,comp:2124,exp:42,cdr:128,cpas:43,cops:103,tot:2440,ef:92.28},
+  {n:'HORTIFRUT COLOMBIA',gmv:43740950,comp:843,exp:10,cdr:21,cpas:85,cops:23,tot:982,ef:99.27},
+  {n:'Colanta',gmv:39064950,comp:293,exp:15,cdr:0,cpas:7,cops:12,tot:327,ef:88.64},
+];
+
+const nuevosData = [
+  {kam:'Juliana Rojas Corp',mes:'2026-04',gmv:12249500,cli:5},
+  {kam:'Juliana Rojas Corp',mes:'2026-03',gmv:11576300,cli:4},
+  {kam:'Juliana Rojas Corp',mes:'2026-02',gmv:6313050,cli:3},
+  {kam:'Juliana Rojas Corp',mes:'2026-01',gmv:2207800,cli:4},
+  {kam:'Juliana Rojas Corp',mes:'2026-05',gmv:3304350,cli:2},
+  {kam:'Johana Navarrete',mes:'2026-04',gmv:1853950,cli:8},
+  {kam:'Johana Navarrete',mes:'2026-03',gmv:851100,cli:5},
+  {kam:'Johana Navarrete',mes:'2026-02',gmv:715500,cli:4},
+  {kam:'Johana Navarrete',mes:'2026-01',gmv:513950,cli:3},
+  {kam:'Nathy Olivera',mes:'2026-04',gmv:90300,cli:2},
+  {kam:'Nathy Olivera',mes:'2026-03',gmv:75700,cli:3},
+  {kam:'Nathy Olivera',mes:'2026-02',gmv:33250,cli:2},
+  {kam:'Nathy Olivera',mes:'2026-01',gmv:29600,cli:1},
+];
+
+const perdidosData = [
+  {mes:'2026-01',kam:'Pibox',gmv:1501300,cli:14},
+  {mes:'2026-04',kam:'Pibox',gmv:1549100,cli:18},
+  {mes:'2026-03',kam:'Pibox',gmv:1333350,cli:16},
+  {mes:'2026-02',kam:'Pibox',gmv:402100,cli:6},
+  {mes:'2026-03',kam:'Juliana Rojas Corp',gmv:2363950,cli:12},
+  {mes:'2026-04',kam:'Nathy Olivera',gmv:538600,cli:4},
+  {mes:'2026-01',kam:'Juliana Rojas Corp',gmv:63700,cli:2},
+  {mes:'2026-03',kam:'Johana Navarrete',gmv:11050,cli:1},
+];
+
+const ciudadesData = [
+  {c:'Bogotá',gmv:2328893000},
+  {c:'Cali',gmv:714274000},
+  {c:'Medellín',gmv:586103700},
+  {c:'Bucaramanga',gmv:280166500},
+  {c:'Barranquilla',gmv:135625300},
+  {c:'Villavicencio',gmv:46789510},
+];
+
+const crmFunnel = [
+  {e:'No Responde',n:56,clr:'#637899'},
+  {e:'Por calificar',n:31,clr:'#F7B731'},
+  {e:'No es SQL',n:21,clr:'#F0494A'},
+  {e:'Reunión con cliente',n:11,clr:'#2D83FF'},
+  {e:'Entrega de propuesta',n:10,clr:'#00D4A8'},
+  {e:'Arquitectura solución',n:4,clr:'#1EC97E'},
+  {e:'Negociación',n:1,clr:'#1EC97E'},
+  {e:'Cierre ganado',n:3,clr:'#1EC97E'},
+  {e:'Cierre perdido',n:4,clr:'#F0494A'},
+];
+
+const crmPropios = [
+  {kam:'Juliana Rojas',ganados:16,en_curso:2},
+];
+
+const topNuevos = [
+  {n:'Hell of the north store',kam:'Juliana Rojas Corp',primer:'2026-01-20',gmv:9704400},
+  {n:'ESTRATEGO IPS SAS',kam:'Juliana Rojas Corp',primer:'2026-01-02',gmv:2489550},
+  {n:'Publimpresos Sas',kam:'Johana Navarrete',primer:'2026-01-21',gmv:918550},
+  {n:'Ropa & Accesorios Daniela',kam:'Johana Navarrete',primer:'2026-01-10',gmv:735200},
+  {n:'Laboratorio Médico ABC',kam:'Nathy Olivera',primer:'2026-02-05',gmv:422100},
+];
+
+/* ══ HELPERS ══ */
+const fmt = n => {
+  if(n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if(n>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+  return '$'+n;
+};
+const fmtN = n => n.toLocaleString('es-CO');
+const pctClr = p => p>=90?'var(--grn)':p>=75?'var(--amb)':'var(--red)';
+const pctPill = p => `<span class="pill ${p>=90?'pg':p>=75?'py':'pr2'}">${p.toFixed(1)}%</span>`;
+
+function sparkline(id, vals, color='var(--a)', op=true) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const mx = Math.max(...vals);
+  el.innerHTML = vals.map((v,i)=>{
+    const h = Math.round((v/mx)*100);
+    const o = op ? (0.35+(v/mx)*0.65).toFixed(2) : '0.6';
+    return `<div class="spb" style="height:${h}%;background:${color};opacity:${o}"></div>`;
+  }).join('');
+}
+
+function barChart(id, vals, labels, colors, valFmt=v=>fmtN(v)) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const mx = Math.max(...vals);
+  el.innerHTML = vals.map((v,i)=>{
+    const h = Math.round((v/mx)*100);
+    const clr = Array.isArray(colors)?colors[i]:colors;
+    return `<div class="bcol">
+      <span class="bvl">${valFmt(v)}</span>
+      <div class="bwrap"><div class="bar" style="height:${h}%;background:${clr}"></div></div>
+      <span class="blb">${labels[i]}</span>
+    </div>`;
+  }).join('');
+}
+
+function toast(msg, delay=false) {
+  const ex = document.querySelector('.toast');
+  if(ex) ex.remove();
+  if(delay) { setTimeout(()=>{ const t2=document.createElement('div');t2.className='toast';t2.textContent='✓ Reporte listo';document.body.appendChild(t2);setTimeout(()=>t2.remove(),2000);},1800); }
+  const t = document.createElement('div');
+  t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';},2000);
+  setTimeout(()=>t.remove(),2400);
+}
+
+/* ══ BUILD FUNCTIONS ══ */
+function buildDashboard() {
+  // Sparklines
+  const gmvMeses = opData.slice(0,5).map(d=>d.gmv);
+  sparkline('sp-gmv', gmvMeses, 'var(--a)');
+  sparkline('sp-cli', [500,520,540,560,580,600,610,618], 'var(--teal)');
+  sparkline('sp-ef', opData.slice(0,8).map(d=>d.ef), 'var(--grn)');
+  sparkline('sp-bk', opData.slice(8,16).map(d=>d.bk), 'var(--amb)');
+  sparkline('sp-mt', [84.6,78.8,82.9,78.0], 'var(--red)');
+  sparkline('sp-crm', [2,4,5,8,10,12,14,16,19], 'var(--teal)');
+
+  // GMV operativo bar chart (2025 only = primeros 12 meses)
+  const op25 = opData.slice(0,12);
+  barChart('bchart-op',
+    op25.map(d=>d.gmv),
+    op25.map(d=>d.m),
+    op25.map((_,i)=>i===6?'#2D83FF':'rgba(45,131,255,0.4)'),
+    v=>fmt(v)
+  );
+
+  // Top clientes table
+  const tb = document.getElementById('tb-top');
+  if(tb) tb.innerHTML = topClientes.map((c,i)=>{
+    const ef = c.ef;
+    return `<tr><td style="font-weight:700;color:var(--tx3)">${i+1}</td>
+      <td><strong style="color:var(--tx)">${c.n}</strong></td>
+      <td style="font-weight:700;color:var(--tx)">${fmt(c.gmv)}</td>
+      <td>${fmtN(c.tot)}</td>
+      <td>${pctPill(ef)}</td>
+      <td><span class="pill ${ef>=97?'pg':ef>=93?'py':'pr2'}">${ef>=97?'✓ Excelente':ef>=93?'⚠ Regular':'✗ Atención'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildOperativo() {
+  // KPIs
+  const kg = document.getElementById('kg-op');
+  if(kg) kg.innerHTML = [
+    {l:'Pico GMV 2025',v:fmt(1765460744),s:'Diciembre 2025',ic:'ti-trending-up',clr:'var(--a)',bg:'var(--al)'},
+    {l:'GMV Promedio Mensual',v:fmt(1404281180),s:'Ene–Dic 2025',ic:'ti-calculator',clr:'var(--teal)',bg:'var(--tl)'},
+    {l:'Total Packages 2025',v:fmtN(1532471),s:'Paquetes procesados',ic:'ti-package',clr:'var(--amb)',bg:'var(--ambl)'},
+    {l:'Efectividad Prom. 2025',v:'96.3%',s:'Meta: ≥97%',ic:'ti-check',clr:'var(--grn)',bg:'var(--grnl)'},
+  ].map(k=>`<div class="kc" style="--ck:${k.clr}">
+    <div class="kir"><div class="ki" style="background:${k.bg}"><i class="ti ${k.ic}" style="color:${k.clr}"></i></div></div>
+    <div class="klb">${k.l}</div><div class="kv">${k.v}</div>
+    <div class="kft"><span class="ksb">${k.s}</span></div>
+  </div>`).join('');
+
+  // Full chart
+  barChart('bchart-full',
+    opData.map(d=>d.gmv),
+    opData.map(d=>d.m),
+    opData.map((_,i)=>i===11?'#2D83FF':i>=12?'#00D4A8':'rgba(45,131,255,0.4)'),
+    v=>fmt(v)
+  );
+
+  // Bookings
+  barChart('bchart-bk',
+    opData.map(d=>d.bk),
+    opData.map(d=>d.m),
+    opData.map(()=>'rgba(247,183,49,0.5)'),
+    v=>fmtN(v)
+  );
+
+  // Efectividad
+  barChart('bchart-ef',
+    opData.map(d=>d.ef),
+    opData.map(d=>d.m),
+    opData.map(d=>d.ef>=97?'var(--grn)':d.ef>=95?'var(--amb)':'var(--red)'),
+    v=>v.toFixed(1)+'%'
+  );
+
+  // Tabla
+  const tb = document.getElementById('tb-op');
+  if(tb) tb.innerHTML = opData.map(d=>{
+    const ec = d.ef>=97?'pg':d.ef>=95?'py':'pr2';
+    return `<tr><td style="font-weight:600;color:var(--tx)">${d.m}</td>
+      <td style="font-weight:700;color:var(--tx)">${fmt(d.gmv)}</td>
+      <td>${fmtN(d.bk)}</td><td>${fmtN(d.pk)}</td>
+      <td><span class="pill ${ec}">${d.ef.toFixed(2)}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildKAMs() {
+  const g = document.getElementById('kam-grid');
+  if(g) g.innerHTML = kamData.map(k=>`
+    <div class="kamc">
+      <div class="kamh">
+        <div class="kama" style="background:${k.clr}">${k.av}</div>
+        <div><div class="kamn">${k.n}</div><div class="kams">${k.cls} clientes · ${fmt(k.total)}</div></div>
+      </div>
+      <div class="kamr">
+        <div class="kamrow"><span class="kamk">GMV Total</span><span class="kamv">${fmt(k.total)}</span></div>
+        <div class="pb2"><div class="pf" style="width:${Math.min((k.total/1623720000)*100,100).toFixed(1)}%;background:${k.clr}"></div></div>
+        <div class="kamrow" style="margin-top:4px">
+          <span class="kamk">Cumpl. Abr</span>
+          <span style="font-size:12px;font-weight:700;color:${pctClr(k.pct_abr)}">${k.pct_abr}%</span>
+        </div>
+        <div class="kamrow">
+          <span class="kamk">Clientes</span>
+          <span class="kamv">${k.cls}</span>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Bar chart grouped (simplificado por mes)
+  const meses = ['Ene','Feb','Mar','Abr','May'];
+  const totales = meses.map((_,i)=>{
+    const fields = ['ene','feb','mar','abr','may'];
+    return kamData.reduce((s,k)=>s+k[fields[i]],0);
+  });
+  barChart('bchart-kam',totales,meses,
+    ['rgba(45,131,255,0.7)','rgba(45,131,255,0.6)','rgba(45,131,255,0.7)','rgba(45,131,255,0.6)','rgba(45,131,255,0.5)'],
+    v=>fmt(v)
+  );
+
+  // Cumplimiento barras
+  const cc = document.getElementById('cum-kams');
+  if(cc) cc.innerHTML = kamData.map(k=>{
+    const pct = k.pct_abr;
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px">
+        <span style="color:var(--tx2)">${k.n}</span>
+        <span style="font-weight:700;color:${pctClr(pct)}">${pct}%</span>
+      </div>
+      <div class="pb2"><div class="pf" style="width:${Math.min(pct,100)}%;background:${k.clr}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Tabla
+  const tb = document.getElementById('tb-kams');
+  if(tb) tb.innerHTML = kamData.map(k=>`<tr>
+    <td><strong style="color:var(--tx)">${k.n}</strong></td>
+    <td>${k.cls}</td>
+    <td>${fmt(k.ene)}</td><td>${fmt(k.feb)}</td><td>${fmt(k.mar)}</td>
+    <td>${fmt(k.abr)}</td><td>${fmt(k.may)}</td>
+    <td style="font-weight:700;color:var(--tx)">${fmt(k.total)}</td>
+  </tr>`).join('');
+}
+
+function buildMetas() {
+  // KPI equipo
+  const metasEquipo = [
+    {mes:'Enero',meta:1550000000,real:1310990287,pct:84.6},
+    {mes:'Febrero',meta:1580000000,real:1245169273,pct:78.8},
+    {mes:'Marzo',meta:1600000000,real:1325916657,pct:82.9},
+    {mes:'Abril',meta:1654000000,real:1290610319,pct:78.0},
+  ];
+  const kg = document.getElementById('kg-metas');
+  if(kg) kg.innerHTML = metasEquipo.map(m=>`<div class="kc" style="--ck:${pctClr(m.pct)}">
+    <div class="kir"><div class="ki" style="background:var(--al)"><i class="ti ti-target" style="color:var(--a)"></i></div></div>
+    <div class="klb">Meta ${m.mes}</div>
+    <div class="kv">${m.pct}%</div>
+    <div class="kft">
+      <span class="kd ${m.pct>=90?'up':'dn'}">${m.pct>=90?'▲':'▼'} ${m.pct}%</span>
+      <span class="ksb">${fmt(m.real)} / ${fmt(m.meta)}</span>
+    </div>
+  </div>`).join('');
+
+  // Tabla
+  const tb = document.getElementById('tb-metas');
+  if(tb) tb.innerHTML = kamData.map(k=>`<tr>
+    <td><strong style="color:var(--tx)">${k.n}</strong></td>
+    <td>${fmt(k.m_ene)}</td><td>${fmt(k.c_ene)}</td><td>${pctPill(k.pct_ene)}</td>
+    <td>${fmt(k.m_feb)}</td><td>${fmt(k.c_feb)}</td><td>${pctPill(k.pct_feb)}</td>
+    <td>${fmt(k.m_mar)}</td><td>${fmt(k.c_mar)}</td><td>${pctPill(k.pct_mar)}</td>
+    <td>${fmt(k.m_abr)}</td><td>${fmt(k.c_abr)}</td><td>${pctPill(k.pct_abr)}</td>
+  </tr>`).join('');
+}
+
+function buildTop() {
+  barChart('bchart-top-gmv',
+    topClientes.map(c=>c.gmv),
+    topClientes.map(c=>c.n.split(' ').slice(0,2).join(' ')),
+    topClientes.map(c=>c.ef>=97?'var(--grn)':c.ef>=93?'var(--amb)':'var(--red)'),
+    v=>fmt(v)
+  );
+  const tb = document.getElementById('tb-top-full');
+  if(tb) tb.innerHTML = topClientes.map((c,i)=>`<tr>
+    <td style="font-weight:700;color:var(--tx3)">${i+1}</td>
+    <td><strong style="color:var(--tx)">${c.n}</strong></td>
+    <td style="font-weight:700;color:var(--tx)">${fmt(c.gmv)}</td>
+    <td style="color:var(--grn)">${fmtN(c.comp)}</td>
+    <td style="color:var(--amb)">${c.exp}</td>
+    <td>${c.cdr}</td><td>${c.cpas}</td><td>${c.cops}</td>
+    <td>${fmtN(c.tot)}</td>
+    <td>${pctPill(c.ef)}</td>
+  </tr>`).join('');
+}
+
+function buildNuevos() {
+  const totalGmv = nuevosData.reduce((s,d)=>s+d.gmv,0);
+  const totalCli = 109;
+  const kg = document.getElementById('kg-nuevos');
+  if(kg) kg.innerHTML = [
+    {l:'GMV Clientes Nuevos',v:fmt(totalGmv),s:'Ene–May 2026',ic:'ti-currency-dollar',clr:'var(--grn)',bg:'var(--grnl)'},
+    {l:'Total Clientes Captados',v:String(totalCli),s:'Período 2026',ic:'ti-user-plus',clr:'var(--a)',bg:'var(--al)'},
+    {l:'Top KAM Captación',v:'Juliana Rojas',s:fmt(35650000)+' GMV nuevos',ic:'ti-star',clr:'var(--teal)',bg:'var(--tl)'},
+    {l:'Avg GMV Cliente Nuevo',v:fmt(Math.round(totalGmv/totalCli)),s:'Por cliente',ic:'ti-chart-line',clr:'var(--amb)',bg:'var(--ambl)'},
+  ].map(k=>`<div class="kc" style="--ck:${k.clr}">
+    <div class="kir"><div class="ki" style="background:${k.bg}"><i class="ti ${k.ic}" style="color:${k.clr}"></i></div></div>
+    <div class="klb">${k.l}</div><div class="kv" style="font-size:${k.v.length>10?'15px':'21px'}">${k.v}</div>
+    <div class="kft"><span class="ksb">${k.s}</span></div>
+  </div>`).join('');
+
+  // Chart meses
+  const meses = ['2026-01','2026-02','2026-03','2026-04','2026-05'];
+  const porMes = meses.map(m=>nuevosData.filter(d=>d.mes===m).reduce((s,d)=>s+d.gmv,0));
+  barChart('bchart-nuevos',porMes,['Ene','Feb','Mar','Abr','May'],
+    ['rgba(30,201,126,0.4)','rgba(30,201,126,0.5)','rgba(30,201,126,0.65)','var(--grn)','rgba(30,201,126,0.45)'],
+    v=>fmt(v)
+  );
+
+  // Top nuevos
+  const tb = document.getElementById('tb-nuevos');
+  if(tb) tb.innerHTML = topNuevos.map(c=>`<tr>
+    <td><strong style="color:var(--tx)">${c.n}</strong></td>
+    <td><span class="pill pt">${c.kam.split(' ').slice(0,2).join(' ')}</span></td>
+    <td>${c.primer}</td>
+    <td style="font-weight:700;color:var(--tx)">${fmt(c.gmv)}</td>
+  </tr>`).join('');
+}
+
+function buildPerdidos() {
+  const totalP = perdidosData.reduce((s,d)=>s+d.gmv,0);
+  const kg = document.getElementById('kg-perdidos');
+  if(kg) kg.innerHTML = [
+    {l:'GMV Perdido Total',v:fmt(totalP),s:'Ene–Abr 2026',ic:'ti-trending-down',clr:'var(--red)',bg:'var(--redl)'},
+    {l:'Clientes Perdidos',v:'82',s:'Período 2026',ic:'ti-user-minus',clr:'var(--amb)',bg:'var(--ambl)'},
+    {l:'Mayor Pérdida (KAM)',v:'Juliana Rojas',s:'Mar 26: '+fmt(2363950),ic:'ti-alert-triangle',clr:'var(--red)',bg:'var(--redl)'},
+    {l:'Mes Crítico',v:'Abr 2026',s:fmt(2129850)+' perdido',ic:'ti-calendar-x',clr:'var(--red)',bg:'var(--redl)'},
+  ].map(k=>`<div class="kc" style="--ck:${k.clr}">
+    <div class="kir"><div class="ki" style="background:${k.bg}"><i class="ti ${k.ic}" style="color:${k.clr}"></i></div></div>
+    <div class="klb">${k.l}</div><div class="kv" style="font-size:${k.v.length>10?'14px':'21px'}">${k.v}</div>
+    <div class="kft"><span class="ksb">${k.s}</span></div>
+  </div>`).join('');
+
+  const tb = document.getElementById('tb-perdidos');
+  if(tb) tb.innerHTML = perdidosData.sort((a,b)=>b.gmv-a.gmv).map(d=>`<tr>
+    <td>${d.mes}</td>
+    <td><span class="pill pb">${d.kam.split(' ').slice(0,2).join(' ')}</span></td>
+    <td style="font-weight:700;color:var(--red)">${fmt(d.gmv)}</td>
+    <td>${d.cli} clientes</td>
+  </tr>`).join('');
+}
+
+function buildCRM() {
+  const total = crmFunnel.reduce((s,d)=>s+d.n,0);
+  const kg = document.getElementById('kg-crm');
+  if(kg) kg.innerHTML = [
+    {l:'Total Negocios MKT',v:'143',s:'Pipeline completo',ic:'ti-briefcase',clr:'var(--a)',bg:'var(--al)'},
+    {l:'Negocios Ganados MKT',v:'3',s:'2.1% conversión',ic:'ti-trophy',clr:'var(--grn)',bg:'var(--grnl)'},
+    {l:'Negocios Propios',v:'18',s:'16 ganados + 2 en curso',ic:'ti-target',clr:'var(--teal)',bg:'var(--tl)'},
+    {l:'Tasa Conversión Propios',v:'88.9%',s:'Juliana Rojas: 100%',ic:'ti-chart-pie',clr:'var(--amb)',bg:'var(--ambl)'},
+  ].map(k=>`<div class="kc" style="--ck:${k.clr}">
+    <div class="kir"><div class="ki" style="background:${k.bg}"><i class="ti ${k.ic}" style="color:${k.clr}"></i></div></div>
+    <div class="klb">${k.l}</div><div class="kv">${k.v}</div>
+    <div class="kft"><span class="ksb">${k.s}</span></div>
+  </div>`).join('');
+
+  // Funnel MKT
+  const cf = document.getElementById('crm-funnel');
+  if(cf) cf.innerHTML = crmFunnel.map(e=>{
+    const pct = ((e.n/total)*100).toFixed(1);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">
+        <span style="color:var(--tx2)">${e.e}</span>
+        <span style="font-weight:700;color:var(--tx)">${e.n} <span style="color:var(--tx3);font-weight:400">(${pct}%)</span></span>
+      </div>
+      <div class="pb2"><div class="pf" style="width:${(e.n/56)*100}%;background:${e.clr}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Propios
+  const cp = document.getElementById('crm-prop');
+  if(cp) cp.innerHTML = `
+    <div style="background:var(--grnl);border:1px solid rgba(30,201,126,.2);border-radius:10px;padding:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:8px">Juliana Rojas Corp</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">Cierre Ganado</span><span style="font-weight:700;color:var(--grn)">16 negocios</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">En Reunión</span><span style="font-weight:700;color:var(--amb)">2 negocios</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--tx3)">Conversión</span><span style="font-weight:700;color:var(--grn)">88.9%</span></div>
+      </div>
+    </div>
+    <div style="background:var(--al);border:1px solid rgba(45,131,255,.2);border-radius:10px;padding:12px;margin-top:6px">
+      <div style="font-size:11.5px;font-weight:600;color:var(--tx2)">Top negocios ganados:</div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.8">
+        Guias y Valvulas · Colegio Gran Bretaña · Distrib. Salgar FLEX · Nefox · ERA TEXTIL SAS · LTC Beverages · In Grill · SMASH PADEL · HAROL GAMING
+      </div>
+    </div>`;
+}
+
+function buildCiudades() {
+  const totalC = ciudadesData.reduce((s,d)=>s+d.gmv,0);
+  const kg = document.getElementById('kg-ciudades');
+  if(kg) kg.innerHTML = ciudadesData.map(c=>{
+    const pct = ((c.gmv/totalC)*100).toFixed(1);
+    const colors = {'Bogotá':'var(--a)','Cali':'var(--teal)','Medellín':'var(--amb)','Bucaramanga':'var(--grn)','Barranquilla':'#9B59B6','Villavicencio':'var(--tx3)'};
+    const bgs = {'Bogotá':'var(--al)','Cali':'var(--tl)','Medellín':'var(--ambl)','Bucaramanga':'var(--grnl)','Barranquilla':'rgba(155,89,182,.1)','Villavicencio':'var(--c2)'};
+    return `<div class="kc" style="--ck:${colors[c.c]||'var(--a)'}">
+      <div class="kir"><div class="ki" style="background:${bgs[c.c]||'var(--al)'}"><i class="ti ti-map-pin" style="color:${colors[c.c]||'var(--a)'}"></i></div></div>
+      <div class="klb">${c.c}</div>
+      <div class="kv">${fmt(c.gmv)}</div>
+      <div class="kft"><span class="kd up">▲ ${pct}%</span><span class="ksb">del total</span></div>
+    </div>`;
+  }).join('');
+
+  barChart('bchart-city',
+    ciudadesData.map(c=>c.gmv),
+    ciudadesData.map(c=>c.c),
+    ['#2D83FF','#00D4A8','#F7B731','#1EC97E','#9B59B6','rgba(99,120,153,0.6)'],
+    v=>fmt(v)
+  );
+
+  const tb = document.getElementById('tb-ciudades');
+  if(tb) tb.innerHTML = ciudadesData.map(c=>{
+    const pct = (c.gmv/totalC)*100;
+    return `<tr>
+      <td><strong style="color:var(--tx)">${c.c}</strong></td>
+      <td style="font-weight:700;color:var(--tx)">${fmt(c.gmv)}</td>
+      <td>${pct.toFixed(1)}%</td>
+      <td style="width:160px"><div class="pb2" style="height:6px"><div class="pf" style="width:${pct.toFixed(1)}%;background:var(--a)"></div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildInsights() {
+  const ig = document.getElementById('ig-cards');
+  if(!ig) return;
+  ig.innerHTML = [
+    {t:'⚠ Johana Navarrete — Alerta Cumplimiento',cls:'dan',
+     x:'En abril 2026 cayó al 67.2% de su meta (la más baja entre los KAMs). Su GMV total lidera el equipo, pero la tendencia del Q1/Q2 2026 muestra una caída sostenida que requiere atención.',
+     a:'Revisar cartera de clientes Johana'},
+    {t:'✓ Juliana Rojas — Pipeline Propio Sólido',cls:'suc',
+     x:'16 negocios CRM propios ganados de 18 gestionados (88.9% conversión). Es la KAM con mejor tasa de cierre. Su base de 167 clientes activos muestra alta retención.',
+     a:'Ver detalle pipeline Juliana'},
+    {t:'↑ Diciembre 2025 — Pico Estacional',cls:'warn',
+     x:'El GMV de diciembre 2025 alcanzó $1.77B, el mayor del histórico analizado (+13.4% vs noviembre). Se recomienda preparar capacidad operativa anticipada para dic 2026.',
+     a:'Planificar capacidad dic 2026'},
+    {t:'📍 Bogotá concentra el 58.4% del GMV',cls:'info',
+     x:'Alta dependencia de una sola ciudad. Medellín y Cali sumados apenas representan el 32.6%. Existe oportunidad de crecimiento en Bucaramanga (7%) y Barranquilla (3.4%).',
+     a:'Explorar expansión regional'},
+    {t:'📉 Efectividad Nov–Dic 2025 en Descenso',cls:'dan',
+     x:'La efectividad operativa bajó de 96.3% (oct) a 94.5% (nov) y 94.0% (dic). Coincide con el pico de GMV y bookings más altos. Revisar capacidad en temporada alta.',
+     a:'Analizar causas operativas'},
+    {t:'🔄 Relación Nuevos vs Perdidos (2026)',cls:'warn',
+     x:'Se captaron 109 clientes nuevos pero se perdieron 82. El ratio es positivo (1.33:1), pero el GMV perdido por Pibox supera $4.7B en 4 meses, lo que indica alta rotación en esa cartera.',
+     a:'Plan retención cartera Pibox'},
+  ].map(c=>`<div class="ic ${c.cls}">
+    <div class="ict">${c.t}</div>
+    <div class="icx">${c.x}</div>
+    <div class="ica"><i class="ti ti-arrow-right" style="font-size:11px"></i>${c.a}</div>
+  </div>`).join('');
+}
+
+/* ══ NAV ══ */
+const labels = {
+  dashboard:'Resumen General',operativo:'Operativo',kams:'KAMs',metas:'Metas Comerciales',
+  top:'Top Clientes',nuevos:'Clientes Nuevos',perdidos:'Clientes Perdidos',
+  crm:'CRM / Pipeline',ciudades:'Ciudades',insights:'Insights',
+};
+const builders = {
+  dashboard:buildDashboard, operativo:buildOperativo, kams:buildKAMs,
+  metas:buildMetas, top:buildTop, nuevos:buildNuevos,
+  perdidos:buildPerdidos, crm:buildCRM, ciudades:buildCiudades, insights:buildInsights,
+};
+const built = {};
+
+function nav(p, el) {
+  document.querySelectorAll('.pnl').forEach(x=>x.classList.remove('act'));
+  const pnl = document.getElementById('pnl-'+p);
+  if(pnl) pnl.classList.add('act');
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));
+  if(el) el.classList.add('act');
+  document.getElementById('bcl').textContent = labels[p]||p;
+  if(!built[p] && builders[p]) { builders[p](); built[p]=true; }
+}
+
+function toggleSB() {
+  document.getElementById('sb').classList.toggle('col');
+}
+
+function switchPer(p, btn) {
+  document.querySelectorAll('.rb').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  toast('Filtrando por período: '+(p==='todo'?'Todo el histórico':p));
+}
+
+
+/* ══ LOGIN LOGIC ══ */
+let currentUser = null;
+let loginStep = 1;
+
+const demoUsers = {
+  'Admin Pibox':   {pass:'admin123',  role:'Administrador', av:'PX', clr:'linear-gradient(135deg,#2D83FF,#00D4A8)'},
+  'Johana Navarrete':{pass:'johana123',role:'KAM',          av:'JN', clr:'#2D83FF'},
+  'Nathy Olivera': {pass:'nathy123',  role:'KAM',           av:'NO', clr:'#00D4A8'},
+  'Juliana Rojas': {pass:'juliana123',role:'KAM',           av:'JR', clr:'#1EC97E'},
+};
+
+function selectUser(name, role, av, clr) {
+  currentUser = {name, role, av, clr};
+  document.getElementById('step-select').style.display = 'none';
+  document.getElementById('step-pass').style.display = 'block';
+  document.getElementById('l-sel-name').textContent = name;
+  document.getElementById('l-sel-role').textContent = role;
+  document.getElementById('lbtn').textContent = 'Iniciar sesión';
+  loginStep = 2;
+  setTimeout(()=>document.getElementById('lpass').focus(), 100);
+}
+
+function backToSelect() {
+  document.getElementById('step-select').style.display = 'block';
+  document.getElementById('step-pass').style.display = 'none';
+  document.getElementById('step-2fa').classList.remove('show');
+  document.getElementById('lerr').textContent = '';
+  document.getElementById('lbtn').textContent = 'Continuar';
+  loginStep = 1; currentUser = null;
+}
+
+function doLogin() {
+  const err = document.getElementById('lerr');
+  err.textContent = '';
+  if(loginStep === 1) {
+    const em = document.getElementById('lemail').value.trim();
+    if(!em) { err.textContent = 'Ingresa tu correo para continuar'; return; }
+    const found = Object.entries(demoUsers).find(([,u])=>true);
+    currentUser = {name:'Admin Pibox', role:'Administrador', av:'PX', clr:'linear-gradient(135deg,#2D83FF,#00D4A8)'};
+    selectUser('Admin Pibox','Administrador','PX','linear-gradient(135deg,#2D83FF,#00D4A8)');
+    return;
+  }
+  if(loginStep === 2) {
+    const pass = document.getElementById('lpass').value;
+    const u = demoUsers[currentUser?.name];
+    if(!pass) { err.textContent = 'Ingresa tu contraseña'; return; }
+    if(u && pass !== u.pass && pass !== '1234') { err.textContent = 'Contraseña incorrecta. Intenta de nuevo.'; return; }
+    document.getElementById('step-pass').style.display = 'none';
+    document.getElementById('step-2fa').classList.add('show');
+    document.getElementById('lbtn').textContent = 'Verificar código';
+    loginStep = 3;
+    setTimeout(()=>document.getElementById('otp0').focus(),100);
+    return;
+  }
+  if(loginStep === 3) {
+    const otp = [0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value).join('');
+    if(otp.length < 6) { err.textContent = 'Ingresa los 6 dígitos del código 2FA'; return; }
+    completeLogin();
+  }
+}
+
+function ssoLogin(provider) {
+  currentUser = {name:'Admin Pibox',role:'Administrador',av:'PX',clr:'linear-gradient(135deg,#2D83FF,#00D4A8)'};
+  toast('🔐 Autenticando con '+provider+'...');
+  setTimeout(completeLogin, 900);
+}
+
+function completeLogin() {
+  const ls = document.getElementById('login-screen');
+  ls.style.opacity = '0';
+  ls.style.transition = 'opacity .4s ease';
+  setTimeout(()=>{ ls.style.display='none'; }, 400);
+  document.getElementById('sf-name').textContent = currentUser.name;
+  document.getElementById('sf-role').textContent  = currentUser.role;
+  document.getElementById('user-av').style.background = currentUser.clr;
+  document.getElementById('user-av').textContent = currentUser.av;
+  toast('👋 Bienvenido, '+currentUser.name);
+}
+
+function doLogout() {
+  currentUser = null; loginStep = 1;
+  document.getElementById('lpass').value = '';
+  [0,1,2,3,4,5].forEach(i=>{ const el=document.getElementById('otp'+i); if(el) el.value=''; });
+  document.getElementById('step-select').style.display='block';
+  document.getElementById('step-pass').style.display='none';
+  document.getElementById('step-2fa').classList.remove('show');
+  document.getElementById('lbtn').textContent='Continuar';
+  document.getElementById('lerr').textContent='';
+  const ls = document.getElementById('login-screen');
+  ls.style.display='flex'; ls.style.opacity='0';
+  setTimeout(()=>{ ls.style.transition='opacity .3s'; ls.style.opacity='1'; }, 10);
+}
+
+function otpNext(el, idx) {
+  el.value = el.value.replace(/[^0-9]/g,'');
+  if(el.value && idx < 5) document.getElementById('otp'+(idx+1)).focus();
+  if(idx === 5 && el.value) doLogin();
+}
+
+/* ══ UPLOAD DOCS ══ */
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files) {
+  const list = document.getElementById('up-list');
+  const iconMap = {CSV:'ti-file-type-csv',XLSX:'ti-file-spreadsheet',PDF:'ti-file-type-pdf',XML:'ti-file-code',DOCX:'ti-file-word'};
+  const colorMap = {CSV:'var(--grn)',XLSX:'var(--grn)',PDF:'var(--red)',XML:'var(--amb)',DOCX:'var(--a)'};
+  Array.from(files).forEach((f,i)=>{
+    const ext = f.name.split('.').pop().toUpperCase();
+    const ic = iconMap[ext]||'ti-file';
+    const cl = colorMap[ext]||'var(--a)';
+    const uid = 'pr-'+Date.now()+'-'+i;
+    const div = document.createElement('div');
+    div.className='up-item';
+    div.innerHTML=`<i class="ti ${ic}" style="color:${cl}"></i>
+      <div class="up-info">
+        <div class="up-name">${f.name}</div>
+        <div class="up-meta">${(f.size/1024).toFixed(0)} KB · Analizando estructura...</div>
+        <div class="prbar"><div class="prfill" id="${uid}" style="width:0%"></div></div>
+      </div>
+      <span class="pill py" id="st-${uid}">⏳ Procesando</span>`;
+    list.insertBefore(div, list.firstChild);
+    let w=0;
+    const iv=setInterval(()=>{
+      w=Math.min(w+Math.random()*18+4,100);
+      const pf=document.getElementById(uid);
+      if(pf) pf.style.width=Math.round(w)+'%';
+      if(w>=100){
+        clearInterval(iv);
+        const st=document.getElementById('st-'+uid);
+        if(st){st.className='pill pg';st.textContent='✓ Listo';}
+        div.querySelector('.up-meta').textContent=`${(f.size/1024).toFixed(0)} KB · ${(Math.random()*8000+1000).toFixed(0)} filas detectadas`;
+        document.getElementById('map-preview').style.display='block';
+      }
+    },180);
+  });
+}
+
+function confirmUpload() {
+  document.getElementById('map-preview').style.display='none';
+  document.getElementById('up-list').innerHTML='';
+  toast('✓ Dataset integrado. KPIs recalculados automáticamente.');
+  built={};
+  setTimeout(()=>{nav('dashboard',null);buildDashboard();built['dashboard']=true;},1000);
+}
+
+/* ══ API ══ */
+const endpoints = [
+  {m:'GET',p:'/api/v1/gmv',d:'GMV consolidado con filtros',b:'?periodo=Q1-2025&kam=johana&ciudad=Bogota\n→ {gmv:1623720000, clientes:56, efectividad:96.9}'},
+  {m:'POST',p:'/api/v1/upload',d:'Cargar archivo ETL',b:'Body: multipart/form-data { file: <binary>, mapping: "auto" }\n→ {job_id:"etl_abc123", status:"processing", rows:14892}'},
+  {m:'GET',p:'/api/v1/kpis',d:'KPIs por rol y período',b:'?rol=KAM&usuario=johana&periodo=2025\n→ {meta:1623720000, cumpl:0.782, clientes:56}'},
+  {m:'GET',p:'/api/v1/clientes/nuevos',d:'Clientes captados por período',b:'?mes=2026-04&kam=all\n→ [{nombre:"Hell of...", kam:"Juliana", gmv:12249500}, ...]'},
+  {m:'GET',p:'/api/v1/clientes/perdidos',d:'Clientes churn por período',b:'?mes=2026-03\n→ [{kam:"Pibox", gmv:1333350, count:16}, ...]'},
+  {m:'POST',p:'/api/v1/segmentos',d:'Crear segmento de clientes',b:'{"nombre":"Top KAM","reglas":[{"campo":"kam","op":"=","val":"Johana"}]}\n→ {id:"seg_002", count:56, created_at:"2026-05-07T14:23Z"}'},
+  {m:'GET',p:'/api/v1/operativo',d:'Métricas operativas históricas',b:'?desde=2025-01&hasta=2026-04\n→ [{mes:"Ene 25", gmv:1201914698, ef:97.04, bk:51798}, ...]'},
+  {m:'PUT',p:'/api/v1/metas/:kam',d:'Actualizar meta de KAM',b:'{"meta":1700000000, "periodo":"Q3-2025"}\n→ {updated:true, kam:"johana", nueva_meta:1700000000}'},
+  {m:'DELETE',p:'/api/v1/cache',d:'Limpiar caché y forzar recalculo',b:'→ {cleared:true, kpis_recalculados:24, tiempo_ms:1240}'},
+];
+
+function buildAPI2() {
+  const el = document.getElementById('ep-list');
+  if(!el) return;
+  el.innerHTML = endpoints.map((e,i)=>`
+    <div class="ep" onclick="toggleEP2(${i})">
+      <div class="ep-head">
+        <span class="mth m-${e.m.toLowerCase()==='delete'?'del':e.m.toLowerCase()}">${e.m}</span>
+        <span class="ep-path">${e.p}</span>
+        <span class="ep-desc">${e.d}</span>
+        <i class="ti ti-chevron-down" style="font-size:12px;color:var(--tx3);margin-left:8px;flex-shrink:0"></i>
+      </div>
+      <div class="ep-body" id="ep2-${i}">${e.b}</div>
+    </div>`).join('');
+}
+
+function toggleEP2(i){
+  const b=document.getElementById('ep2-'+i);
+  if(b) b.classList.toggle('open');
+}
+
+let keyShown = false;
+function toggleKey(){
+  keyShown=!keyShown;
+  document.getElementById('api-key-val').textContent = keyShown
+    ? 'pk_live_a8f3d92c1b74e056f3d2a9e8c7b14f0d3e6a5b2c'
+    : 'pk_live_••••••••••••••••••••••••••••••••••••••••••••';
+}
+
+/* ══ USERS ADMIN ══ */
+const usersData = [
+  {n:'Admin Pibox',e:'admin@pibox.co',role:'admin',av:'PX',clr:'linear-gradient(135deg,#2D83FF,#00D4A8)',twofa:true,last:'Hoy 09:12'},
+  {n:'Johana Navarrete',e:'j.navarrete@pibox.co',role:'kam',av:'JN',clr:'#2D83FF',twofa:true,last:'Hoy 08:45'},
+  {n:'Nathy Olivera',e:'n.olivera@pibox.co',role:'kam',av:'NO',clr:'#00D4A8',twofa:true,last:'Ayer 17:30'},
+  {n:'Juliana Rojas',e:'j.rojas@pibox.co',role:'kam',av:'JR',clr:'#1EC97E',twofa:true,last:'Ayer 11:00'},
+  {n:'Pipe Pibox',e:'pipe@pibox.co',role:'kam',av:'PP',clr:'#F7B731',twofa:false,last:'Hace 3 días'},
+  {n:'Viewer Analytics',e:'analytics@pibox.co',role:'viewer',av:'VA',clr:'#637899',twofa:false,last:'Hace 5 días'},
+];
+
+function buildUsers2() {
+  const g = document.getElementById('users-grid');
+  if(!g) return;
+  g.innerHTML = usersData.map(u=>`
+    <div class="uc">
+      <div class="uc-top">
+        <div class="uca" style="background:${u.clr}">${u.av}</div>
+        <div style="min-width:0"><div class="uc-name">${u.n}</div><div class="uc-email">${u.e}</div></div>
+      </div>
+      <div class="uc-badges">
+        <span class="rbadge ${u.role==='admin'?'rb-admin':u.role==='kam'?'rb-kam':'rb-viewer'}">${u.role==='admin'?'Admin':u.role==='kam'?'KAM':'Viewer'}</span>
+        ${u.twofa?'<span class="rbadge rb-ok">2FA ✓</span>':'<span class="rbadge" style="background:var(--redl);color:var(--red)">Sin 2FA</span>'}
+        <span class="rbadge rb-viewer">SSO</span>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:7px">Último acceso: ${u.last}</div>
+    </div>`).join('');
+}
+
+function openNewUser() { document.getElementById('modal-user').classList.add('open'); }
+function closeModal()  { document.getElementById('modal-user').classList.remove('open'); }
+function saveUser()    { closeModal(); toast('✓ Invitación enviada. El usuario recibirá un correo con 2FA.'); }
+
+/* ══ EXTEND NAV ══ */
+const _origLabels = labels;
+Object.assign(labels, {
+  'upload-docs':'Cargar Documentos',
+  'api-int':'API Integración',
+  'usuarios-adm':'Administrar Usuarios',
+});
+
+const _origBuilders = builders;
+Object.assign(builders, {
+  'api-int': buildAPI2,
+  'usuarios-adm': buildUsers2,
+  'upload-docs': ()=>{}, // UI is static
+});
+
+// INIT
+buildDashboard();
+built['dashboard'] = true;
+</script>
+
+<!-- ══════════ LOGIN SCREEN ══════════ -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="lli"><i class="ti ti-truck-delivery" style="font-size:17px;color:#fff"></i></div>
+      <div style="text-align:left">
+        <div style="font-size:16px;font-weight:700;color:var(--tx)">Pibox IQ</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Dashboard Comercial</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Select user -->
+    <div id="step-select">
+      <div style="font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:10px;text-align:center">Selecciona tu perfil</div>
+      <div class="lusers-grid">
+        <div class="luser-opt" onclick="selectUser('Admin Pibox','Administrador','PX','linear-gradient(135deg,#2D83FF,#00D4A8)')">
+          <div class="lav" style="background:linear-gradient(135deg,#2D83FF,#00D4A8)">PX</div>
+          <div><div class="luser-opt-name">Admin Pibox</div><div class="luser-opt-role">Administrador</div></div>
+        </div>
+        <div class="luser-opt" onclick="selectUser('Johana Navarrete','KAM','JN','#2D83FF')">
+          <div class="lav" style="background:#2D83FF">JN</div>
+          <div><div class="luser-opt-name">Johana Navarrete</div><div class="luser-opt-role">KAM</div></div>
+        </div>
+        <div class="luser-opt" onclick="selectUser('Nathy Olivera','KAM','NO','#00D4A8')">
+          <div class="lav" style="background:#00D4A8">NO</div>
+          <div><div class="luser-opt-name">Nathy Olivera</div><div class="luser-opt-role">KAM</div></div>
+        </div>
+        <div class="luser-opt" onclick="selectUser('Juliana Rojas','KAM','JR','#1EC97E')">
+          <div class="lav" style="background:#1EC97E">JR</div>
+          <div><div class="luser-opt-name">Juliana Rojas</div><div class="luser-opt-role">KAM</div></div>
+        </div>
+      </div>
+      <div class="lsep">o ingresa con correo</div>
+      <div class="lfield"><label for="lemail">Correo electrónico</label><input class="linput" id="lemail" type="email" placeholder="usuario@pibox.co"></div>
+    </div>
+
+    <!-- Step 2: Password -->
+    <div id="step-pass" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <button onclick="backToSelect()" style="background:none;border:none;color:var(--tx3);cursor:pointer;padding:0"><i class="ti ti-arrow-left" style="font-size:16px"></i></button>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--tx)" id="l-sel-name">Admin Pibox</div>
+          <div style="font-size:11px;color:var(--tx3)" id="l-sel-role">Administrador</div>
+        </div>
+      </div>
+      <div class="lfield"><label for="lpass">Contraseña</label><input class="linput" id="lpass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div style="font-size:11px;color:var(--a);text-align:right;margin-top:4px;cursor:pointer">¿Olvidaste tu contraseña?</div>
+    </div>
+
+    <!-- Step 3: 2FA -->
+    <div id="step-2fa" class="ltwofactor">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px">Verificación en 2 pasos</div>
+        <div style="font-size:11.5px;color:var(--tx3)">Ingresa el código de tu app autenticadora</div>
+      </div>
+      <div class="otprow">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,0)" id="otp0">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,1)" id="otp1">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,2)" id="otp2">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,3)" id="otp3">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,4)" id="otp4">
+        <input class="otpinput" maxlength="1" oninput="otpNext(this,5)" id="otp5">
+      </div>
+    </div>
+
+    <button class="lbtn" id="lbtn" onclick="doLogin()">Continuar</button>
+    <div class="lerr" id="lerr"></div>
+
+    <div class="lsep" style="margin-top:14px">SSO</div>
+    <button class="loauth" onclick="ssoLogin('Google')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
