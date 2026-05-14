@@ -84,6 +84,11 @@
   .filter-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
   .filter-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; font-family: inherit; outline: none; cursor: pointer; transition: all 0.15s; }
   .filter-select:hover, .filter-select:focus { border-color: var(--border2); color: var(--text); }
+  .filter-date { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; font-family: inherit; outline: none; cursor: pointer; transition: all 0.15s; color-scheme: dark; }
+  .filter-date:hover, .filter-date:focus { border-color: var(--border2); color: var(--text); }
+  .filter-date::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+  .date-range-group { display: none; align-items: center; gap: 6px; }
+  .date-range-group.visible { display: flex; }
   .filter-actions { margin-left: auto; display: flex; gap: 8px; }
   .btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; font-weight: 500; transition: all 0.15s; border: 1px solid transparent; }
   .btn-ghost { background: var(--bg3); border-color: var(--border); color: var(--text2); }
@@ -386,15 +391,47 @@
   <div class="view active" id="view-overview">
 
     <!-- Filter bar -->
-    <div class="filter-bar">
+    <div class="filter-bar" id="global-filter-bar">
       <div class="filter-group">
-        <span class="filter-label">Período</span>
-        <select class="filter-select" id="f-period" onchange="applyFilters()">
-          <option value="all">Todo el año</option>
-          <option value="q1">Q1 2026</option>
-          <option value="q2" selected>Q2 2026</option>
+        <span class="filter-label">Tipo</span>
+        <select class="filter-select" id="f-period-type" onchange="onPeriodTypeChange();applyFilters()">
+          <option value="all">Todo</option>
+          <option value="year">Año</option>
+          <option value="quarter">Trimestre</option>
+          <option value="month">Mes</option>
+          <option value="range">Rango de fechas</option>
+        </select>
+      </div>
+      <div class="filter-group" id="f-year-group" style="display:none;">
+        <span class="filter-label">Año</span>
+        <select class="filter-select" id="f-year" onchange="applyFilters()">
+          <option value="2026">2026</option>
           <option value="2025">2025</option>
         </select>
+      </div>
+      <div class="filter-group" id="f-quarter-group" style="display:none;">
+        <span class="filter-label">Trimestre</span>
+        <select class="filter-select" id="f-quarter" onchange="applyFilters()">
+          <option value="q1">Q1 (Ene–Mar)</option>
+          <option value="q2">Q2 (Abr–Jun)</option>
+          <option value="q3">Q3 (Jul–Sep)</option>
+          <option value="q4">Q4 (Oct–Dic)</option>
+        </select>
+      </div>
+      <div class="filter-group" id="f-month-group" style="display:none;">
+        <span class="filter-label">Mes</span>
+        <select class="filter-select" id="f-month" onchange="applyFilters()">
+          <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+          <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+          <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+          <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="date-range-group" id="f-range-group">
+        <span class="filter-label">Desde</span>
+        <input type="date" class="filter-date" id="f-date-start" value="2025-01-01" onchange="applyFilters()">
+        <span class="filter-label">Hasta</span>
+        <input type="date" class="filter-date" id="f-date-end" value="2026-05-31" onchange="applyFilters()">
       </div>
       <div class="filter-group">
         <span class="filter-label">KAM</span>
@@ -408,15 +445,15 @@
       </div>
       <div class="filter-group">
         <span class="filter-label">Segmento</span>
-        <select class="filter-select">
-          <option>Todos</option>
+        <select class="filter-select" id="f-segment" onchange="applyFilters()">
+          <option value="all">Todos</option>
           <option>Enterprise</option>
           <option>Mid-Market</option>
           <option>SMB</option>
         </select>
       </div>
       <div class="filter-actions">
-        <button class="btn btn-ghost" onclick="toast('Filtros guardados')"><i class="ti ti-bookmark"></i> Guardar filtro</button>
+        <button class="btn btn-ghost" onclick="resetFilters()"><i class="ti ti-filter-off"></i> Limpiar</button>
         <button class="btn btn-success" onclick="exportReport('xlsx')"><i class="ti ti-table-export"></i> Exportar XLSX</button>
         <button class="btn btn-primary" onclick="exportReport('pdf')"><i class="ti ti-file-text"></i> Exportar PDF</button>
       </div>
@@ -561,6 +598,7 @@
       </div>
       <button class="btn btn-primary" onclick="showModal('meta-modal')"><i class="ti ti-plus"></i> Nueva meta</button>
     </div>
+    <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
 
     <div class="meta-grid">
       <div class="meta-card">
@@ -642,6 +680,7 @@
         <div class="section-sub">Indicadores individuales · Prospección, activación, retención</div>
       </div>
     </div>
+    <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
     <div class="tabs">
       <div class="tab active" onclick="switchTab('kam','juliana')">Juliana Rojas</div>
       <div class="tab" onclick="switchTab('kam','johana')">Johana Navarrete</div>
@@ -684,6 +723,7 @@
       <div><div class="section-title">Gestión de Clientes</div><div class="section-sub">Nuevos · Activos · Perdidos · Segmentación</div></div>
       <button class="btn btn-primary" onclick="showModal('seg-modal')"><i class="ti ti-filter-cog"></i> Crear segmento</button>
     </div>
+    <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
     <div class="tabs">
       <div class="tab active" onclick="switchTab('cli','nuevos')">Nuevos</div>
       <div class="tab" onclick="switchTab('cli','perdidos')">Perdidos</div>
@@ -743,6 +783,7 @@
   <!-- ────────────────── OPERATIVO VIEW ────────────────── -->
   <div class="view" id="view-operativo">
     <div class="section-head"><div><div class="section-title">Comportamiento Operativo</div><div class="section-sub">Efectividad · Bookings · Packages · GMV mensual</div></div></div>
+    <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
     <div class="kpi-grid">
       <div class="kpi-card teal"><div class="kpi-label">Efectividad Promedio 2025</div><div class="kpi-value">96.1%</div><div class="kpi-sub">Sobre 12 meses</div></div>
       <div class="kpi-card blue"><div class="kpi-label">Bookings Totales 2025</div><div class="kpi-value">638K</div><div class="kpi-sub">Suma anual</div></div>
@@ -770,6 +811,7 @@
   <!-- ────────────────── CRM VIEW ────────────────── -->
   <div class="view" id="view-crm">
     <div class="section-head"><div><div class="section-title">Pipeline CRM</div><div class="section-sub">Negocios MKT y propios · Estado del funnel</div></div><button class="btn btn-primary" onclick="showModal('crm-modal')"><i class="ti ti-plus"></i> Nuevo negocio</button></div>
+    <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
     <div class="kpi-grid">
       <div class="kpi-card blue"><div class="kpi-label">Negocios MKT</div><div class="kpi-value">143</div><div class="kpi-sub">Total en pipeline</div></div>
       <div class="kpi-card green"><div class="kpi-label">Negocios Propios</div><div class="kpi-value">18</div><div class="kpi-sub">Total en pipeline</div></div>
@@ -1553,12 +1595,195 @@ function refreshInsights(){
   toast('Insights actualizados con IA');
   auditLog('Insights de IA actualizados manualmente','data','info','');
 }
-function applyFilters(){
-  toast('Filtros aplicados');
-  const period = document.getElementById('f-period')?.value || '—';
-  const kam = document.getElementById('f-kam')?.value || '—';
-  auditLog('Filtros aplicados en dashboard','nav','info','Período: '+period+' · KAM: '+kam);
+// ─── PERIOD LABEL PARSING ───
+// Maps labels like "Ene25","Feb26","Ene","Febrero" to {year, month} for filtering
+const MONTH_MAP = {ene:1,feb:2,mar:3,abr:4,may:5,jun:6,jul:7,ago:8,sep:9,oct:10,nov:11,dic:12,
+  enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12,
+  jan:1,feb_en:2,mar_en:3,apr:4,may_en:5,jun_en:6,jul_en:7,aug:8,sep_en:9,oct_en:10,nov_en:11,dec:12};
+
+function parseLabelDate(label){
+  if(!label) return null;
+  const s = String(label).trim().toLowerCase();
+  // "Ene25", "Mar26"
+  const m1 = s.match(/^([a-záéíóú]+)\s*(\d{2,4})$/);
+  if(m1){
+    const mon = MONTH_MAP[m1[1]];
+    let yr = parseInt(m1[2]);
+    if(yr < 100) yr += 2000;
+    if(mon) return {year:yr, month:mon};
+  }
+  // "Ene", "Febrero" (assume current context year)
+  const mon2 = MONTH_MAP[s];
+  if(mon2) return {year:2026, month:mon2};
+  // "2025-03", "2026-01"
+  const m3 = s.match(/^(\d{4})-(\d{2})$/);
+  if(m3) return {year:parseInt(m3[1]), month:parseInt(m3[2])};
+  // "01/2026"
+  const m4 = s.match(/^(\d{2})\/(\d{4})$/);
+  if(m4) return {year:parseInt(m4[2]), month:parseInt(m4[1])};
+  return null;
 }
+
+function getFilteredIndices(labels){
+  const type = document.getElementById('f-period-type')?.value || 'all';
+  if(type === 'all') return labels.map((_,i)=>i);
+
+  const parsed = labels.map(l => parseLabelDate(l));
+
+  if(type === 'year'){
+    const yr = parseInt(document.getElementById('f-year')?.value || '2026');
+    return parsed.map((p,i) => p && p.year === yr ? i : -1).filter(i => i !== -1);
+  }
+  if(type === 'quarter'){
+    const yr = parseInt(document.getElementById('f-year')?.value || '2026');
+    const q = document.getElementById('f-quarter')?.value || 'q1';
+    const qMonths = {q1:[1,2,3], q2:[4,5,6], q3:[7,8,9], q4:[10,11,12]}[q];
+    return parsed.map((p,i) => p && p.year === yr && qMonths.includes(p.month) ? i : -1).filter(i => i !== -1);
+  }
+  if(type === 'month'){
+    const yr = parseInt(document.getElementById('f-year')?.value || '2026');
+    const mon = parseInt(document.getElementById('f-month')?.value || '1');
+    return parsed.map((p,i) => p && p.year === yr && p.month === mon ? i : -1).filter(i => i !== -1);
+  }
+  if(type === 'range'){
+    const startStr = document.getElementById('f-date-start')?.value;
+    const endStr = document.getElementById('f-date-end')?.value;
+    if(!startStr || !endStr) return labels.map((_,i)=>i);
+    const sd = new Date(startStr);
+    const ed = new Date(endStr);
+    const startYM = sd.getFullYear()*100 + (sd.getMonth()+1);
+    const endYM = ed.getFullYear()*100 + (ed.getMonth()+1);
+    return parsed.map((p,i) => {
+      if(!p) return -1;
+      const ym = p.year*100 + p.month;
+      return ym >= startYM && ym <= endYM ? i : -1;
+    }).filter(i => i !== -1);
+  }
+  return labels.map((_,i)=>i);
+}
+
+function filterArray(arr, indices){ return indices.map(i => arr[i]).filter(v => v !== undefined); }
+
+function onPeriodTypeChange(){
+  const type = document.getElementById('f-period-type')?.value || 'all';
+  document.getElementById('f-year-group').style.display = ['year','quarter','month'].includes(type) ? '' : 'none';
+  document.getElementById('f-quarter-group').style.display = type === 'quarter' ? '' : 'none';
+  document.getElementById('f-month-group').style.display = type === 'month' ? '' : 'none';
+  document.getElementById('f-range-group').className = type === 'range' ? 'date-range-group visible' : 'date-range-group';
+}
+
+function resetFilters(){
+  document.getElementById('f-period-type').value = 'all';
+  onPeriodTypeChange();
+  const kam = document.getElementById('f-kam');
+  if(kam) kam.value = 'all';
+  const seg = document.getElementById('f-segment');
+  if(seg) seg.value = 'all';
+  applyFilters();
+  toast('Filtros limpiados');
+}
+
+function syncSecondaryFilterBars(){
+  // Copy period filter state from main bar to all .period-filter-bar
+  const type = document.getElementById('f-period-type')?.value || 'all';
+  const year = document.getElementById('f-year')?.value || '2026';
+  const quarter = document.getElementById('f-quarter')?.value || 'q1';
+  const month = document.getElementById('f-month')?.value || '01';
+  const dateStart = document.getElementById('f-date-start')?.value || '';
+  const dateEnd = document.getElementById('f-date-end')?.value || '';
+
+  const typeLabels = {all:'Todo', year:'Año '+year, quarter:quarter.toUpperCase()+' '+year, month:document.getElementById('f-month')?.selectedOptions[0]?.text+' '+year, range:dateStart+' a '+dateEnd};
+  const label = typeLabels[type] || 'Todo';
+
+  document.querySelectorAll('.period-filter-bar').forEach(bar => {
+    bar.innerHTML = `
+      <div class="filter-group">
+        <span class="filter-label">Período activo</span>
+        <span class="tag tag-blue" style="font-size:12px;padding:4px 10px;"><i class="ti ti-calendar" style="font-size:12px;margin-right:4px;"></i>${label}</span>
+      </div>
+      <div class="filter-actions" style="margin-left:auto;">
+        <button class="btn btn-ghost" style="font-size:11px;" onclick="location.hash='#/resumen-ejecutivo';setTimeout(()=>document.getElementById('f-period-type').focus(),200)"><i class="ti ti-filter-edit"></i> Cambiar filtro</button>
+      </div>`;
+  });
+}
+
+function applyFilters(){
+  const indices = getFilteredIndices(DATA.ops.labels);
+  const fLabels = filterArray(DATA.ops.labels, indices);
+  const fGmv = filterArray(DATA.ops.gmv, indices);
+  const fEfect = filterArray(DATA.ops.efect, indices);
+  const fBookings = filterArray(DATA.ops.bookings, indices);
+  const fPackages = filterArray(DATA.ops.packages, indices);
+
+  // Update KPIs
+  const totalGMV = fGmv.reduce((a,b) => a+b, 0);
+  const kpiGmv = document.getElementById('kpi-gmv');
+  if(kpiGmv) kpiGmv.textContent = '$' + fmt(totalGMV);
+
+  const avgEfect = fEfect.length > 0 ? (fEfect.reduce((a,b) => a+b, 0) / fEfect.length).toFixed(1) : '—';
+  const kpiEfect = document.getElementById('kpi-efect');
+  if(kpiEfect) kpiEfect.textContent = avgEfect + '%';
+
+  // Rebuild main charts with filtered data
+  destroyChart('gmv-trend');
+  const ctx1 = document.getElementById('chart-gmv-trend');
+  if(ctx1) charts['gmv-trend'] = new Chart(ctx1,{
+    type:'line',
+    data:{ labels:fLabels, datasets:[{label:'GMV',data:fGmv.map(v=>Math.round(v/1e6)),borderColor:'#4f6ef7',fill:true,backgroundColor:'rgba(79,110,247,0.08)',tension:0.4,pointRadius:3,pointBackgroundColor:'#4f6ef7',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`$${c.raw}M`}}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10},callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  destroyChart('efect');
+  const ctx3 = document.getElementById('chart-efect');
+  if(ctx3) charts['efect'] = new Chart(ctx3,{
+    type:'line',
+    data:{ labels:fLabels, datasets:[{label:'Efectividad',data:fEfect,borderColor:'#00cdb8',backgroundColor:'rgba(0,205,184,0.06)',fill:true,tension:0.4,pointRadius:2,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{min:Math.max(0,Math.min(...fEfect)-2),max:Math.min(100,Math.max(...fEfect)+1),ticks:{color:'#555d74',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // Ops charts (if visible)
+  destroyChart('ops-vol');
+  const cOps = document.getElementById('chart-ops-vol');
+  if(cOps) charts['ops-vol'] = new Chart(cOps,{
+    type:'bar',
+    data:{ labels:fLabels, datasets:[{label:'Bookings',data:fBookings,backgroundColor:'rgba(79,110,247,0.7)',borderRadius:3},{label:'Packages',data:fPackages,backgroundColor:'rgba(0,205,184,0.5)',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // Metas chart filtered
+  const metaIndices = getFilteredIndices(DATA.metas.labels);
+  if(metaIndices.length > 0){
+    destroyChart('metas');
+    const ctxM = document.getElementById('chart-metas');
+    if(ctxM) charts['metas'] = new Chart(ctxM,{
+      type:'bar',
+      data:{ labels:filterArray(DATA.metas.labels, metaIndices), datasets:[
+        {label:'Meta',data:filterArray(DATA.metas.meta, metaIndices).map(v=>Math.round(v/1e6)),backgroundColor:'rgba(79,110,247,0.2)',borderColor:'#4f6ef7',borderWidth:1.5,borderRadius:4},
+        {label:'Real',data:filterArray(DATA.metas.real, metaIndices).map(v=>Math.round(v/1e6)),backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+    });
+  }
+
+  // Nuevos chart filtered
+  const nuevosIndices = getFilteredIndices(DATA.nuevos.labels);
+  if(nuevosIndices.length > 0){
+    destroyChart('nuevos');
+    const ctxN = document.getElementById('chart-nuevos');
+    if(ctxN) charts['nuevos'] = new Chart(ctxN,{
+      type:'bar',
+      data:{ labels:filterArray(DATA.nuevos.labels, nuevosIndices), datasets:[{label:'GMV Nuevos',data:filterArray(DATA.nuevos.data, nuevosIndices).map(v=>Math.round(v/1e6)),backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74',callback:v=>`$${v}M`},grid:{color:'rgba(255,255,255,0.04)'}}}}
+    });
+  }
+
+  syncSecondaryFilterBars();
+
+  const type = document.getElementById('f-period-type')?.value || 'all';
+  const filterDesc = type === 'all' ? 'Todo' : type === 'range' ? document.getElementById('f-date-start')?.value+' a '+document.getElementById('f-date-end')?.value : type;
+  auditLog('Filtros aplicados','nav','info','Período: '+filterDesc+' · Datos mostrados: '+fLabels.length+' períodos');
+}
+
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 
 // ─── FILE UPLOAD & ETL ───
