@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pibox — Dashboard Comercial</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
@@ -792,40 +793,85 @@
 
   <!-- ────────────────── UPLOAD VIEW ────────────────── -->
   <div class="view" id="view-upload">
-    <div class="section-head"><div><div class="section-title">Cargar & Actualizar Datos</div><div class="section-sub">ETL · Validación · Normalización · Detección de duplicados</div></div></div>
-    <div class="charts-grid">
-      <div class="chart-card" style="grid-column:1/-1">
-        <div class="chart-title" style="margin-bottom:16px">Zona de carga de archivos</div>
-        <div class="upload-zone" id="drop-zone" ondragover="handleDrag(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
-          <div class="upload-icon"><i class="ti ti-file-upload"></i></div>
-          <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
-          <div class="upload-sub">Soporta: CSV, XLSX, XML, PDF, DOCX · Máximo 50MB por archivo</div>
-          <div class="upload-formats">
-            <span class="tag tag-green">CSV</span>
-            <span class="tag tag-blue">XLSX</span>
-            <span class="tag tag-amber">XML</span>
-            <span class="tag tag-teal">PDF</span>
-            <span class="tag tag-blue">DOCX</span>
-          </div>
-        </div>
-        <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xml,.pdf,.docx" style="display:none" onchange="handleFiles(event)">
-        <div class="upload-list" id="upload-list"></div>
-        <div style="margin-top:16px;display:flex;gap:10px;">
-          <button class="btn btn-primary" onclick="runETL()"><i class="ti ti-cpu"></i> Ejecutar ETL y Validar</button>
-          <button class="btn btn-ghost"><i class="ti ti-map"></i> Mapeo de columnas</button>
-          <button class="btn btn-ghost"><i class="ti ti-copy-check"></i> Detectar duplicados</button>
+    <div class="section-head"><div><div class="section-title">Cargar & Actualizar Datos</div><div class="section-sub">Sube archivos CSV, XLSX o XLS para alimentar las métricas del tablero</div></div></div>
+
+    <!-- Upload Zone -->
+    <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-title" style="margin-bottom:16px">Zona de carga de archivos</div>
+      <div class="upload-zone" id="drop-zone" ondragover="handleDrag(event)" ondragleave="document.getElementById('drop-zone').classList.remove('dragover')" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon"><i class="ti ti-file-upload"></i></div>
+        <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+        <div class="upload-sub">Soporta: CSV, XLSX, XLS · Máximo 50MB por archivo</div>
+        <div class="upload-formats">
+          <span class="tag tag-green">CSV</span>
+          <span class="tag tag-blue">XLSX</span>
+          <span class="tag tag-amber">XLS</span>
         </div>
       </div>
+      <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFiles(event)">
+      <div class="upload-list" id="upload-list"></div>
     </div>
-    <!-- ETL Status -->
-    <div class="table-card" style="margin-top:0">
+
+    <!-- Preview Panel (hidden until file loaded) -->
+    <div id="etl-preview-panel" style="display:none;">
+      <!-- File Info -->
+      <div class="kpi-grid" style="margin-bottom:16px;">
+        <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-file-spreadsheet"></i> Archivo</div><div class="kpi-value" id="etl-file-name" style="font-size:15px;">—</div><div class="kpi-sub" id="etl-file-meta">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-rows"></i> Filas</div><div class="kpi-value" id="etl-row-count">0</div><div class="kpi-sub">Registros detectados</div></div>
+        <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-columns-3"></i> Columnas</div><div class="kpi-value" id="etl-col-count">0</div><div class="kpi-sub" id="etl-col-names">—</div></div>
+        <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-table"></i> Hojas</div><div class="kpi-value" id="etl-sheet-count">1</div><div class="kpi-sub" id="etl-sheet-names">—</div></div>
+      </div>
+
+      <!-- Sheet selector (for multi-sheet files) -->
+      <div class="filter-bar" id="etl-sheet-selector" style="display:none;margin-bottom:16px;">
+        <div class="filter-group">
+          <span class="filter-label">Hoja activa</span>
+          <select class="filter-select" id="etl-sheet-select" onchange="selectSheet(this.value)"></select>
+        </div>
+      </div>
+
+      <!-- Column Mapping -->
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title"><i class="ti ti-map" style="font-size:15px;margin-right:4px;"></i> Mapeo de columnas</div>
+        <div class="chart-sub" style="margin-bottom:12px;">Asigna las columnas del archivo a los campos del tablero. El sistema detecta automáticamente los campos compatibles.</div>
+        <div id="etl-mapping" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;"></div>
+      </div>
+
+      <!-- Data Preview Table -->
+      <div class="table-card" style="margin-bottom:16px;">
+        <div class="table-header">
+          <div class="table-header-title">Vista previa de datos <span style="font-size:11px;color:var(--text3);font-weight:400;">(primeras 15 filas)</span></div>
+          <span class="tag tag-blue" id="etl-preview-tag">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="etl-preview-table"><thead><tr></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <!-- Validation & Actions -->
+      <div id="etl-validation" class="insight-panel" style="display:none;margin-bottom:16px;">
+        <div class="insight-head">
+          <i class="ti ti-checklist"></i>
+          <div>
+            <div class="insight-head-text">Validación de datos</div>
+            <div class="insight-head-sub" id="etl-validation-sub">—</div>
+          </div>
+        </div>
+        <div id="etl-validation-items" class="insights-grid"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:24px;">
+        <button class="btn btn-primary" onclick="runETL()"><i class="ti ti-cpu"></i> Procesar y aplicar al tablero</button>
+        <button class="btn btn-ghost" onclick="cancelETL()"><i class="ti ti-x"></i> Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Upload History -->
+    <div class="table-card">
       <div class="table-header"><div class="table-header-title">Historial de cargas</div></div>
       <table>
-        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Duplicados</th><th>Errores</th><th>Estado</th><th>Acción</th></tr></thead>
-        <tbody>
-          <tr><td>2026-05-01</td><td class="bold">sesos_tablero_.xlsx</td><td>1,838</td><td>0</td><td>0</td><td><span class="tag tag-green"><i class="ti ti-check" style="font-size:11px"></i> OK</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="toast('Versión restaurada')">Restaurar</button></td></tr>
-          <tr><td>2026-04-15</td><td class="bold">gmv_abril.csv</td><td>632</td><td>3</td><td>1</td><td><span class="tag tag-amber"><i class="ti ti-alert-triangle" style="font-size:11px"></i> Advertencias</span></td><td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px">Ver log</button></td></tr>
-        </tbody>
+        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Columnas aplicadas</th><th>Estado</th></tr></thead>
+        <tbody id="etl-history-body"></tbody>
       </table>
     </div>
   </div>
@@ -1344,6 +1390,7 @@ function navigateTo(hash){
   if(id==='metas') setTimeout(initMetasChart,100);
   if(id==='kam') setTimeout(initKamCharts,100);
   if(id==='clientes') setTimeout(initClienteCharts,100);
+  if(id==='upload') setTimeout(renderETLHistory,100);
   if(id==='usuarios') setTimeout(renderUsersTable,100);
   if(id==='perfil') setTimeout(loadProfileView,100);
   if(id==='auditoria') setTimeout(renderAuditLog,100);
@@ -1514,36 +1561,452 @@ function applyFilters(){
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 
-// ─── FILE UPLOAD ───
+// ─── FILE UPLOAD & ETL ───
+let etlWorkbook = null;
+let etlParsedData = [];
+let etlHeaders = [];
+let etlFileName = '';
+let etlFileSize = 0;
+let etlColumnMap = {};
+let etlHistory = JSON.parse(localStorage.getItem('pibox_etl_history') || '[]');
+
+const ETL_FIELDS = [
+  {key:'mes',       label:'Mes / Período',    desc:'Ene25, Feb26, etc.'},
+  {key:'gmv',       label:'GMV',              desc:'Valor monetario operativo'},
+  {key:'bookings',  label:'Bookings',         desc:'Total de reservas'},
+  {key:'packages',  label:'Packages',         desc:'Paquetes entregados'},
+  {key:'efect',     label:'Efectividad %',    desc:'Porcentaje de efectividad'},
+  {key:'kam',       label:'KAM',              desc:'Nombre del KAM'},
+  {key:'cliente',   label:'Cliente',          desc:'Nombre del cliente'},
+  {key:'completados',label:'Completados',     desc:'Servicios completados'},
+  {key:'cancelados', label:'Cancelados',      desc:'Servicios cancelados'},
+  {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial'},
+  {key:'real',      label:'Real / Cumplimiento', desc:'Valor real cumplido'},
+  {key:'nuevos',    label:'Clientes Nuevos',  desc:'Cantidad de clientes nuevos'},
+  {key:'perdidos',  label:'Clientes Perdidos',desc:'Cantidad de clientes perdidos'}
+];
+
 function handleDrag(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
 function handleDrop(e){
   e.preventDefault();
   document.getElementById('drop-zone').classList.remove('dragover');
   handleFiles({target:{files:e.dataTransfer.files}});
 }
+
 function handleFiles(e){
-  const list = document.getElementById('upload-list');
-  const fileNames = [];
-  Array.from(e.target.files).forEach(f=>{
-    fileNames.push(f.name);
-    const div = document.createElement('div');
-    div.className = 'upload-item';
-    div.innerHTML = `<i class="ti ti-file-spreadsheet"></i><span class="upload-item-name">${f.name}</span><span class="upload-item-size">${(f.size/1024).toFixed(0)} KB</span><span class="upload-status tag tag-amber">Pendiente</span>`;
-    list.appendChild(div);
-  });
-  if(fileNames.length > 0){
-    auditLog(`Archivo(s) cargados para procesamiento: <strong>${fileNames.join(', ')}</strong>`,'data','info',fileNames.length+' archivo(s)');
+  const file = e.target.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['csv','xlsx','xls'].includes(ext)){
+    toast('Formato no soportado. Usa CSV, XLSX o XLS');
+    return;
   }
+  if(file.size > 50*1024*1024){
+    toast('El archivo supera los 50MB permitidos');
+    return;
+  }
+
+  etlFileName = file.name;
+  etlFileSize = file.size;
+
+  // Show loading in upload list
+  const list = document.getElementById('upload-list');
+  list.innerHTML = `<div class="upload-item"><i class="ti ti-file-spreadsheet" style="color:var(--accent2)"></i><span class="upload-item-name">${file.name}</span><span class="upload-item-size">${(file.size/1024).toFixed(0)} KB</span><span class="upload-status tag tag-amber">Leyendo...</span></div>`;
+
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const data = new Uint8Array(ev.target.result);
+      etlWorkbook = XLSX.read(data, {type:'array', cellDates:true});
+      // Default: first sheet
+      selectSheet(etlWorkbook.SheetNames[0]);
+      showETLPreview();
+      list.querySelector('.upload-status').className = 'upload-status tag tag-green';
+      list.querySelector('.upload-status').textContent = 'Listo';
+      auditLog(`Archivo cargado: <strong>${file.name}</strong>`,'data','info',(file.size/1024).toFixed(0)+' KB · '+ext.toUpperCase());
+    } catch(err){
+      list.querySelector('.upload-status').className = 'upload-status tag tag-red';
+      list.querySelector('.upload-status').textContent = 'Error';
+      toast('Error al leer el archivo: ' + err.message);
+      auditLog(`Error al leer archivo: <strong>${file.name}</strong> — ${err.message}`,'data','error','');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  if(e.target && e.target.value) e.target.value = '';
 }
-function runETL(){
-  const pending = document.querySelectorAll('.upload-status');
-  const count = pending.length;
-  pending.forEach(el=>{
-    el.className='upload-status tag tag-green';
-    el.textContent='Procesado';
+
+function selectSheet(sheetName){
+  if(!etlWorkbook) return;
+  const ws = etlWorkbook.Sheets[sheetName];
+  const json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+  if(json.length === 0){ toast('La hoja está vacía'); return; }
+  etlHeaders = json[0].map(h => String(h).trim());
+  etlParsedData = json.slice(1).filter(row => row.some(cell => cell !== ''));
+  autoMapColumns();
+}
+
+function showETLPreview(){
+  const panel = document.getElementById('etl-preview-panel');
+  panel.style.display = 'block';
+
+  // File info KPIs
+  document.getElementById('etl-file-name').textContent = etlFileName;
+  document.getElementById('etl-file-meta').textContent = (etlFileSize/1024).toFixed(0) + ' KB · ' + etlFileName.split('.').pop().toUpperCase();
+  document.getElementById('etl-row-count').textContent = etlParsedData.length.toLocaleString();
+  document.getElementById('etl-col-count').textContent = etlHeaders.length;
+  document.getElementById('etl-col-names').textContent = etlHeaders.slice(0,5).join(', ') + (etlHeaders.length>5 ? '...' : '');
+
+  // Sheets
+  const sheetNames = etlWorkbook.SheetNames;
+  document.getElementById('etl-sheet-count').textContent = sheetNames.length;
+  document.getElementById('etl-sheet-names').textContent = sheetNames.join(', ');
+
+  // Sheet selector
+  if(sheetNames.length > 1){
+    const sel = document.getElementById('etl-sheet-select');
+    sel.innerHTML = sheetNames.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('etl-sheet-selector').style.display = 'flex';
+  } else {
+    document.getElementById('etl-sheet-selector').style.display = 'none';
+  }
+
+  renderColumnMapping();
+  renderPreviewTable();
+  runValidation();
+}
+
+function autoMapColumns(){
+  etlColumnMap = {};
+  const headerLower = etlHeaders.map(h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const patterns = {
+    mes:        ['mes','periodo','period','month','fecha','date'],
+    gmv:        ['gmv','valor','revenue','ingreso','monto','amount','ventas','sales'],
+    bookings:   ['booking','bookings','reservas','reserva','ordenes','orders'],
+    packages:   ['package','packages','paquetes','paquete','envios','shipments'],
+    efect:      ['efectividad','effectiveness','efect','cumplimiento','tasa','rate','%'],
+    kam:        ['kam','ejecutivo','vendedor','asesor','comercial','sales_rep'],
+    cliente:    ['cliente','client','customer','empresa','company','razon_social','nombre'],
+    completados:['completado','completados','completed','exitoso','exitosos','entregado','entregados'],
+    cancelados: ['cancelado','cancelados','canceled','cancelled','fallido','fallidos'],
+    meta:       ['meta','target','objetivo','goal'],
+    real:       ['real','actual','cumplido','logrado','achieved'],
+    nuevos:     ['nuevo','nuevos','new','alta','altas','activado','activados'],
+    perdidos:   ['perdido','perdidos','lost','baja','bajas','churn','inactivo']
+  };
+
+  ETL_FIELDS.forEach(field => {
+    const pats = patterns[field.key] || [];
+    const idx = headerLower.findIndex(h => pats.some(p => h.includes(p)));
+    if(idx !== -1) etlColumnMap[field.key] = idx;
   });
-  toast('ETL completado · KPIs recalculados');
-  auditLog(`ETL ejecutado exitosamente · <strong>${count} archivo(s)</strong> procesados · KPIs recalculados`,'data','success','Registros procesados');
+}
+
+function renderColumnMapping(){
+  const container = document.getElementById('etl-mapping');
+  container.innerHTML = ETL_FIELDS.map(field => {
+    const mapped = etlColumnMap[field.key];
+    const opts = etlHeaders.map((h,i) => `<option value="${i}" ${mapped===i?'selected':''}>${h}</option>`).join('');
+    const statusClass = mapped !== undefined ? 'tag-green' : 'tag-amber';
+    const statusText = mapped !== undefined ? 'Mapeado' : 'Sin asignar';
+    return `
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:500;">${field.label}</span>
+          <span class="tag ${statusClass}" style="font-size:9px;padding:1px 5px;">${statusText}</span>
+        </div>
+        <select class="form-select" style="font-size:12px;padding:4px 8px;" onchange="etlColumnMap['${field.key}']=this.value===''?undefined:parseInt(this.value);renderColumnMapping();renderPreviewTable();runValidation();">
+          <option value="">— No asignar —</option>
+          ${opts}
+        </select>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">${field.desc}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderPreviewTable(){
+  const thead = document.querySelector('#etl-preview-table thead tr');
+  const tbody = document.querySelector('#etl-preview-table tbody');
+  const tag = document.getElementById('etl-preview-tag');
+
+  thead.innerHTML = '<th style="color:var(--text3)">#</th>' + etlHeaders.map((h,i) => {
+    const mapped = Object.entries(etlColumnMap).find(([k,v]) => v === i);
+    const highlight = mapped ? 'color:var(--green);' : '';
+    const badge = mapped ? ` <span style="font-size:9px;color:var(--accent2);">[${ETL_FIELDS.find(f=>f.key===mapped[0])?.label||''}]</span>` : '';
+    return `<th style="${highlight}white-space:nowrap;">${h}${badge}</th>`;
+  }).join('');
+
+  const preview = etlParsedData.slice(0, 15);
+  tbody.innerHTML = preview.map((row, ri) => {
+    const cells = etlHeaders.map((_, ci) => {
+      const val = row[ci] !== undefined ? row[ci] : '';
+      const mapped = Object.entries(etlColumnMap).find(([k,v]) => v === ci);
+      const style = mapped ? 'color:var(--text);font-weight:500;' : 'color:var(--text3);';
+      return `<td style="${style}">${val}</td>`;
+    }).join('');
+    return `<tr><td style="color:var(--text3);font-size:11px;">${ri+1}</td>${cells}</tr>`;
+  }).join('');
+
+  const mappedCount = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined).length;
+  tag.textContent = `${mappedCount} de ${ETL_FIELDS.length} campos mapeados`;
+}
+
+function runValidation(){
+  const panel = document.getElementById('etl-validation');
+  const sub = document.getElementById('etl-validation-sub');
+  const items = document.getElementById('etl-validation-items');
+  panel.style.display = 'block';
+
+  const checks = [];
+  const mappedKeys = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined);
+
+  // Check: at least some columns mapped
+  if(mappedKeys.length === 0){
+    checks.push({type:'critical', text:'No hay columnas mapeadas. Asigna al menos una columna a un campo del tablero.', meta:''});
+  } else {
+    checks.push({type:'info', text:`${mappedKeys.length} columna(s) mapeada(s) correctamente.`, meta: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label).join(', ')});
+  }
+
+  // Check: row count
+  if(etlParsedData.length === 0){
+    checks.push({type:'critical', text:'El archivo no contiene filas de datos.', meta:''});
+  } else {
+    checks.push({type:'opportunity', text:`${etlParsedData.length.toLocaleString()} filas de datos listas para procesar.`, meta:''});
+  }
+
+  // Check: numeric validation for numeric fields
+  const numericFields = ['gmv','bookings','packages','efect','completados','cancelados','meta','real','nuevos','perdidos'];
+  numericFields.forEach(key => {
+    if(etlColumnMap[key] === undefined) return;
+    const ci = etlColumnMap[key];
+    const nonNumeric = etlParsedData.filter(row => {
+      const v = row[ci];
+      return v !== '' && v !== null && v !== undefined && isNaN(Number(String(v).replace(/[,$%]/g,'')));
+    }).length;
+    if(nonNumeric > 0){
+      checks.push({type:'warning', text:`Campo "${ETL_FIELDS.find(f=>f.key===key)?.label}": ${nonNumeric} valor(es) no numérico(s) detectados.`, meta:'Se omitirán al procesar'});
+    }
+  });
+
+  // Check: empty cells in mapped columns
+  mappedKeys.forEach(key => {
+    const ci = etlColumnMap[key];
+    const empties = etlParsedData.filter(row => row[ci] === '' || row[ci] === null || row[ci] === undefined).length;
+    if(empties > 0 && empties < etlParsedData.length){
+      checks.push({type:'warning', text:`Campo "${ETL_FIELDS.find(f=>f.key===key)?.label}": ${empties} celda(s) vacía(s).`, meta:'Se usará valor 0 por defecto'});
+    }
+  });
+
+  const errors = checks.filter(c => c.type === 'critical').length;
+  const warnings = checks.filter(c => c.type === 'warning').length;
+  sub.textContent = errors > 0 ? `${errors} error(es) crítico(s)` : warnings > 0 ? `${warnings} advertencia(s)` : 'Datos listos para procesar';
+
+  items.innerHTML = checks.map(c => `
+    <div class="insight-item">
+      <div class="insight-type ${c.type}">${c.type==='critical'?'Error':c.type==='warning'?'Advertencia':c.type==='opportunity'?'OK':'Info'}</div>
+      <div class="insight-text">${c.text}</div>
+      ${c.meta ? `<div class="insight-meta">${c.meta}</div>` : ''}
+    </div>`).join('');
+}
+
+function cancelETL(){
+  document.getElementById('etl-preview-panel').style.display = 'none';
+  document.getElementById('upload-list').innerHTML = '';
+  etlWorkbook = null;
+  etlParsedData = [];
+  etlHeaders = [];
+  etlFileName = '';
+  etlColumnMap = {};
+}
+
+function runETL(){
+  const mappedKeys = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined);
+  if(mappedKeys.length === 0){
+    toast('Mapea al menos una columna antes de procesar');
+    return;
+  }
+  if(etlParsedData.length === 0){
+    toast('No hay datos para procesar');
+    return;
+  }
+
+  const applied = [];
+
+  // Helper: extract numeric column
+  function getNumCol(key){
+    const ci = etlColumnMap[key];
+    if(ci === undefined) return null;
+    return etlParsedData.map(row => {
+      const v = row[ci];
+      if(v === '' || v === null || v === undefined) return 0;
+      const n = Number(String(v).replace(/[,$%\s]/g,''));
+      return isNaN(n) ? 0 : n;
+    });
+  }
+  function getStrCol(key){
+    const ci = etlColumnMap[key];
+    if(ci === undefined) return null;
+    return etlParsedData.map(row => String(row[ci] ?? '').trim());
+  }
+
+  // ── Apply: GMV time series ──
+  if(etlColumnMap.mes !== undefined && etlColumnMap.gmv !== undefined){
+    const labels = getStrCol('mes');
+    const gmv = getNumCol('gmv');
+    if(labels && gmv){
+      DATA.ops.labels = labels;
+      DATA.ops.gmv = gmv;
+      applied.push('GMV mensual');
+    }
+  }
+
+  // ── Apply: Bookings ──
+  if(etlColumnMap.bookings !== undefined && etlColumnMap.mes !== undefined){
+    const bookings = getNumCol('bookings');
+    if(bookings){
+      DATA.ops.bookings = bookings;
+      applied.push('Bookings');
+    }
+  }
+
+  // ── Apply: Packages ──
+  if(etlColumnMap.packages !== undefined && etlColumnMap.mes !== undefined){
+    const packages = getNumCol('packages');
+    if(packages){
+      DATA.ops.packages = packages;
+      applied.push('Packages');
+    }
+  }
+
+  // ── Apply: Efectividad ──
+  if(etlColumnMap.efect !== undefined && etlColumnMap.mes !== undefined){
+    const efect = getNumCol('efect');
+    if(efect){
+      DATA.ops.efect = efect;
+      applied.push('Efectividad');
+    }
+  }
+
+  // ── Apply: Top Clients ──
+  if(etlColumnMap.cliente !== undefined && etlColumnMap.gmv !== undefined){
+    const nombres = getStrCol('cliente');
+    const gmvs = getNumCol('gmv');
+    const completados = getNumCol('completados');
+    const cancelados = getNumCol('cancelados');
+    const efects = getNumCol('efect');
+
+    if(nombres && gmvs){
+      // Aggregate by client
+      const clientMap = {};
+      nombres.forEach((name, i) => {
+        if(!name) return;
+        if(!clientMap[name]) clientMap[name] = {name, gmv:0, completed:0, canceled:0, total:0};
+        clientMap[name].gmv += gmvs[i] || 0;
+        if(completados) clientMap[name].completed += completados[i] || 0;
+        if(cancelados) clientMap[name].canceled += cancelados[i] || 0;
+      });
+      const sorted = Object.values(clientMap)
+        .map(c => { c.total = c.completed + c.canceled; c.eff = c.total > 0 ? c.completed / c.total : 1; return c; })
+        .sort((a,b) => b.gmv - a.gmv)
+        .slice(0, 10);
+      DATA.topClients = sorted;
+      applied.push('Top Clientes');
+    }
+  }
+
+  // ── Apply: KAM GMV ──
+  if(etlColumnMap.kam !== undefined && etlColumnMap.gmv !== undefined){
+    const kams = getStrCol('kam');
+    const gmvs = getNumCol('gmv');
+    if(kams && gmvs){
+      const kamMap = {};
+      kams.forEach((k, i) => { if(k) kamMap[k] = (kamMap[k]||0) + (gmvs[i]||0); });
+      const sorted = Object.entries(kamMap).sort((a,b) => b[1] - a[1]);
+      DATA.kamGMV.labels = sorted.map(s => s[0]);
+      DATA.kamGMV.data = sorted.map(s => s[1]);
+      applied.push('GMV por KAM');
+    }
+  }
+
+  // ── Apply: Metas ──
+  if(etlColumnMap.mes !== undefined && etlColumnMap.meta !== undefined && etlColumnMap.real !== undefined){
+    const labels = getStrCol('mes');
+    const meta = getNumCol('meta');
+    const real = getNumCol('real');
+    if(labels && meta && real){
+      DATA.metas.labels = labels;
+      DATA.metas.meta = meta;
+      DATA.metas.real = real;
+      applied.push('Metas comerciales');
+    }
+  }
+
+  // ── Apply: Clientes nuevos ──
+  if(etlColumnMap.mes !== undefined && etlColumnMap.nuevos !== undefined){
+    const labels = getStrCol('mes');
+    const nuevos = getNumCol('nuevos');
+    if(labels && nuevos){
+      DATA.nuevos.labels = labels;
+      DATA.nuevos.data = nuevos;
+      applied.push('Clientes nuevos');
+    }
+  }
+
+  if(applied.length === 0){
+    toast('No se encontraron datos aplicables con el mapeo actual');
+    return;
+  }
+
+  // Recalculate KPIs
+  const totalGMV = DATA.ops.gmv.reduce((a,b) => a+b, 0);
+  const kpiGmv = document.getElementById('kpi-gmv');
+  if(kpiGmv) kpiGmv.textContent = '$' + fmt(totalGMV);
+
+  // Rebuild all charts
+  setTimeout(()=>{
+    initMainCharts();
+    initMetasChart();
+    initOpsCharts();
+    initClienteCharts();
+  }, 200);
+
+  // Save to history
+  const entry = {
+    date: new Date().toISOString().slice(0,10),
+    time: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+    file: etlFileName,
+    rows: etlParsedData.length,
+    applied: applied
+  };
+  etlHistory.unshift(entry);
+  if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
+  localStorage.setItem('pibox_etl_history', JSON.stringify(etlHistory));
+
+  renderETLHistory();
+  toast(`Datos aplicados: ${applied.join(', ')}`);
+  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Aplicado: ${applied.join(', ')}`,'data','success','');
+
+  // Clean up
+  document.getElementById('etl-preview-panel').style.display = 'none';
+  document.getElementById('upload-list').innerHTML = '';
+  etlWorkbook = null;
+  etlParsedData = [];
+}
+
+function renderETLHistory(){
+  const tbody = document.getElementById('etl-history-body');
+  if(!tbody) return;
+  if(etlHistory.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px;">No hay cargas registradas</td></tr>';
+    return;
+  }
+  tbody.innerHTML = etlHistory.map(h => `
+    <tr>
+      <td style="white-space:nowrap;">${h.date} <span style="color:var(--text3);font-size:11px;">${h.time||''}</span></td>
+      <td class="bold">${h.file}</td>
+      <td>${h.rows.toLocaleString()}</td>
+      <td>${h.applied.map(a => `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;margin:1px;">${a}</span>`).join(' ')}</td>
+      <td><span class="tag tag-green"><i class="ti ti-check" style="font-size:11px"></i> Aplicado</span></td>
+    </tr>`).join('');
 }
 
 // ─── TOP CLIENTS TABLE ───
