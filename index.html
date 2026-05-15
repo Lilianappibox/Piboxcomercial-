@@ -530,11 +530,11 @@
         <div class="kpi-value" id="kpi-bookings">NA</div>
         <div class="kpi-sub" id="kpi-bookings-sub">Total acumulado</div>
       </div>
-      <!-- 8. Nuevos Leads -->
+      <!-- 8. Utilidad Bruta -->
       <div class="kpi-card" style="border-top:2px solid var(--accent);">
-        <div class="kpi-label"><i class="ti ti-user-search"></i> Nuevos Leads</div>
-        <div class="kpi-value" id="kpi-leads-total">NA</div>
-        <div class="kpi-sub" id="kpi-leads-total-sub">Total prospectos</div>
+        <div class="kpi-label"><i class="ti ti-report-money"></i> Utilidad Bruta</div>
+        <div class="kpi-value compact" id="kpi-utilidad">NA</div>
+        <div class="kpi-sub" id="kpi-utilidad-sub">Ingresos - Costos</div>
       </div>
       <!-- 9. Leads MKT -->
       <div class="kpi-card" style="border-top:2px solid var(--green);">
@@ -1621,7 +1621,8 @@ const DATA = {
   kamGMV: {labels:[], data:[]},
   nuevos: {labels:[], count:[], gmv:[]},
   perdidos: {labels:[], count:[], gmv:[]},
-  leads: {labels:[], total:[], mkt:[], propios:[]},
+  utilidad: {labels:[], data:[]},
+  leads: {labels:[], mkt:[], propios:[]},
   metas: {labels:[], meta:[], real:[]},
   kamJul: {labels:[], propios:[], referidos:[], mkt:[]},
   kamJoh: {labels:[], propios:[], referidos:[], mkt:[]}
@@ -2198,14 +2199,19 @@ function applyFilters(){
   const kpiPerdidosSub = document.getElementById('kpi-perdidos-sub');
   if(kpiPerdidosSub) kpiPerdidosSub.textContent = totalPerdidosCount > 0 ? totalPerdidosCount + ' clientes · ' + fmtMoneyShort(totalPerdidosGmv) + ' GMV' : 'Conteo · GMV mes anterior';
 
+  // Utilidad Bruta
+  const totalUtilidad = DATA.utilidad.data ? DATA.utilidad.data.reduce((a,b) => a+b, 0) : 0;
+  const kpiUtilidad = document.getElementById('kpi-utilidad');
+  if(kpiUtilidad) kpiUtilidad.textContent = totalUtilidad > 0 ? fmtMoneyShort(totalUtilidad) : 'NA';
+  const kpiUtilidadSub = document.getElementById('kpi-utilidad-sub');
+  if(kpiUtilidadSub && totalUtilidad > 0 && totalGMV > 0){
+    const margenPct = ((totalUtilidad / totalGMV) * 100).toFixed(1);
+    kpiUtilidadSub.textContent = 'Margen: ' + margenPct + '% del GMV';
+  } else if(kpiUtilidadSub){ kpiUtilidadSub.textContent = 'Ingresos - Costos'; }
+
   // Leads
-  const totalLeads = DATA.leads.total ? DATA.leads.total.reduce((a,b) => a+b, 0) : 0;
   const totalLeadsMkt = DATA.leads.mkt ? DATA.leads.mkt.reduce((a,b) => a+b, 0) : 0;
   const totalLeadsPropios = DATA.leads.propios ? DATA.leads.propios.reduce((a,b) => a+b, 0) : 0;
-  const kpiLeadsTotal = document.getElementById('kpi-leads-total');
-  if(kpiLeadsTotal) kpiLeadsTotal.textContent = totalLeads > 0 ? totalLeads.toLocaleString('es-CO') : 'NA';
-  const kpiLeadsTotalSub = document.getElementById('kpi-leads-total-sub');
-  if(kpiLeadsTotalSub) kpiLeadsTotalSub.textContent = totalLeads > 0 ? 'MKT: ' + totalLeadsMkt + ' · Propios: ' + totalLeadsPropios : 'Total prospectos';
   const kpiLeadsMkt = document.getElementById('kpi-leads-mkt');
   if(kpiLeadsMkt) kpiLeadsMkt.textContent = totalLeadsMkt > 0 ? totalLeadsMkt.toLocaleString('es-CO') : 'NA';
   const kpiLeadsPropios = document.getElementById('kpi-leads-propios');
@@ -2333,7 +2339,7 @@ const ETL_FIELDS = [
   {key:'gmv_nuevos',  label:'GMV Clientes Nuevos', desc:'GMV generado por clientes nuevos'},
   {key:'perdidos',    label:'Clientes Perdidos',   desc:'Cantidad de clientes perdidos'},
   {key:'gmv_perdidos',label:'GMV Clientes Perdidos',desc:'GMV perdido por clientes que salieron'},
-  {key:'leads_total', label:'Nuevos Leads',         desc:'Total de leads/prospectos nuevos'},
+  {key:'utilidad',    label:'Utilidad Bruta',         desc:'Utilidad bruta (ingresos - costos)'},
   {key:'leads_mkt',   label:'Leads MKT',            desc:'Leads provenientes de marketing'},
   {key:'leads_propios',label:'Leads Propios',       desc:'Leads generados por el equipo comercial'}
 ];
@@ -2448,7 +2454,7 @@ function autoMapColumns(){
     gmv_nuevos:  ['gmv nuevo','gmv nuevos','gmv_nuevos','gmv clientes nuevos'],
     perdidos:    ['perdido','perdidos','lost','baja','bajas','churn','inactivo','clientes perdidos'],
     gmv_perdidos:['gmv perdido','gmv perdidos','gmv_perdidos','gmv clientes perdidos'],
-    leads_total: ['leads','lead','prospectos','prospecto','leads total','total leads','nuevos leads'],
+    utilidad:     ['utilidad','utilidad bruta','gross profit','margen','margen bruto','profit','ganancia'],
     leads_mkt:   ['leads mkt','lead mkt','marketing','leads marketing','mkt'],
     leads_propios:['leads propios','lead propio','propios','leads comercial','comercial leads']
   };
@@ -2693,7 +2699,7 @@ function rebuildFromHistory(){
     const gmvNuevos = etlGetNumCol(data, map, 'gmv_nuevos');
     const perdidos = etlGetNumCol(data, map, 'perdidos');
     const gmvPerdidos = etlGetNumCol(data, map, 'gmv_perdidos');
-    const leadsTotal = etlGetNumCol(data, map, 'leads_total');
+    const utilidad = etlGetNumCol(data, map, 'utilidad');
     const leadsMkt = etlGetNumCol(data, map, 'leads_mkt');
     const leadsPropios = etlGetNumCol(data, map, 'leads_propios');
 
@@ -2729,7 +2735,7 @@ function rebuildFromHistory(){
       // Monthly aggregation (current month override for same label)
       if(months && months[i]){
         const mKey = months[i];
-        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0, leadsTotal:0, leadsMkt:0, leadsPropios:0};
+        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0, utilidad:0, leadsMkt:0, leadsPropios:0};
         if(gmvs) monthlyData[mKey].gmv += gmvs[i] || 0;
         if(bookings) monthlyData[mKey].bookings += bookings[i] || 0;
         if(packages) monthlyData[mKey].packages += packages[i] || 0;
@@ -2740,7 +2746,7 @@ function rebuildFromHistory(){
         if(gmvNuevos) monthlyData[mKey].gmvNuevos += gmvNuevos[i] || 0;
         if(perdidos) monthlyData[mKey].perdidos += perdidos[i] || 0;
         if(gmvPerdidos) monthlyData[mKey].gmvPerdidos += gmvPerdidos[i] || 0;
-        if(leadsTotal) monthlyData[mKey].leadsTotal += leadsTotal[i] || 0;
+        if(utilidad) monthlyData[mKey].utilidad += utilidad[i] || 0;
         if(leadsMkt) monthlyData[mKey].leadsMkt += leadsMkt[i] || 0;
         if(leadsPropios) monthlyData[mKey].leadsPropios += leadsPropios[i] || 0;
       }
@@ -2786,11 +2792,17 @@ function rebuildFromHistory(){
     DATA.perdidos.gmv = perdidosLabels.map(m => monthlyData[m].gmvPerdidos);
   }
 
+  // Apply utilidad
+  const utilLabels = monthLabels.filter(m => monthlyData[m].utilidad > 0);
+  if(utilLabels.length > 0){
+    DATA.utilidad.labels = utilLabels;
+    DATA.utilidad.data = utilLabels.map(m => monthlyData[m].utilidad);
+  }
+
   // Apply leads
-  const leadsLabels = monthLabels.filter(m => monthlyData[m].leadsTotal > 0 || monthlyData[m].leadsMkt > 0 || monthlyData[m].leadsPropios > 0);
+  const leadsLabels = monthLabels.filter(m => monthlyData[m].leadsMkt > 0 || monthlyData[m].leadsPropios > 0);
   if(leadsLabels.length > 0){
     DATA.leads.labels = leadsLabels;
-    DATA.leads.total = leadsLabels.map(m => monthlyData[m].leadsTotal);
     DATA.leads.mkt = leadsLabels.map(m => monthlyData[m].leadsMkt);
     DATA.leads.propios = leadsLabels.map(m => monthlyData[m].leadsPropios);
   }
@@ -2824,7 +2836,8 @@ function resetDataToEmpty(){
   DATA.nuevos.count = [];
   DATA.nuevos.gmv = [];
   DATA.perdidos = {labels:[], count:[], gmv:[]};
-  DATA.leads = {labels:[], total:[], mkt:[], propios:[]};
+  DATA.utilidad = {labels:[], data:[]};
+  DATA.leads = {labels:[], mkt:[], propios:[]};
   DATA.metas.labels = [];
   DATA.metas.meta = [];
   DATA.metas.real = [];
