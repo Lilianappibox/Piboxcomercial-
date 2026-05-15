@@ -487,36 +487,66 @@
       </div>
     </div>
 
-    <div class="kpi-grid">
-      <div class="kpi-card blue">
-        <div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total</div>
-        <div class="kpi-value compact" id="kpi-gmv">NA</div>
-        <div class="kpi-sub" id="kpi-gmv-sub">Sin datos cargados</div>
-      </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));">
+      <!-- 1. Meta Asignada -->
       <div class="kpi-card green">
         <div class="kpi-label"><i class="ti ti-target"></i> Meta Asignada</div>
         <div class="kpi-value compact" id="kpi-meta">NA</div>
         <div class="kpi-sub" id="kpi-meta-sub">Sin meta definida</div>
       </div>
+      <!-- 2. GMV Total -->
+      <div class="kpi-card blue">
+        <div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total</div>
+        <div class="kpi-value compact" id="kpi-gmv">NA</div>
+        <div class="kpi-sub" id="kpi-gmv-sub">Sin datos cargados</div>
+      </div>
+      <!-- 3. Cumplimiento -->
       <div class="kpi-card" id="kpi-cumpl-card" style="border-top:2px solid var(--amber);">
         <div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div>
         <div class="kpi-value" id="kpi-cumpl">NA</div>
         <div class="kpi-sub" id="kpi-cumpl-sub">Real vs Meta</div>
       </div>
+      <!-- 4. Clientes Nuevos -->
       <div class="kpi-card teal">
+        <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
+        <div class="kpi-value" id="kpi-nuevos">NA</div>
+        <div class="kpi-sub" id="kpi-nuevos-sub">Conteo · GMV</div>
+      </div>
+      <!-- 5. Clientes Perdidos -->
+      <div class="kpi-card red">
+        <div class="kpi-label"><i class="ti ti-users-minus"></i> Clientes Perdidos</div>
+        <div class="kpi-value" id="kpi-perdidos">NA</div>
+        <div class="kpi-sub" id="kpi-perdidos-sub">Conteo · GMV mes anterior</div>
+      </div>
+      <!-- 6. Efectividad -->
+      <div class="kpi-card" style="border-top:2px solid var(--teal);">
         <div class="kpi-label"><i class="ti ti-check"></i> Efectividad Ops</div>
         <div class="kpi-value" id="kpi-efect">NA</div>
         <div class="kpi-sub">Promedio operativo</div>
       </div>
+      <!-- 7. Bookings -->
       <div class="kpi-card amber">
         <div class="kpi-label"><i class="ti ti-package"></i> Bookings</div>
         <div class="kpi-value" id="kpi-bookings">NA</div>
         <div class="kpi-sub" id="kpi-bookings-sub">Total acumulado</div>
       </div>
-      <div class="kpi-card red">
-        <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
-        <div class="kpi-value" id="kpi-nuevos">NA</div>
-        <div class="kpi-sub">Según datos cargados</div>
+      <!-- 8. Nuevos Leads -->
+      <div class="kpi-card" style="border-top:2px solid var(--accent);">
+        <div class="kpi-label"><i class="ti ti-user-search"></i> Nuevos Leads</div>
+        <div class="kpi-value" id="kpi-leads-total">NA</div>
+        <div class="kpi-sub" id="kpi-leads-total-sub">Total prospectos</div>
+      </div>
+      <!-- 9. Leads MKT -->
+      <div class="kpi-card" style="border-top:2px solid var(--green);">
+        <div class="kpi-label"><i class="ti ti-speakerphone"></i> Leads MKT</div>
+        <div class="kpi-value" id="kpi-leads-mkt">NA</div>
+        <div class="kpi-sub">Provenientes de marketing</div>
+      </div>
+      <!-- 10. Leads Propios -->
+      <div class="kpi-card" style="border-top:2px solid var(--amber);">
+        <div class="kpi-label"><i class="ti ti-user-bolt"></i> Leads Propios</div>
+        <div class="kpi-value" id="kpi-leads-propios">NA</div>
+        <div class="kpi-sub">Generados por comercial</div>
       </div>
     </div>
 
@@ -1589,7 +1619,9 @@ const DATA = {
   ops: { labels: [], gmv: [], efect: [], bookings: [], packages: [] },
   topClients: [],
   kamGMV: {labels:[], data:[]},
-  nuevos: {labels:[], data:[]},
+  nuevos: {labels:[], count:[], gmv:[]},
+  perdidos: {labels:[], count:[], gmv:[]},
+  leads: {labels:[], total:[], mkt:[], propios:[]},
   metas: {labels:[], meta:[], real:[]},
   kamJul: {labels:[], propios:[], referidos:[], mkt:[]},
   kamJoh: {labels:[], propios:[], referidos:[], mkt:[]}
@@ -2150,9 +2182,34 @@ function applyFilters(){
   const kpiBookings = document.getElementById('kpi-bookings');
   if(kpiBookings) kpiBookings.textContent = totalBookings > 0 ? totalBookings.toLocaleString('es-CO') : 'NA';
 
-  const totalNuevos = DATA.nuevos.data.reduce((a,b) => a+b, 0);
+  // Clientes Nuevos (conteo + GMV)
+  const totalNuevosCount = DATA.nuevos.count ? DATA.nuevos.count.reduce((a,b) => a+b, 0) : 0;
+  const totalNuevosGmv = DATA.nuevos.gmv ? DATA.nuevos.gmv.reduce((a,b) => a+b, 0) : 0;
   const kpiNuevos = document.getElementById('kpi-nuevos');
-  if(kpiNuevos) kpiNuevos.textContent = totalNuevos > 0 ? totalNuevos.toLocaleString('es-CO') : 'NA';
+  if(kpiNuevos) kpiNuevos.textContent = totalNuevosCount > 0 ? totalNuevosCount.toLocaleString('es-CO') : 'NA';
+  const kpiNuevosSub = document.getElementById('kpi-nuevos-sub');
+  if(kpiNuevosSub) kpiNuevosSub.textContent = totalNuevosCount > 0 ? totalNuevosCount + ' clientes · ' + fmtMoneyShort(totalNuevosGmv) : 'Conteo · GMV';
+
+  // Clientes Perdidos (conteo + GMV)
+  const totalPerdidosCount = DATA.perdidos.count ? DATA.perdidos.count.reduce((a,b) => a+b, 0) : 0;
+  const totalPerdidosGmv = DATA.perdidos.gmv ? DATA.perdidos.gmv.reduce((a,b) => a+b, 0) : 0;
+  const kpiPerdidos = document.getElementById('kpi-perdidos');
+  if(kpiPerdidos) kpiPerdidos.textContent = totalPerdidosCount > 0 ? totalPerdidosCount.toLocaleString('es-CO') : 'NA';
+  const kpiPerdidosSub = document.getElementById('kpi-perdidos-sub');
+  if(kpiPerdidosSub) kpiPerdidosSub.textContent = totalPerdidosCount > 0 ? totalPerdidosCount + ' clientes · ' + fmtMoneyShort(totalPerdidosGmv) + ' GMV' : 'Conteo · GMV mes anterior';
+
+  // Leads
+  const totalLeads = DATA.leads.total ? DATA.leads.total.reduce((a,b) => a+b, 0) : 0;
+  const totalLeadsMkt = DATA.leads.mkt ? DATA.leads.mkt.reduce((a,b) => a+b, 0) : 0;
+  const totalLeadsPropios = DATA.leads.propios ? DATA.leads.propios.reduce((a,b) => a+b, 0) : 0;
+  const kpiLeadsTotal = document.getElementById('kpi-leads-total');
+  if(kpiLeadsTotal) kpiLeadsTotal.textContent = totalLeads > 0 ? totalLeads.toLocaleString('es-CO') : 'NA';
+  const kpiLeadsTotalSub = document.getElementById('kpi-leads-total-sub');
+  if(kpiLeadsTotalSub) kpiLeadsTotalSub.textContent = totalLeads > 0 ? 'MKT: ' + totalLeadsMkt + ' · Propios: ' + totalLeadsPropios : 'Total prospectos';
+  const kpiLeadsMkt = document.getElementById('kpi-leads-mkt');
+  if(kpiLeadsMkt) kpiLeadsMkt.textContent = totalLeadsMkt > 0 ? totalLeadsMkt.toLocaleString('es-CO') : 'NA';
+  const kpiLeadsPropios = document.getElementById('kpi-leads-propios');
+  if(kpiLeadsPropios) kpiLeadsPropios.textContent = totalLeadsPropios > 0 ? totalLeadsPropios.toLocaleString('es-CO') : 'NA';
 
   // Meta & Cumplimiento
   const metaIndicesKpi = getModFilteredIndices(DATA.metas.labels);
@@ -2272,8 +2329,13 @@ const ETL_FIELDS = [
   {key:'cancelados', label:'Cancelados',      desc:'Servicios cancelados'},
   {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial'},
   {key:'real',      label:'Real / Cumplimiento', desc:'Valor real cumplido'},
-  {key:'nuevos',    label:'Clientes Nuevos',  desc:'Cantidad de clientes nuevos'},
-  {key:'perdidos',  label:'Clientes Perdidos',desc:'Cantidad de clientes perdidos'}
+  {key:'nuevos',      label:'Clientes Nuevos',    desc:'Cantidad de clientes nuevos'},
+  {key:'gmv_nuevos',  label:'GMV Clientes Nuevos', desc:'GMV generado por clientes nuevos'},
+  {key:'perdidos',    label:'Clientes Perdidos',   desc:'Cantidad de clientes perdidos'},
+  {key:'gmv_perdidos',label:'GMV Clientes Perdidos',desc:'GMV perdido por clientes que salieron'},
+  {key:'leads_total', label:'Nuevos Leads',         desc:'Total de leads/prospectos nuevos'},
+  {key:'leads_mkt',   label:'Leads MKT',            desc:'Leads provenientes de marketing'},
+  {key:'leads_propios',label:'Leads Propios',       desc:'Leads generados por el equipo comercial'}
 ];
 
 function handleDrag(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
@@ -2382,8 +2444,13 @@ function autoMapColumns(){
     cancelados: ['cancelado','cancelados','canceled','cancelled','fallido','fallidos'],
     meta:       ['meta','target','objetivo','goal'],
     real:       ['real','actual','cumplido','logrado','achieved'],
-    nuevos:     ['nuevo','nuevos','new','alta','altas','activado','activados'],
-    perdidos:   ['perdido','perdidos','lost','baja','bajas','churn','inactivo']
+    nuevos:      ['nuevo','nuevos','new','alta','altas','activado','activados','clientes nuevos'],
+    gmv_nuevos:  ['gmv nuevo','gmv nuevos','gmv_nuevos','gmv clientes nuevos'],
+    perdidos:    ['perdido','perdidos','lost','baja','bajas','churn','inactivo','clientes perdidos'],
+    gmv_perdidos:['gmv perdido','gmv perdidos','gmv_perdidos','gmv clientes perdidos'],
+    leads_total: ['leads','lead','prospectos','prospecto','leads total','total leads','nuevos leads'],
+    leads_mkt:   ['leads mkt','lead mkt','marketing','leads marketing','mkt'],
+    leads_propios:['leads propios','lead propio','propios','leads comercial','comercial leads']
   };
 
   ETL_FIELDS.forEach(field => {
@@ -2623,6 +2690,12 @@ function rebuildFromHistory(){
     const metas = etlGetNumCol(data, map, 'meta');
     const reals = etlGetNumCol(data, map, 'real');
     const nuevos = etlGetNumCol(data, map, 'nuevos');
+    const gmvNuevos = etlGetNumCol(data, map, 'gmv_nuevos');
+    const perdidos = etlGetNumCol(data, map, 'perdidos');
+    const gmvPerdidos = etlGetNumCol(data, map, 'gmv_perdidos');
+    const leadsTotal = etlGetNumCol(data, map, 'leads_total');
+    const leadsMkt = etlGetNumCol(data, map, 'leads_mkt');
+    const leadsPropios = etlGetNumCol(data, map, 'leads_propios');
 
     data.forEach((row, i) => {
       // Homologate clients by ID Compañía
@@ -2656,7 +2729,7 @@ function rebuildFromHistory(){
       // Monthly aggregation (current month override for same label)
       if(months && months[i]){
         const mKey = months[i];
-        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0};
+        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0, leadsTotal:0, leadsMkt:0, leadsPropios:0};
         if(gmvs) monthlyData[mKey].gmv += gmvs[i] || 0;
         if(bookings) monthlyData[mKey].bookings += bookings[i] || 0;
         if(packages) monthlyData[mKey].packages += packages[i] || 0;
@@ -2664,6 +2737,12 @@ function rebuildFromHistory(){
         if(metas) monthlyData[mKey].meta = metas[i] || monthlyData[mKey].meta;
         if(reals) monthlyData[mKey].real += reals[i] || 0;
         if(nuevos) monthlyData[mKey].nuevos += nuevos[i] || 0;
+        if(gmvNuevos) monthlyData[mKey].gmvNuevos += gmvNuevos[i] || 0;
+        if(perdidos) monthlyData[mKey].perdidos += perdidos[i] || 0;
+        if(gmvPerdidos) monthlyData[mKey].gmvPerdidos += gmvPerdidos[i] || 0;
+        if(leadsTotal) monthlyData[mKey].leadsTotal += leadsTotal[i] || 0;
+        if(leadsMkt) monthlyData[mKey].leadsMkt += leadsMkt[i] || 0;
+        if(leadsPropios) monthlyData[mKey].leadsPropios += leadsPropios[i] || 0;
       }
 
       // KAM aggregation
@@ -2692,10 +2771,28 @@ function rebuildFromHistory(){
   }
 
   // Apply nuevos
-  const nuevosLabels = monthLabels.filter(m => monthlyData[m].nuevos > 0);
+  const nuevosLabels = monthLabels.filter(m => monthlyData[m].nuevos > 0 || monthlyData[m].gmvNuevos > 0);
   if(nuevosLabels.length > 0){
     DATA.nuevos.labels = nuevosLabels;
-    DATA.nuevos.data = nuevosLabels.map(m => monthlyData[m].nuevos);
+    DATA.nuevos.count = nuevosLabels.map(m => monthlyData[m].nuevos);
+    DATA.nuevos.gmv = nuevosLabels.map(m => monthlyData[m].gmvNuevos);
+  }
+
+  // Apply perdidos
+  const perdidosLabels = monthLabels.filter(m => monthlyData[m].perdidos > 0 || monthlyData[m].gmvPerdidos > 0);
+  if(perdidosLabels.length > 0){
+    DATA.perdidos.labels = perdidosLabels;
+    DATA.perdidos.count = perdidosLabels.map(m => monthlyData[m].perdidos);
+    DATA.perdidos.gmv = perdidosLabels.map(m => monthlyData[m].gmvPerdidos);
+  }
+
+  // Apply leads
+  const leadsLabels = monthLabels.filter(m => monthlyData[m].leadsTotal > 0 || monthlyData[m].leadsMkt > 0 || monthlyData[m].leadsPropios > 0);
+  if(leadsLabels.length > 0){
+    DATA.leads.labels = leadsLabels;
+    DATA.leads.total = leadsLabels.map(m => monthlyData[m].leadsTotal);
+    DATA.leads.mkt = leadsLabels.map(m => monthlyData[m].leadsMkt);
+    DATA.leads.propios = leadsLabels.map(m => monthlyData[m].leadsPropios);
   }
 
   // Apply clients (homologated by ID Compañía)
@@ -2724,7 +2821,10 @@ function resetDataToEmpty(){
   DATA.kamGMV.labels = [];
   DATA.kamGMV.data = [];
   DATA.nuevos.labels = [];
-  DATA.nuevos.data = [];
+  DATA.nuevos.count = [];
+  DATA.nuevos.gmv = [];
+  DATA.perdidos = {labels:[], count:[], gmv:[]};
+  DATA.leads = {labels:[], total:[], mkt:[], propios:[]};
   DATA.metas.labels = [];
   DATA.metas.meta = [];
   DATA.metas.real = [];
