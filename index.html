@@ -879,6 +879,76 @@
         </div>
       </div>
 
+      <!-- Destination Config -->
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title"><i class="ti ti-settings-2" style="font-size:15px;margin-right:4px;"></i> Configuración de carga</div>
+        <div class="chart-sub" style="margin-bottom:12px;">Define el destino, período y tabla para aplicar los datos.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+          <!-- 1. Módulos destino -->
+          <div class="form-group">
+            <label class="form-label">Módulos destino</label>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;max-height:140px;overflow-y:auto;" id="etl-modules-list">
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="all" checked onchange="etlToggleAllModules(this)" style="accent-color:var(--accent);"> <strong>Todos los módulos</strong></label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="resumen" checked class="etl-mod-cb"> Resumen Ejecutivo</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="metas" checked class="etl-mod-cb"> Metas Comerciales</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="kam" checked class="etl-mod-cb"> Desempeño KAM</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="clientes" checked class="etl-mod-cb"> Clientes</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="operativo" checked class="etl-mod-cb"> Comportamiento Operativo</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="historico" checked class="etl-mod-cb"> Histórico Pibox</label>
+            </div>
+          </div>
+
+          <!-- 2. Período -->
+          <div class="form-group">
+            <label class="form-label">Período de los datos</label>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div>
+                <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px;">Año</label>
+                <select class="form-select" id="etl-year" style="width:100%;">
+                  <option value="auto">Auto-detectar del archivo</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px;">Mes (si aplica a un solo mes)</label>
+                <select class="form-select" id="etl-month" style="width:100%;">
+                  <option value="auto">Auto-detectar / Múltiples meses</option>
+                  <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+                  <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+                  <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Tabla destino -->
+          <div class="form-group">
+            <label class="form-label">Tabla / Dataset destino</label>
+            <select class="form-select" id="etl-target-table" style="width:100%;margin-bottom:8px;">
+              <option value="auto">Auto-detectar</option>
+              <option value="gmv_mensual">GMV Mensual</option>
+              <option value="metas">Metas Comerciales</option>
+              <option value="clientes">Clientes</option>
+              <option value="kam">Desempeño KAM</option>
+              <option value="operativo">Comportamiento Operativo</option>
+              <option value="leads">Leads / CRM</option>
+              <option value="utilidad">Utilidad Bruta</option>
+            </select>
+            <div id="etl-table-suggestion" style="font-size:11px;color:var(--teal);display:none;">
+              <i class="ti ti-bulb" style="font-size:12px;margin-right:2px;"></i> <span id="etl-suggestion-text"></span>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3);">
+              <i class="ti ti-info-circle" style="font-size:12px;margin-right:2px;"></i> La tabla se sugiere según el nombre del archivo
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Column Mapping -->
       <div class="chart-card" style="margin-bottom:16px;">
         <div class="chart-title"><i class="ti ti-map" style="font-size:15px;margin-right:4px;"></i> Mapeo de columnas</div>
@@ -922,7 +992,7 @@
         <button class="btn btn-ghost" style="color:var(--red);font-size:12px;" onclick="showFormatConfirm()"><i class="ti ti-trash"></i> FORMATEAR</button>
       </div>
       <table>
-        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Homologación</th><th>Columnas aplicadas</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Tabla</th><th>Período</th><th>Homologación</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody id="etl-history-body"></tbody>
       </table>
     </div>
@@ -2406,6 +2476,52 @@ const ETL_FIELDS = [
   {key:'leads_propios',label:'Leads Propios',       desc:'Leads generados por el equipo comercial'}
 ];
 
+function etlToggleAllModules(el){
+  document.querySelectorAll('.etl-mod-cb').forEach(cb => cb.checked = el.checked);
+}
+
+function etlSuggestTable(){
+  if(!etlFileName) return;
+  const name = etlFileName.toLowerCase().replace(/\.[^.]+$/,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const suggestions = [
+    {keywords:['gmv','revenue','ingreso','venta','sales','operativo','comportamiento'],table:'gmv_mensual',label:'GMV Mensual'},
+    {keywords:['meta','target','objetivo','goal','cumplimiento'],table:'metas',label:'Metas Comerciales'},
+    {keywords:['cliente','client','customer','empresa','company'],table:'clientes',label:'Clientes'},
+    {keywords:['kam','ejecutivo','vendedor','asesor','desempeno','performance'],table:'kam',label:'Desempeño KAM'},
+    {keywords:['booking','package','paquete','envio','operativo','efectividad'],table:'operativo',label:'Comportamiento Operativo'},
+    {keywords:['lead','prospecto','crm','pipeline','negocio','deal'],table:'leads',label:'Leads / CRM'},
+    {keywords:['utilidad','margen','profit','ganancia','rentabilidad'],table:'utilidad',label:'Utilidad Bruta'}
+  ];
+
+  for(const s of suggestions){
+    if(s.keywords.some(k => name.includes(k))){
+      document.getElementById('etl-target-table').value = s.table;
+      const sugEl = document.getElementById('etl-table-suggestion');
+      const sugText = document.getElementById('etl-suggestion-text');
+      if(sugEl && sugText){
+        sugText.textContent = `Sugerencia: "${s.label}" basada en el nombre del archivo`;
+        sugEl.style.display = 'block';
+      }
+      return;
+    }
+  }
+  document.getElementById('etl-target-table').value = 'auto';
+  const sugEl = document.getElementById('etl-table-suggestion');
+  if(sugEl) sugEl.style.display = 'none';
+}
+
+function getSelectedModules(){
+  const allCb = document.querySelector('#etl-modules-list input[value="all"]');
+  if(allCb && allCb.checked) return 'all';
+  return [...document.querySelectorAll('.etl-mod-cb:checked')].map(cb => cb.value);
+}
+
+function getETLPeriod(){
+  const year = document.getElementById('etl-year')?.value || 'auto';
+  const month = document.getElementById('etl-month')?.value || 'auto';
+  return {year, month};
+}
+
 function handleDrag(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
 function handleDrop(e){
   e.preventDefault();
@@ -2490,6 +2606,7 @@ function showETLPreview(){
     document.getElementById('etl-sheet-selector').style.display = 'none';
   }
 
+  etlSuggestTable();
   renderColumnMapping();
   renderPreviewTable();
   runValidation();
@@ -2673,6 +2790,13 @@ function runETL(){
   const hasRecordId = etlColumnMap.record_id !== undefined;
   const homoType = hasIdCompania ? 'ID Compañía' : hasRecordId ? 'Record ID' : 'Ninguna';
 
+  // Get config
+  const selectedModules = getSelectedModules();
+  const period = getETLPeriod();
+  const targetTable = document.getElementById('etl-target-table')?.value || 'auto';
+  const tableLabels = {auto:'Auto',gmv_mensual:'GMV Mensual',metas:'Metas',clientes:'Clientes',kam:'KAM',operativo:'Operativo',leads:'Leads',utilidad:'Utilidad'};
+  const modLabels = selectedModules === 'all' ? 'Todos' : (Array.isArray(selectedModules) ? selectedModules.join(', ') : 'Todos');
+
   // Save to history WITH parsed data for activate/deactivate
   const entry = {
     id: Date.now(),
@@ -2683,8 +2807,12 @@ function runETL(){
     applied: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k),
     active: true,
     homoType: homoType,
+    modules: selectedModules,
+    period: period,
+    targetTable: targetTable,
+    targetTableLabel: tableLabels[targetTable] || targetTable,
     columnMap: {...etlColumnMap},
-    data: etlParsedData.slice(0, 5000) // Cap at 5000 rows for storage
+    data: etlParsedData.slice(0, 5000)
   };
   etlHistory.unshift(entry);
   if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
@@ -2694,8 +2822,9 @@ function runETL(){
   rebuildFromHistory();
 
   renderETLHistory();
-  toast(`Datos aplicados: ${entry.applied.join(', ')}${hasIdCompania || hasRecordId ? ' · Homologación: '+homoType : ''}`);
-  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Homologación: ${homoType}`,'data','success','Campos: '+entry.applied.join(', '));
+  const periodLabel = period.year !== 'auto' ? period.year + (period.month !== 'auto' ? '/'+period.month : '') : 'Auto';
+  toast(`Datos aplicados: ${entry.targetTableLabel} · ${periodLabel}`);
+  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Tabla: ${entry.targetTableLabel} · Período: ${periodLabel} · Módulos: ${modLabels}`,'data','success','');
 
   // Clean up
   document.getElementById('etl-preview-panel').style.display = 'none';
@@ -3504,7 +3633,7 @@ function renderETLHistory(){
   const tbody = document.getElementById('etl-history-body');
   if(!tbody) return;
   if(etlHistory.length === 0){
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">No hay cargas registradas</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;">No hay cargas registradas</td></tr>';
     return;
   }
   tbody.innerHTML = etlHistory.map(h => {
@@ -3516,13 +3645,17 @@ function renderETLHistory(){
     const homoTag = h.homoType && h.homoType !== 'Ninguna'
       ? `<span class="tag tag-teal" style="font-size:10px;padding:1px 6px;">${h.homoType}</span>`
       : '<span style="font-size:11px;color:var(--text3);">—</span>';
+    const tableTag = h.targetTableLabel ? `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;">${h.targetTableLabel}</span>` : '<span style="color:var(--text3);font-size:11px;">Auto</span>';
+    const prd = h.period || {};
+    const periodText = prd.year && prd.year !== 'auto' ? prd.year + (prd.month && prd.month !== 'auto' ? '/'+prd.month : '') : 'Auto';
     return `
     <tr style="${h.active?'':'opacity:0.5;'}">
       <td style="white-space:nowrap;">${h.date} <span style="color:var(--text3);font-size:11px;">${h.time||''}</span></td>
       <td class="bold">${h.file}</td>
       <td>${h.rows.toLocaleString()}</td>
+      <td>${tableTag}</td>
+      <td style="font-size:12px;">${periodText}</td>
       <td>${homoTag}</td>
-      <td>${(h.applied||[]).map(a => `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;margin:1px;">${a}</span>`).join(' ')}</td>
       <td>${statusTag}</td>
       <td style="white-space:nowrap;">
         <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;${toggleColor}" onclick="toggleETLEntry(${h.id})"><i class="ti ti-${h.active?'player-pause':'player-play'}" style="font-size:12px"></i> ${toggleLabel}</button>
