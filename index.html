@@ -1033,9 +1033,11 @@
             <tr>
               <th>Usuario</th>
               <th>Email</th>
+              <th>Perfil comercial</th>
               <th>Rol</th>
+              <th>Ingreso</th>
+              <th>Antigüedad</th>
               <th>Estado</th>
-              <th>Último acceso</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -1185,11 +1187,15 @@
         </div>
       </div>
 
-      <!-- Role Info Card (read-only) -->
+      <!-- Role & Profile Info Card (read-only) -->
       <div class="profile-card">
-        <div class="profile-card-title"><i class="ti ti-shield-check" style="color:var(--amber)"></i> Rol Asignado</div>
+        <div class="profile-card-title"><i class="ti ti-briefcase" style="color:var(--green)"></i> Perfil Comercial y Rol</div>
         <div class="profile-field">
-          <div class="profile-field-label">Rol actual</div>
+          <div class="profile-field-label">Perfil comercial</div>
+          <div class="profile-field-value"><span class="tag" id="profile-commercial-tag">—</span></div>
+        </div>
+        <div class="profile-field">
+          <div class="profile-field-label">Rol de acceso</div>
           <div class="profile-field-value"><span class="tag" id="profile-role-tag">Administrativo</span></div>
         </div>
         <div class="profile-field">
@@ -1197,12 +1203,20 @@
           <div class="profile-field-value" id="profile-perm-summary" style="font-size:12px;color:var(--text2);">Acceso completo</div>
         </div>
         <div class="profile-field">
+          <div class="profile-field-label">Fecha de ingreso</div>
+          <div class="profile-field-value" id="profile-join-date" style="font-size:13px;">—</div>
+        </div>
+        <div class="profile-field">
+          <div class="profile-field-label">Antigüedad</div>
+          <div class="profile-field-value" id="profile-seniority" style="font-size:13px;font-family:'DM Mono',monospace;color:var(--teal);">—</div>
+        </div>
+        <div class="profile-field">
           <div class="profile-field-label">Último acceso</div>
           <div class="profile-field-value" id="profile-last-access" style="font-size:12px;color:var(--text3);">—</div>
         </div>
         <div style="margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:var(--radius-sm);font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;">
           <i class="ti ti-info-circle" style="font-size:14px;color:var(--accent2)"></i>
-          Tu rol es asignado por el administrador. Contacta a un administrador si necesitas cambiar tus permisos.
+          Tu perfil comercial y rol son asignados por el administrador.
         </div>
       </div>
     </div>
@@ -1435,13 +1449,25 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Rol</label>
+        <label class="form-label">Rol de acceso</label>
         <select class="form-select" id="usr-role">
           <option value="visualizador">Visualizador</option>
           <option value="comercial">Comercial</option>
           <option value="administrativo">Administrativo</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Perfil comercial</label>
+        <select class="form-select" id="usr-profile">
+          <option value="KAM">KAM</option>
+          <option value="GESTOR COMERCIAL">Gestor Comercial</option>
+          <option value="HEAD OF SALES">Head of Sales</option>
+          <option value="GERENTE">Gerente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha de ingreso</label><input class="form-input filter-date" id="usr-join-date" type="date" style="color-scheme:dark;"></div>
       <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="usr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
     </div>
     <div class="form-actions">
@@ -2971,10 +2997,10 @@ const ROLE_PERMISSIONS = {
 };
 
 let usersDB = JSON.parse(localStorage.getItem('pibox_users') || 'null') || [
-  {id:1, name:'Johana Navarrete', email:'admin@pibox.co', role:'administrativo', password:'admin123', active:true, lastAccess:'2026-05-13 09:14'},
-  {id:2, name:'Juliana Rojas', email:'juliana@pibox.co', role:'comercial', password:'comercial123', active:true, lastAccess:'2026-05-12 17:30'},
-  {id:3, name:'Nathy Olivera', email:'nathy@pibox.co', role:'visualizador', password:'viewer123', active:true, lastAccess:'2026-05-11 14:22'},
-  {id:4, name:'Pipe Pibox', email:'pipe@pibox.co', role:'visualizador', password:'viewer123', active:false, lastAccess:'2026-04-28 10:05'}
+  {id:1, name:'Johana Navarrete', email:'admin@pibox.co', role:'administrativo', password:'admin123', active:true, lastAccess:'2026-05-13 09:14', profile:'HEAD OF SALES', joinDate:'2023-03-15'},
+  {id:2, name:'Juliana Rojas', email:'juliana@pibox.co', role:'comercial', password:'comercial123', active:true, lastAccess:'2026-05-12 17:30', profile:'KAM', joinDate:'2024-01-10'},
+  {id:3, name:'Nathy Olivera', email:'nathy@pibox.co', role:'visualizador', password:'viewer123', active:true, lastAccess:'2026-05-11 14:22', profile:'KAM', joinDate:'2024-06-01'},
+  {id:4, name:'Pipe Pibox', email:'pipe@pibox.co', role:'visualizador', password:'viewer123', active:false, lastAccess:'2026-04-28 10:05', profile:'GESTOR COMERCIAL', joinDate:'2025-02-20'}
 ];
 
 let currentUser = JSON.parse(sessionStorage.getItem('pibox_current_user') || 'null');
@@ -3077,22 +3103,30 @@ function renderUsersTable(){
   const colors = {administrativo:'var(--amber)', comercial:'var(--green)', visualizador:'var(--accent)'};
   const roleTags = {administrativo:'tag-amber', comercial:'tag-green', visualizador:'tag-blue'};
 
+  const profileTags = {'KAM':'tag-blue','GESTOR COMERCIAL':'tag-teal','HEAD OF SALES':'tag-amber','GERENTE':'tag-red'};
+
   tbody.innerHTML = filtered.map(u => {
     const photo = getUserPhoto(u.id);
     const initials = u.name.split(' ').map(w=>w[0]).join('').slice(0,2);
     const avatarContent = photo
       ? `<span class="user-table-avatar" style="overflow:hidden"><img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></span>`
       : `<span class="user-table-avatar" style="background:${colors[u.role]}">${initials}</span>`;
+    const months = calcMonthsActive(u.joinDate);
+    const monthsText = months !== null ? (months < 1 ? '< 1 mes' : months + (months===1?' mes':' meses')) : '—';
+    const profileTag = u.profile ? `<span class="tag ${profileTags[u.profile]||'tag-blue'}">${u.profile}</span>` : '<span style="color:var(--text3)">—</span>';
+    const joinDisplay = u.joinDate ? formatJoinDate(u.joinDate) : '—';
     return `
     <tr>
       <td>
         ${avatarContent}
         <span class="bold">${u.name}</span>
       </td>
-      <td style="color:var(--text2)">${u.email}</td>
+      <td style="color:var(--text2);font-size:12px;">${u.email}</td>
+      <td>${profileTag}</td>
       <td><span class="tag ${roleTags[u.role]}">${ROLE_PERMISSIONS[u.role].label}</span></td>
+      <td style="color:var(--text3);font-size:12px;">${joinDisplay}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);">${monthsText}</td>
       <td><span class="tag ${u.active?'tag-green':'tag-red'}">${u.active?'Activo':'Inactivo'}</span></td>
-      <td style="color:var(--text3);font-size:12px">${u.lastAccess}</td>
       <td>
         ${currentUser && currentUser.role==='administrativo' ? `
           <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="toggleUserActive(${u.id})">${u.active?'Desactivar':'Activar'}</button>
@@ -3104,14 +3138,34 @@ function renderUsersTable(){
 
 function filterUsers(){ renderUsersTable(); }
 
+function calcMonthsActive(joinDate){
+  if(!joinDate) return null;
+  const join = new Date(joinDate);
+  const now = new Date();
+  return (now.getFullYear() - join.getFullYear()) * 12 + (now.getMonth() - join.getMonth());
+}
+
+function formatJoinDate(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 function saveUser(){
   const name = document.getElementById('usr-name').value.trim();
   const email = document.getElementById('usr-email').value.trim();
   const role = document.getElementById('usr-role').value;
   const pass = document.getElementById('usr-pass').value;
+  const profile = document.getElementById('usr-profile').value;
+  const joinDate = document.getElementById('usr-join-date').value;
 
   if(!name || !email || !pass || pass.length < 6){
     toast('Completa todos los campos (contraseña mín. 6 caracteres)');
+    return;
+  }
+  if(!joinDate){
+    toast('Selecciona la fecha de ingreso');
     return;
   }
   if(usersDB.find(u => u.email === email)){
@@ -3119,15 +3173,16 @@ function saveUser(){
     return;
   }
   const newId = Math.max(...usersDB.map(u=>u.id)) + 1;
-  usersDB.push({id:newId, name, email, role, password:pass, active:true, lastAccess:'—'});
+  usersDB.push({id:newId, name, email, role, password:pass, active:true, lastAccess:'—', profile, joinDate});
   saveUsersDB();
   closeModal('user-modal');
   document.getElementById('usr-name').value = '';
   document.getElementById('usr-email').value = '';
   document.getElementById('usr-pass').value = '';
+  document.getElementById('usr-join-date').value = '';
   renderUsersTable();
   toast('Usuario creado exitosamente');
-  auditLog(`Usuario creado: <strong>${name}</strong> (${email}) con rol <strong>${ROLE_PERMISSIONS[role].label}</strong>`,'users','success','');
+  auditLog(`Usuario creado: <strong>${name}</strong> (${email}) · Perfil: ${profile} · Rol: ${ROLE_PERMISSIONS[role].label}`,'users','success','Ingreso: '+joinDate);
 }
 
 function toggleUserActive(id){
@@ -3240,12 +3295,33 @@ function loadProfileView(){
   roleTag.textContent = perms.label;
   roleTag.className = `tag ${roleTags[currentUser.role]}`;
 
-  // Role info card
+  // Role & profile info card
   const roleInfoTag = document.getElementById('profile-role-tag');
   roleInfoTag.textContent = perms.label;
   roleInfoTag.className = `tag ${roleTags[currentUser.role]}`;
   document.getElementById('profile-perm-summary').textContent = permSummaries[currentUser.role];
   document.getElementById('profile-last-access').textContent = currentUser.lastAccess || '—';
+
+  // Commercial profile
+  const profileTags = {'KAM':'tag-blue','GESTOR COMERCIAL':'tag-teal','HEAD OF SALES':'tag-amber','GERENTE':'tag-red'};
+  const commTag = document.getElementById('profile-commercial-tag');
+  if(commTag){
+    commTag.textContent = currentUser.profile || '—';
+    commTag.className = `tag ${profileTags[currentUser.profile]||'tag-blue'}`;
+  }
+
+  // Join date & seniority
+  const joinEl = document.getElementById('profile-join-date');
+  if(joinEl) joinEl.textContent = currentUser.joinDate ? formatJoinDate(currentUser.joinDate) : '—';
+  const seniorEl = document.getElementById('profile-seniority');
+  if(seniorEl){
+    const months = calcMonthsActive(currentUser.joinDate);
+    if(months !== null){
+      const years = Math.floor(months / 12);
+      const rem = months % 12;
+      seniorEl.textContent = years > 0 ? `${years} año${years>1?'s':''} y ${rem} mes${rem!==1?'es':''}` : `${months} mes${months!==1?'es':''}`;
+    } else { seniorEl.textContent = '—'; }
+  }
 
   // Photo
   const photo = getUserPhoto(currentUser.id);
