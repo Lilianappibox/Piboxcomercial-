@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pibox — Dashboard Comercial</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='120' y2='120' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%236C3AE0'/%3E%3Cstop offset='1' stop-color='%234F6EF7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='26' fill='url(%23g)'/%3E%3Cpath d='M35 52L60 40L85 52V82C85 84.2 83.2 86 81 86H39C36.8 86 35 84.2 35 82V52Z' fill='%23fff' opacity='.95'/%3E%3Cpath d='M35 52L60 40L85 52L60 62Z' fill='%23fff'/%3E%3Cpath d='M54 34L60 24L66 34' stroke='%23FFD166' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='60' y1='24' x2='60' y2='40' stroke='%23FFD166' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,7 +49,7 @@
 
   /* ─── SIDEBAR ─── */
   .sidebar-logo { padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-  .logo-mark { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .logo-mark { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .logo-text { font-weight: 600; font-size: 15px; letter-spacing: -0.2px; }
   .logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; }
   .nav { padding: 12px 12px; flex: 1; overflow-y: auto; }
@@ -353,7 +354,34 @@
 <!-- ─── SIDEBAR ─── -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">PB</div>
+    <div class="logo-mark">
+      <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-bg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6C3AE0"/>
+            <stop offset="1" stop-color="#4F6EF7"/>
+          </linearGradient>
+          <linearGradient id="logo-box" x1="35" y1="30" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#fff"/>
+            <stop offset="1" stop-color="#E0D6FF"/>
+          </linearGradient>
+        </defs>
+        <rect width="120" height="120" rx="26" fill="url(#logo-bg)"/>
+        <!-- Box body -->
+        <path d="M35 52L60 40L85 52V82C85 84.2 83.2 86 81 86H39C36.8 86 35 84.2 35 82V52Z" fill="url(#logo-box)" opacity="0.95"/>
+        <!-- Box lid flaps -->
+        <path d="M35 52L60 40L85 52L60 62Z" fill="#fff"/>
+        <!-- Center line -->
+        <line x1="60" y1="62" x2="60" y2="86" stroke="#6C3AE0" stroke-width="2.5" opacity="0.3"/>
+        <!-- Arrow up (delivery/speed) -->
+        <path d="M54 34L60 24L66 34" stroke="#FFD166" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="60" y1="24" x2="60" y2="40" stroke="#FFD166" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Speed lines -->
+        <line x1="26" y1="58" x2="32" y2="58" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="24" y1="66" x2="32" y2="66" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+        <line x1="26" y1="74" x2="32" y2="74" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+      </svg>
+    </div>
     <div>
       <div class="logo-text">Pibox</div>
       <div class="logo-sub">Comercial BI</div>
@@ -1501,9 +1529,31 @@
 <div class="login-overlay active" id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <div class="logo-mark" style="width:40px;height:40px;font-size:16px;">PB</div>
+      <div class="logo-mark" style="width:52px;height:52px;">
+        <svg width="52" height="52" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="login-bg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6C3AE0"/>
+              <stop offset="1" stop-color="#4F6EF7"/>
+            </linearGradient>
+            <linearGradient id="login-box" x1="35" y1="30" x2="85" y2="95" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fff"/>
+              <stop offset="1" stop-color="#E0D6FF"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" rx="26" fill="url(#login-bg)"/>
+          <path d="M35 52L60 40L85 52V82C85 84.2 83.2 86 81 86H39C36.8 86 35 84.2 35 82V52Z" fill="url(#login-box)" opacity="0.95"/>
+          <path d="M35 52L60 40L85 52L60 62Z" fill="#fff"/>
+          <line x1="60" y1="62" x2="60" y2="86" stroke="#6C3AE0" stroke-width="2.5" opacity="0.3"/>
+          <path d="M54 34L60 24L66 34" stroke="#FFD166" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="60" y1="24" x2="60" y2="40" stroke="#FFD166" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="26" y1="58" x2="32" y2="58" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <line x1="24" y1="66" x2="32" y2="66" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          <line x1="26" y1="74" x2="32" y2="74" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+        </svg>
+      </div>
       <div>
-        <div class="logo-text" style="font-size:18px;">Pibox</div>
+        <div class="logo-text" style="font-size:20px;">Pibox</div>
         <div class="logo-sub">Comercial BI</div>
       </div>
     </div>
