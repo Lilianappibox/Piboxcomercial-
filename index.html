@@ -3068,35 +3068,42 @@ function renderMetasCards(){
     }
   });
 
-  const qLabels = ['Q1 — Ene · Feb · Mar','Q2 — Abr · May · Jun','Q3 — Jul · Ago · Sep','Q4 — Oct · Nov · Dic'];
+  const qNames = ['Q1','Q2','Q3','Q4'];
+  const qColors = ['var(--accent)','var(--green)','var(--amber)','var(--teal)'];
+
+  function buildCard(m){
+    const d = monthData[m];
+    const hasMeta = d && d.meta > 0;
+    const hasGmv = d && d.gmv > 0;
+    const hasReal = d && d.real > 0;
+    const gmvVal = hasGmv ? d.gmv : (hasReal ? d.real : 0);
+    const metaVal = hasMeta ? d.meta : 0;
+    const pctNum = hasMeta && gmvVal > 0 ? (gmvVal / metaVal) * 100 : 0;
+    const pctText = hasMeta && gmvVal > 0 ? pctNum.toFixed(1) + '%' : 'NA';
+    const color = hasMeta && gmvVal > 0 ? cumplColor(pctNum) : 'var(--text3)';
+    const barW = hasMeta && gmvVal > 0 ? Math.min(pctNum, 120) : 0;
+    return `
+      <div class="meta-card">
+        <div class="meta-month">${fullNames[m]} ${year}</div>
+        <div class="meta-values">
+          <div class="meta-real" style="color:var(--text);font-size:14px;"><span style="font-size:10px;color:var(--text3);display:block;">GMV</span>${hasGmv || hasReal ? fmtMoneyShort(gmvVal) : 'NA'}</div>
+          <div class="meta-target" style="font-size:12px;"><span style="font-size:10px;color:var(--text3);display:block;">Meta</span>${hasMeta ? fmtMoneyShort(metaVal) : 'NA'}</div>
+        </div>
+        <div class="meta-pct" style="color:${color};font-size:18px;">${pctText}</div>
+        <div class="meta-bar"><div class="meta-bar-fill" style="width:${barW}%;background:${color}"></div></div>
+      </div>`;
+  }
 
   let html = '';
   for(let q = 0; q < 4; q++){
-    html += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">${qLabels[q]}</div><div class="meta-grid" style="grid-template-columns:repeat(3,1fr);">`;
-    for(let m = q*3; m < q*3+3; m++){
-      const d = monthData[m];
-      const hasMeta = d && d.meta > 0;
-      const hasGmv = d && d.gmv > 0;
-      const hasReal = d && d.real > 0;
-      const gmvVal = hasGmv ? d.gmv : (hasReal ? d.real : 0);
-      const metaVal = hasMeta ? d.meta : 0;
-      const pctNum = hasMeta && gmvVal > 0 ? (gmvVal / metaVal) * 100 : 0;
-      const pctText = hasMeta && gmvVal > 0 ? pctNum.toFixed(1) + '%' : 'NA';
-      const color = hasMeta && gmvVal > 0 ? cumplColor(pctNum) : 'var(--text3)';
-      const barW = hasMeta && gmvVal > 0 ? Math.min(pctNum, 120) : 0;
-
-      html += `
-        <div class="meta-card">
-          <div class="meta-month">${fullNames[m]} ${year}</div>
-          <div class="meta-values">
-            <div class="meta-real" style="color:var(--text);font-size:14px;"><span style="font-size:10px;color:var(--text3);display:block;">GMV</span>${hasGmv || hasReal ? fmtMoneyShort(gmvVal) : 'NA'}</div>
-            <div class="meta-target" style="font-size:12px;"><span style="font-size:10px;color:var(--text3);display:block;">Meta</span>${hasMeta ? fmtMoneyShort(metaVal) : 'NA'}</div>
-          </div>
-          <div class="meta-pct" style="color:${color};font-size:18px;">${pctText}</div>
-          <div class="meta-bar"><div class="meta-bar-fill" style="width:${barW}%;background:${color}"></div></div>
-        </div>`;
-    }
-    html += '</div></div>';
+    html += `<div style="margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:600;color:${qColors[q]};letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <span style="background:${qColors[q]};width:4px;height:16px;border-radius:2px;display:inline-block;"></span> ${qNames[q]}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        ${buildCard(q*3)}${buildCard(q*3+1)}${buildCard(q*3+2)}
+      </div>
+    </div>`;
   }
 
   container.innerHTML = html;
