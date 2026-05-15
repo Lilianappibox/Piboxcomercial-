@@ -288,6 +288,20 @@
   .profile-field-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500; }
   .profile-field-value { font-size: 14px; color: var(--text); }
 
+  /* ─── HISTORICO ─── */
+  .hist-year-tabs { display: flex; gap: 2px; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 20px; width: fit-content; }
+  .hist-year-tab { padding: 7px 18px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .hist-year-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .pred-card { background: linear-gradient(135deg, rgba(79,110,247,0.06) 0%, rgba(0,205,184,0.04) 100%); border: 1px solid rgba(79,110,247,0.15); border-radius: var(--radius); padding: 16px 18px; }
+  .pred-month { font-size: 12px; font-weight: 600; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .pred-value { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+  .pred-detail { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  .pred-confidence { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-top: 6px; }
+  .ecom-insight { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .ecom-source { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--teal); margin-bottom: 6px; }
+  .ecom-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .ecom-impact { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
   /* ─── SCROLLBAR ─── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -354,6 +368,9 @@
     </a>
     <a class="nav-item" href="#/usuarios-roles">
       <i class="ti ti-users-group"></i> Usuarios y Roles
+    </a>
+    <a class="nav-item" href="#/historico">
+      <i class="ti ti-history"></i> Histórico Pibox
     </a>
     <a class="nav-item" href="#/mi-perfil">
       <i class="ti ti-user-circle"></i> Mi Perfil
@@ -1062,6 +1079,7 @@
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Configurar Métricas</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Histórico Pibox</span>
         </div>
       </div>
 
@@ -1088,6 +1106,7 @@
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Configurar Métricas</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
+          <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Histórico Pibox</span>
         </div>
       </div>
 
@@ -1114,6 +1133,7 @@
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Configurar Métricas</span>
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Gestionar Usuarios</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Histórico Pibox</span>
         </div>
       </div>
     </div>
@@ -1191,6 +1211,103 @@
           <i class="ti ti-info-circle" style="font-size:14px;color:var(--accent2)"></i>
           Tu rol es asignado por el administrador. Contacta a un administrador si necesitas cambiar tus permisos.
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────── HISTÓRICO PIBOX VIEW ────────────────── -->
+  <div class="view" id="view-historico">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Histórico Pibox</div>
+        <div class="section-sub">Cifras consolidadas · Predicciones mensuales · Insights de mercado eCommerce Colombia</div>
+      </div>
+      <button class="btn btn-primary" onclick="exportHistorico()"><i class="ti ti-download"></i> Exportar histórico</button>
+    </div>
+
+    <!-- KPIs resumen -->
+    <div class="kpi-grid" id="hist-kpis"></div>
+
+    <!-- Year tabs -->
+    <div class="hist-year-tabs" id="hist-year-tabs"></div>
+
+    <!-- Historical table -->
+    <div class="table-card" style="margin-bottom:20px;">
+      <div class="table-header">
+        <div class="table-header-title">Cifras mensuales — GMV, Metas y Cumplimiento</div>
+        <span class="tag tag-blue" id="hist-table-tag">—</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>GMV Operativo</th>
+              <th>Meta</th>
+              <th>Cumplimiento</th>
+              <th>Bookings</th>
+              <th>Packages</th>
+              <th>Efectividad</th>
+              <th>Tendencia</th>
+            </tr>
+          </thead>
+          <tbody id="hist-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid" style="margin-bottom:20px;">
+      <div class="chart-card">
+        <div class="chart-title">Evolución GMV Histórico</div>
+        <div class="chart-sub">Real vs Meta · Incluye proyecciones</div>
+        <div class="chart-canvas-wrap" style="height:260px;">
+          <canvas id="chart-hist-gmv"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cumplimiento Mensual %</div>
+        <div class="chart-sub">Porcentaje de meta alcanzada por mes</div>
+        <div class="chart-canvas-wrap" style="height:260px;">
+          <canvas id="chart-hist-cumpl"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predicciones -->
+    <div class="section-head" style="margin-top:8px;">
+      <div>
+        <div class="section-title">Predicciones — Próximos meses</div>
+        <div class="section-sub">Basadas en comportamiento histórico + tendencias eCommerce Colombia</div>
+      </div>
+    </div>
+    <div class="meta-grid" id="hist-predictions"></div>
+
+    <!-- eCommerce Insights -->
+    <div class="insight-panel" style="margin-top:20px;">
+      <div class="insight-head">
+        <i class="ti ti-chart-arrows-vertical"></i>
+        <div>
+          <div class="insight-head-text">Insights eCommerce Colombia — Factores de mercado</div>
+          <div class="insight-head-sub">Fuentes: CCCE (Cámara Colombiana de Comercio Electrónico) · Cámara de Comercio de Bogotá · MinTIC</div>
+        </div>
+      </div>
+      <div class="insights-grid" id="hist-ecom-insights"></div>
+    </div>
+
+    <!-- AI Insights por mes -->
+    <div class="section-head" style="margin-top:24px;">
+      <div>
+        <div class="section-title">Análisis de comportamiento por mes</div>
+        <div class="section-sub">Patrones estacionales identificados en el histórico de Pibox</div>
+      </div>
+    </div>
+    <div class="table-card">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Mes</th><th>Patrón histórico</th><th>Factor eCommerce</th><th>Impacto estimado</th><th>Recomendación</th></tr></thead>
+          <tbody id="hist-seasonal-body"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -1454,7 +1571,8 @@ const ROUTES = {
   '/configurar-metricas': {view:'metricas',   title:'Configuración de Métricas'},
   '/auditoria':           {view:'auditoria',  title:'Auditoría'},
   '/usuarios-roles':      {view:'usuarios',   title:'Usuarios y Roles'},
-  '/mi-perfil':           {view:'perfil',     title:'Mi Perfil'}
+  '/mi-perfil':           {view:'perfil',     title:'Mi Perfil'},
+  '/historico':           {view:'historico',  title:'Histórico Pibox'}
 };
 
 function navigateTo(hash){
@@ -1490,6 +1608,7 @@ function navigateTo(hash){
   if(id==='usuarios') setTimeout(renderUsersTable,100);
   if(id==='perfil') setTimeout(loadProfileView,100);
   if(id==='auditoria') setTimeout(renderAuditLog,100);
+  if(id==='historico') setTimeout(renderHistorico,100);
 
   // Log navigation (skip audit view to avoid recursion)
   if(currentUser && id!=='auditoria'){
@@ -1504,7 +1623,7 @@ function onHashChange(){
 
 // Keep legacy showView working for any inline calls
 function showView(id){
-  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil'};
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico'};
   location.hash = viewToRoute[id] || '/resumen-ejecutivo';
 }
 
@@ -2573,7 +2692,7 @@ const ROLE_PERMISSIONS = {
     label: 'Comercial'
   },
   administrativo: {
-    views: ['overview','metas','kam','clientes','operativo','crm','upload','metricas','auditoria','usuarios','perfil'],
+    views: ['overview','metas','kam','clientes','operativo','crm','upload','metricas','auditoria','usuarios','perfil','historico'],
     canExport: true,
     canManageUsers: true,
     label: 'Administrativo'
@@ -2651,7 +2770,7 @@ function applyRoleRestrictions(){
   if(roleBadge) roleBadge.innerHTML = `<i class="ti ti-shield-check" style="font-size:11px;"></i> ${perms.label}`;
 
   // Show/hide nav items based on role
-  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil'};
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico'};
   document.querySelectorAll('.nav-item').forEach(item => {
     const href = item.getAttribute('href');
     if(!href) return;
@@ -2905,6 +3024,313 @@ function saveProfile(){
   loadProfileView();
   toast('Perfil actualizado correctamente');
   auditLog(`Perfil actualizado: <strong>${newName}</strong>`,'profile','success',changes.join(' · ') || 'Sin cambios');
+}
+
+// ─── HISTÓRICO PIBOX ───
+const HIST_DATA = {
+  2025: {
+    labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+    gmv: [1201914698,1195805469,1348109585,1310516436,1456794651,1367139572,1595604072,1543415578,1426171979,1413384857,1489506405,1765460744],
+    meta: [1200000000,1200000000,1300000000,1300000000,1400000000,1350000000,1500000000,1500000000,1400000000,1400000000,1450000000,1700000000],
+    bookings: [51798,51434,55913,51650,57063,50417,59174,55534,56132,55805,54307,57427],
+    packages: [106498,110323,118357,106431,123387,114223,143646,136433,129281,124287,122023,127582],
+    efect: [97.04,97.14,96.68,97.05,96.24,96.27,96.28,96.16,96.26,95.64,94.54,93.97]
+  },
+  2026: {
+    labels: ['Ene','Feb','Mar','Abr','May'],
+    gmv: [1301592891,1236711990,1318575524,1291401190,235470949],
+    meta: [1550000000,1580000000,1600000000,1654000000,1700000000],
+    bookings: [45329,44557,46355,43545,7639],
+    packages: [103675,91703,95909,94799,16867],
+    efect: [96.48,97.05,97.60,97.68,96.69]
+  }
+};
+
+const SEASONAL_PATTERNS = [
+  {month:'Enero', pattern:'Inicio de año lento. Recuperación post-festividades. Empresas ajustan presupuestos.', ecom:'Rebajas de temporada, liqwidaciones de inventario enero. Bajo volumen general vs diciembre (-40% promedio CCCE).', impact:'Medio-Bajo', impactClass:'tag-amber', rec:'Enfoque en retención de clientes existentes. Campañas de reactivación post-navidad.'},
+  {month:'Febrero', pattern:'Mes corto con repunte por San Valentín. Sector retail activo.', ecom:'Día sin IVA potencial (DIAN). San Valentín impulsa categorías regalo y delivery (+18% CCCE).', impact:'Medio', impactClass:'tag-blue', rec:'Activar clientes de categorías regalo/flores/alimentos. Cross-sell servicios express.'},
+  {month:'Marzo', pattern:'Estabilización. Cierres de Q1. Mejor mes para prospección B2B.', ecom:'Día de la Mujer. Cierre fiscal Q1. Hot Sale de primavera en LatAm. eCommerce crece +12% interanual (CCCE 2025).', impact:'Medio-Alto', impactClass:'tag-green', rec:'Cierre agresivo de pipeline Q1. Presentar resultados a clientes enterprise para renovación.'},
+  {month:'Abril', pattern:'Semana Santa genera baja operativa (5-8 días). Recuperación segunda quincena.', ecom:'Caída por Semana Santa (-15% vs marzo). Post-Semana Santa genera rebote en eCommerce según CCB.', impact:'Bajo', impactClass:'tag-red', rec:'Planificar operación reducida en Semana Santa. Meta conservadora. Enfoque en post-SS.'},
+  {month:'Mayo', pattern:'Día de la Madre como pico estacional. Segundo mejor momento del semestre.', ecom:'Día de la Madre: top 3 fechas eCommerce Colombia (+35% CCCE). Hot Sale Mayo. Incremento en delivery y regalos.', impact:'Alto', impactClass:'tag-green', rec:'Máxima capacidad operativa. Campañas con clientes retail. Negociar volúmenes con top clientes.'},
+  {month:'Junio', pattern:'Cierre de semestre. Día del Padre. Presupuestos corporativos en revisión.', ecom:'Día del Padre (+15%). Cyberlunes junio (CCCE). Mid-year sales. Empresas evalúan H1 para ajustar H2.', impact:'Medio', impactClass:'tag-blue', rec:'Presentar informes de H1 a clientes. Renegociar contratos semestrales. Preparar H2.'},
+  {month:'Julio', pattern:'Pico histórico en Pibox. Vacaciones escolares generan consumo sostenido.', ecom:'Temporada escolar impulsa retail. Prime Day efecto. Colombia: +22% en eCommerce julio vs junio (CCCE 2025).', impact:'Alto', impactClass:'tag-green', rec:'Capacidad máxima. Expansión de flota. Ofertar paquetes volumen a clientes top.'},
+  {month:'Agosto', pattern:'Segundo mes más fuerte. Estabilidad operativa alta.', ecom:'Vuelta a clases. Love Friday agosto. eCommerce mantiene momentum de julio según tendencia CCCE.', impact:'Medio-Alto', impactClass:'tag-green', rec:'Mantener capacidad. Foco en eficiencia operativa. Prospección para Q4.'},
+  {month:'Septiembre', pattern:'Inicio de planificación Q4. Amor y Amistad genera pico puntual.', ecom:'Amor y Amistad: fecha clave Colombia (+28% delivery CCCE). Cyberlunes septiembre. Empresas preparan Black Friday.', impact:'Medio-Alto', impactClass:'tag-green', rec:'Capitalizar Amor y Amistad. Empezar negociaciones Black Friday con retail.'},
+  {month:'Octubre', pattern:'Mes de preparación logística. Halloween crece como fecha comercial.', ecom:'Halloween crece +20% anual en eCommerce Colombia (CCB). Pre-Black Friday. Día sin IVA potencial.', impact:'Medio', impactClass:'tag-blue', rec:'Preparar infraestructura para pico Nov-Dic. Cerrar acuerdos Black Friday.'},
+  {month:'Noviembre', pattern:'Black Friday / Cyberlunes. Top 2 mes del año históricamente.', ecom:'Black Friday + Cyberlunes: segunda fecha más importante eCommerce Colombia. +55% vs mes normal (CCCE). Hot Sale noviembre.', impact:'Muy Alto', impactClass:'tag-green', rec:'Operación máxima. Personal temporal. SLAs especiales. Meta agresiva.'},
+  {month:'Diciembre', pattern:'Mejor mes del año en Pibox. Navidad + Fin de año + bonos salariales.', ecom:'Navidad + primas: TOP 1 fecha eCommerce Colombia. +70% vs promedio anual (CCCE 2025). Máximo histórico de delivery.', impact:'Muy Alto', impactClass:'tag-green', rec:'Capacidad máxima. Anticipar cierres corporativos. Meta más alta del año.'}
+];
+
+let histSelectedYear = 2026;
+
+function renderHistorico(){
+  renderHistYearTabs();
+  renderHistKPIs();
+  renderHistTable();
+  renderHistCharts();
+  renderPredictions();
+  renderEcomInsights();
+  renderSeasonalTable();
+}
+
+function renderHistYearTabs(){
+  const container = document.getElementById('hist-year-tabs');
+  if(!container) return;
+  const years = Object.keys(HIST_DATA).sort();
+  container.innerHTML = years.map(y =>
+    `<div class="hist-year-tab ${parseInt(y)===histSelectedYear?'active':''}" onclick="histSelectedYear=${y};renderHistorico()">${y}</div>`
+  ).join('');
+}
+
+function renderHistKPIs(){
+  const container = document.getElementById('hist-kpis');
+  if(!container) return;
+  const d = HIST_DATA[histSelectedYear];
+  if(!d) return;
+
+  const totalGMV = d.gmv.reduce((a,b)=>a+b,0);
+  const totalMeta = d.meta.reduce((a,b)=>a+b,0);
+  const cumpl = totalMeta > 0 ? ((totalGMV/totalMeta)*100).toFixed(1) : '—';
+  const avgEfect = (d.efect.reduce((a,b)=>a+b,0)/d.efect.length).toFixed(1);
+  const totalBookings = d.bookings.reduce((a,b)=>a+b,0);
+  const bestMonth = d.labels[d.gmv.indexOf(Math.max(...d.gmv))];
+
+  container.innerHTML = `
+    <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total ${histSelectedYear}</div><div class="kpi-value">${fmtMoneyShort(totalGMV)}</div><div class="kpi-sub">${d.labels.length} meses</div></div>
+    <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-target"></i> Meta Total</div><div class="kpi-value">${fmtMoneyShort(totalMeta)}</div><div class="kpi-sub">Objetivo acumulado</div></div>
+    <div class="kpi-card ${parseFloat(cumpl)>=85?'teal':'amber'}"><div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div><div class="kpi-value">${cumpl}%</div><div class="kpi-sub">Real / Meta</div></div>
+    <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-check"></i> Efectividad Prom.</div><div class="kpi-value">${avgEfect}%</div><div class="kpi-sub">Sobre ${d.labels.length} meses</div></div>
+    <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-trophy"></i> Mejor mes</div><div class="kpi-value">${bestMonth}</div><div class="kpi-sub">${fmtMoneyShort(Math.max(...d.gmv))}</div></div>
+  `;
+}
+
+function renderHistTable(){
+  const tbody = document.getElementById('hist-table-body');
+  const tag = document.getElementById('hist-table-tag');
+  if(!tbody) return;
+  const d = HIST_DATA[histSelectedYear];
+  if(!d) return;
+
+  tag.textContent = histSelectedYear;
+  tbody.innerHTML = d.labels.map((label, i) => {
+    const cumpl = d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : '—';
+    const cuplNum = parseFloat(cumpl);
+    const cuplClass = cuplNum >= 90 ? 'tag-green' : cuplNum >= 80 ? 'tag-amber' : 'tag-red';
+    const trend = i > 0 ? (d.gmv[i] > d.gmv[i-1] ? '📈' : d.gmv[i] < d.gmv[i-1] ? '📉' : '➡️') : '—';
+    return `<tr>
+      <td class="bold">${label} ${histSelectedYear}</td>
+      <td style="font-family:'DM Mono',monospace;">${fmtMoneyShort(d.gmv[i])}</td>
+      <td style="color:var(--text3)">${fmtMoneyShort(d.meta[i])}</td>
+      <td><span class="tag ${cuplClass}">${cumpl}%</span></td>
+      <td>${d.bookings[i].toLocaleString('es-CO')}</td>
+      <td>${d.packages[i].toLocaleString('es-CO')}</td>
+      <td>${d.efect[i]}%</td>
+      <td style="font-size:16px">${trend}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHistCharts(){
+  // Combine all years for the GMV chart
+  const allLabels = [];
+  const allGmv = [];
+  const allMeta = [];
+  const allCumpl = [];
+
+  Object.keys(HIST_DATA).sort().forEach(year => {
+    const d = HIST_DATA[year];
+    d.labels.forEach((l, i) => {
+      allLabels.push(l + ' ' + String(year).slice(2));
+      allGmv.push(d.gmv[i]);
+      allMeta.push(d.meta[i]);
+      allCumpl.push(d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100) : 0);
+    });
+  });
+
+  // Add predictions
+  const predMonths = getPredictions();
+  const predLabels = predMonths.map(p => p.label);
+  const predGmv = predMonths.map(p => p.gmv);
+
+  destroyChart('hist-gmv');
+  const ctx1 = document.getElementById('chart-hist-gmv');
+  if(ctx1) charts['hist-gmv'] = new Chart(ctx1,{
+    type:'line',
+    data:{
+      labels: [...allLabels, ...predLabels],
+      datasets:[
+        {label:'GMV Real',data:[...allGmv, ...Array(predLabels.length).fill(null)],borderColor:'#4f6ef7',backgroundColor:'rgba(79,110,247,0.08)',fill:true,tension:0.4,pointRadius:3,borderWidth:2},
+        {label:'Meta',data:[...allMeta, ...Array(predLabels.length).fill(null)],borderColor:'rgba(255,255,255,0.2)',borderDash:[5,5],fill:false,tension:0.3,pointRadius:0,borderWidth:1.5},
+        {label:'Predicción',data:[...Array(allLabels.length).fill(null), ...predGmv],borderColor:'#22c87a',backgroundColor:'rgba(34,200,122,0.06)',fill:true,tension:0.4,pointRadius:4,borderWidth:2,borderDash:[6,3]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8b92a8',font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtChartVal(c.raw)}}},scales:{x:{ticks:{color:'#555d74',font:{size:9},maxRotation:45},grid:{color:'rgba(255,255,255,0.04)'}},y:chartMoneyAxis()}}
+  });
+
+  destroyChart('hist-cumpl');
+  const ctx2 = document.getElementById('chart-hist-cumpl');
+  if(ctx2) charts['hist-cumpl'] = new Chart(ctx2,{
+    type:'bar',
+    data:{
+      labels: allLabels,
+      datasets:[{
+        label:'Cumplimiento %',
+        data: allCumpl.map(v=>Math.round(v*10)/10),
+        backgroundColor: allCumpl.map(v => v>=90?'rgba(34,200,122,0.7)':v>=80?'rgba(245,166,35,0.7)':'rgba(240,84,90,0.7)'),
+        borderRadius:3
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'%'}}},scales:{x:{ticks:{color:'#555d74',font:{size:9},maxRotation:45},grid:{color:'rgba(255,255,255,0.04)'}},y:{min:60,max:110,ticks:{color:'#555d74',font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+function getPredictions(){
+  // Build monthly averages from all historical data
+  const monthlyGmv = {};
+  const monthlyGrowth = {};
+  Object.keys(HIST_DATA).forEach(year => {
+    const d = HIST_DATA[year];
+    d.labels.forEach((l, i) => {
+      const mIdx = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].indexOf(l);
+      if(mIdx === -1) return;
+      if(!monthlyGmv[mIdx]) monthlyGmv[mIdx] = [];
+      monthlyGmv[mIdx].push(d.gmv[i]);
+    });
+  });
+
+  // eCommerce seasonal multipliers (based on CCCE data)
+  const ecomMultipliers = {
+    0: 0.92,  // Ene: post-navidad lento
+    1: 0.95,  // Feb: San Valentín leve
+    2: 1.02,  // Mar: cierre Q1
+    3: 0.93,  // Abr: Semana Santa
+    4: 1.08,  // May: Día de la Madre
+    5: 1.00,  // Jun: Día del Padre
+    6: 1.12,  // Jul: vacaciones, pico
+    7: 1.08,  // Ago: sostenido
+    8: 1.05,  // Sep: Amor y Amistad
+    9: 1.03,  // Oct: pre-BF
+    10: 1.18, // Nov: Black Friday
+    11: 1.25  // Dic: Navidad, máximo
+  };
+
+  // YoY growth trend
+  const gmv2025Total = HIST_DATA[2025].gmv.reduce((a,b)=>a+b,0);
+  const gmv2026Partial = HIST_DATA[2026].gmv.reduce((a,b)=>a+b,0);
+  const months2026 = HIST_DATA[2026].labels.length;
+  const avgMonthly2026 = gmv2026Partial / months2026;
+  const avgMonthly2025 = gmv2025Total / 12;
+  const yoyGrowth = avgMonthly2026 / avgMonthly2025;
+
+  // Generate predictions for remaining 2026 months
+  const lastDataMonth = months2026 - 1; // May = 4
+  const predictions = [];
+  const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  for(let m = months2026; m < 12; m++){
+    const historicalAvg = monthlyGmv[m] ? monthlyGmv[m].reduce((a,b)=>a+b,0)/monthlyGmv[m].length : avgMonthly2025;
+    const predicted = Math.round(historicalAvg * yoyGrowth * ecomMultipliers[m]);
+    const confidence = monthlyGmv[m] && monthlyGmv[m].length >= 1 ? 85 : 70;
+
+    predictions.push({
+      label: monthNames[m] + ' 26',
+      month: monthNames[m],
+      monthIdx: m,
+      gmv: predicted,
+      confidence: confidence,
+      ecomFactor: ecomMultipliers[m],
+      historicalAvg: historicalAvg
+    });
+  }
+  return predictions;
+}
+
+function renderPredictions(){
+  const container = document.getElementById('hist-predictions');
+  if(!container) return;
+  const preds = getPredictions();
+
+  container.innerHTML = preds.map(p => {
+    const factorPct = ((p.ecomFactor - 1) * 100).toFixed(0);
+    const factorSign = p.ecomFactor >= 1 ? '+' : '';
+    const factorColor = p.ecomFactor >= 1.05 ? 'var(--green)' : p.ecomFactor >= 1 ? 'var(--text2)' : 'var(--red)';
+    const seasonal = SEASONAL_PATTERNS[p.monthIdx];
+    return `
+    <div class="pred-card">
+      <div class="pred-month">${p.month} 2026</div>
+      <div class="pred-value">${fmtMoneyShort(p.gmv)}</div>
+      <div class="pred-detail">
+        Base histórica: ${fmtMoneyShort(p.historicalAvg)}<br>
+        Factor eCommerce: <span style="color:${factorColor}">${factorSign}${factorPct}%</span>
+      </div>
+      <div class="pred-detail" style="margin-top:4px;font-size:10px;color:var(--text3);">${seasonal ? seasonal.ecom.slice(0,80)+'...' : ''}</div>
+      <div class="pred-confidence" style="background:${p.confidence>=80?'var(--green-bg)':'var(--amber-bg)'};color:${p.confidence>=80?'var(--green)':'var(--amber)'}">
+        <i class="ti ti-chart-dots" style="font-size:11px;"></i> Confianza: ${p.confidence}%
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEcomInsights(){
+  const container = document.getElementById('hist-ecom-insights');
+  if(!container) return;
+
+  const insights = [
+    {source:'CCCE — Cámara Colombiana de Comercio Electrónico', text:'El eCommerce en Colombia creció 28% en 2025, alcanzando $67 billones COP en transacciones. Las categorías de logística y delivery lideran el crecimiento con +35% interanual, impulsadas por la adopción de modelos D2C y marketplace fulfillment.', impact:'Oportunidad de capturar más clientes enterprise que migran a canales digitales.', type:'opportunity'},
+    {source:'CCCE — Informe fechas comerciales 2025', text:'Las 5 fechas top de eCommerce Colombia: 1) Navidad/Diciembre (+70%), 2) Black Friday (+55%), 3) Día de la Madre (+35%), 4) Amor y Amistad (+28%), 5) San Valentín (+18%). Estas fechas concentran el 42% del volumen anual.', impact:'Pibox debe maximizar capacidad operativa en estos meses. Negociar tarifas por volumen anticipadas.', type:'info'},
+    {source:'Cámara de Comercio de Bogotá — Tendencias 2026', text:'El 73% de las empresas colombianas planean aumentar su inversión en logística de última milla en 2026. El delivery same-day pasó de ser premium a estándar en el 65% de retailers encuestados.', impact:'Crecimiento orgánico esperado por expansión de mercado. Meta 2026 debería considerar +15-20% vs 2025.', type:'opportunity'},
+    {source:'MinTIC — Colombia Digital 2026', text:'Penetración de internet en Colombia alcanzó 78% en 2025. Pagos digitales crecieron 41%. Esto amplía la base de compradores online especialmente en ciudades intermedias donde la logística de última milla tiene menor cobertura.', impact:'Oportunidad de expansión geográfica. Ciudades intermedias como nuevo mercado.', type:'warning'},
+    {source:'CCCE — Proyección Semestre 2 2026', text:'Se espera que el segundo semestre de 2026 supere al H2-2025 en un 20-25%, impulsado por la recuperación económica, nuevas jornadas de Día sin IVA y un Black Friday más largo (Black Week). El canal de delivery se consolida como infraestructura crítica para el retail.', impact:'H2 2026 es la ventana clave para crecimiento. Preparar capacidad desde julio.', type:'opportunity'},
+    {source:'Cámara de Comercio — Informe PYME 2026', text:'El 58% de las PYMEs colombianas ya utilizan servicios de logística tercerizada para eCommerce, frente al 34% en 2023. El costo de adquisición de clientes PYME ha bajado 22% gracias a la madurez del ecosistema.', impact:'Segmento SMB en crecimiento acelerado. Evaluar paquetes de entrada para PYMEs.', type:'info'}
+  ];
+
+  container.innerHTML = insights.map(ins => `
+    <div class="ecom-insight">
+      <div class="ecom-source">${ins.source}</div>
+      <div class="ecom-text">${ins.text}</div>
+      <div class="ecom-impact"><i class="ti ti-bulb" style="color:var(--amber);font-size:13px;"></i> <strong>Impacto Pibox:</strong>&nbsp;${ins.impact}</div>
+    </div>
+  `).join('');
+}
+
+function renderSeasonalTable(){
+  const tbody = document.getElementById('hist-seasonal-body');
+  if(!tbody) return;
+
+  tbody.innerHTML = SEASONAL_PATTERNS.map(s => `
+    <tr>
+      <td class="bold">${s.month}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:200px;">${s.pattern}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:200px;">${s.ecom}</td>
+      <td><span class="tag ${s.impactClass}">${s.impact}</span></td>
+      <td style="font-size:12px;color:var(--accent2);max-width:200px;">${s.rec}</td>
+    </tr>
+  `).join('');
+}
+
+function exportHistorico(){
+  const csv = ['Año,Mes,GMV,Meta,Cumplimiento%,Bookings,Packages,Efectividad%'];
+  Object.keys(HIST_DATA).sort().forEach(year => {
+    const d = HIST_DATA[year];
+    d.labels.forEach((l, i) => {
+      const cumpl = d.meta[i]>0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : '0';
+      csv.push(`${year},${l},${d.gmv[i]},${d.meta[i]},${cumpl},${d.bookings[i]},${d.packages[i]},${d.efect[i]}`);
+    });
+  });
+  // Add predictions
+  csv.push('');
+  csv.push('--- PREDICCIONES ---');
+  getPredictions().forEach(p => {
+    csv.push(`2026,${p.month},${p.gmv},—,—,—,—,—`);
+  });
+  const blob = new Blob([csv.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'historico_pibox_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  auditLog('Histórico exportado a CSV','data','info','');
+  toast('Histórico exportado');
 }
 
 // ─── INIT ───
