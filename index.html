@@ -302,6 +302,30 @@
   .ecom-text { font-size: 13px; color: var(--text); line-height: 1.5; }
   .ecom-impact { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
 
+  /* ─── RECURSOS ─── */
+  .res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .res-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+  .res-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .res-thumb { width: 100%; height: 140px; background: var(--bg3); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+  .res-thumb img, .res-thumb video { width: 100%; height: 100%; object-fit: cover; }
+  .res-thumb-icon { font-size: 40px; color: var(--text3); }
+  .res-thumb-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+  .res-body { padding: 12px 14px; }
+  .res-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .res-meta { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .res-category-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .res-cat-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .res-cat-btn:hover, .res-cat-btn.active { background: var(--accent-bg); color: var(--accent2); border-color: rgba(79,110,247,0.3); }
+  .res-preview-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 250; align-items: center; justify-content: center; flex-direction: column; }
+  .res-preview-overlay.open { display: flex; }
+  .res-preview-content { max-width: 90vw; max-height: 80vh; border-radius: var(--radius); overflow: hidden; }
+  .res-preview-content img, .res-preview-content video { max-width: 90vw; max-height: 75vh; border-radius: var(--radius); }
+  .res-preview-info { text-align: center; margin-top: 14px; }
+  .res-preview-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .res-preview-meta { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .res-empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .res-empty .ti { font-size: 48px; display: block; margin-bottom: 12px; }
+
   /* ─── SCROLLBAR ─── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -348,6 +372,9 @@
     </a>
     <a class="nav-item" href="#/clientes">
       <i class="ti ti-building-store"></i> Clientes
+    </a>
+    <a class="nav-item" href="#/recursos">
+      <i class="ti ti-school"></i> Recursos
     </a>
     <div class="nav-label">Operaciones</div>
     <a class="nav-item" href="#/comportamiento-operativo">
@@ -1080,6 +1107,7 @@
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Histórico Pibox</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Recursos</span>
         </div>
       </div>
 
@@ -1107,6 +1135,7 @@
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Gestionar Usuarios</span>
           <span class="perm-tag denied"><i class="ti ti-x" style="font-size:12px"></i> Histórico Pibox</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Recursos</span>
         </div>
       </div>
 
@@ -1134,6 +1163,7 @@
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Auditoría</span>
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Gestionar Usuarios</span>
           <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Histórico Pibox</span>
+          <span class="perm-tag allowed"><i class="ti ti-check" style="font-size:12px"></i> Recursos</span>
         </div>
       </div>
     </div>
@@ -1312,6 +1342,60 @@
     </div>
   </div>
 
+  <!-- ────────────────── RECURSOS VIEW ────────────────── -->
+  <div class="view" id="view-recursos">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Recursos — Entrenamiento Comercial</div>
+        <div class="section-sub">Videos, documentos, imágenes y material de capacitación</div>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('recurso-modal')"><i class="ti ti-upload"></i> Subir recurso</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="kpi-grid" style="margin-bottom:16px;">
+      <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-files"></i> Total recursos</div><div class="kpi-value" id="res-total">0</div><div class="kpi-sub">Archivos almacenados</div></div>
+      <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-video"></i> Videos</div><div class="kpi-value" id="res-videos">0</div><div class="kpi-sub">Capacitaciones</div></div>
+      <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-file-text"></i> Documentos</div><div class="kpi-value" id="res-docs">0</div><div class="kpi-sub">PDF, XLSX, DOCX, PPT</div></div>
+      <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-photo"></i> Imágenes</div><div class="kpi-value" id="res-imgs">0</div><div class="kpi-sub">PNG, JPG, GIF, WebP</div></div>
+    </div>
+
+    <!-- Search + filter -->
+    <div class="filter-bar" style="margin-bottom:16px;">
+      <div class="filter-group" style="flex:1;">
+        <span class="filter-label">Buscar</span>
+        <input type="text" class="filter-select" id="res-search" placeholder="Nombre del recurso..." style="width:220px;" oninput="renderRecursos()">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Categoría</span>
+        <select class="filter-select" id="res-filter-cat" onchange="renderRecursos()">
+          <option value="all">Todas</option>
+          <option value="onboarding">Onboarding</option>
+          <option value="producto">Producto</option>
+          <option value="ventas">Ventas</option>
+          <option value="procesos">Procesos</option>
+          <option value="marca">Marca</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Tipo</span>
+        <select class="filter-select" id="res-filter-type" onchange="renderRecursos()">
+          <option value="all">Todos</option>
+          <option value="video">Video</option>
+          <option value="document">Documento</option>
+          <option value="image">Imagen</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Category tags -->
+    <div class="res-category-bar" id="res-cat-bar"></div>
+
+    <!-- Resources grid -->
+    <div class="res-grid" id="res-grid"></div>
+  </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app -->
@@ -1421,6 +1505,61 @@
     <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="login-pass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px;margin-top:8px;" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
     <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text3);">Contacta al administrador si no tienes acceso</div>
+  </div>
+</div>
+
+<!-- Upload Resource Modal -->
+<div class="modal-overlay" id="recurso-modal" onclick="closeModal('recurso-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Subir Recurso</div><span class="modal-close" onclick="closeModal('recurso-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="form-group"><label class="form-label">Nombre del recurso</label><input class="form-input" id="res-name" placeholder="ej: Guía de ventas Q2 2026"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <select class="form-select" id="res-category">
+          <option value="onboarding">Onboarding</option>
+          <option value="producto">Producto</option>
+          <option value="ventas">Ventas</option>
+          <option value="procesos">Procesos</option>
+          <option value="marca">Marca</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción (opcional)</label>
+        <input class="form-input" id="res-desc" placeholder="Breve descripción del contenido">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Archivo</label>
+      <div class="upload-zone" style="padding:24px;" onclick="document.getElementById('res-file-input').click()">
+        <div class="upload-icon" style="font-size:28px;margin-bottom:8px;"><i class="ti ti-file-upload"></i></div>
+        <div class="upload-text" style="font-size:13px;">Clic para seleccionar archivo</div>
+        <div class="upload-sub" style="font-size:11px;">Videos, imágenes, PDF, Excel, Word, PowerPoint y más</div>
+      </div>
+      <input type="file" id="res-file-input" style="display:none" accept="video/*,image/*,.pdf,.xlsx,.xls,.csv,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar" onchange="onResFileSelected(event)">
+      <div id="res-file-preview" style="margin-top:8px;"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('recurso-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRecurso()"><i class="ti ti-upload"></i> Subir recurso</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resource Preview Overlay -->
+<div class="res-preview-overlay" id="res-preview" onclick="closeResPreview()">
+  <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:center;">
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <button class="btn btn-ghost" onclick="downloadResource()" style="font-size:12px;"><i class="ti ti-download"></i> Descargar</button>
+      <button class="btn btn-ghost" onclick="deleteResource()" style="font-size:12px;color:var(--red);"><i class="ti ti-trash"></i> Eliminar</button>
+      <button class="btn btn-ghost" onclick="closeResPreview()" style="font-size:12px;"><i class="ti ti-x"></i> Cerrar</button>
+    </div>
+    <div class="res-preview-content" id="res-preview-content"></div>
+    <div class="res-preview-info">
+      <div class="res-preview-title" id="res-preview-title">—</div>
+      <div class="res-preview-meta" id="res-preview-meta">—</div>
+    </div>
   </div>
 </div>
 
@@ -1572,7 +1711,8 @@ const ROUTES = {
   '/auditoria':           {view:'auditoria',  title:'Auditoría'},
   '/usuarios-roles':      {view:'usuarios',   title:'Usuarios y Roles'},
   '/mi-perfil':           {view:'perfil',     title:'Mi Perfil'},
-  '/historico':           {view:'historico',  title:'Histórico Pibox'}
+  '/historico':           {view:'historico',  title:'Histórico Pibox'},
+  '/recursos':            {view:'recursos',   title:'Recursos'}
 };
 
 function navigateTo(hash){
@@ -1609,6 +1749,7 @@ function navigateTo(hash){
   if(id==='perfil') setTimeout(loadProfileView,100);
   if(id==='auditoria') setTimeout(renderAuditLog,100);
   if(id==='historico') setTimeout(renderHistorico,100);
+  if(id==='recursos') setTimeout(renderRecursos,100);
 
   // Log navigation (skip audit view to avoid recursion)
   if(currentUser && id!=='auditoria'){
@@ -1623,7 +1764,7 @@ function onHashChange(){
 
 // Keep legacy showView working for any inline calls
 function showView(id){
-  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico'};
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico',recursos:'/recursos'};
   location.hash = viewToRoute[id] || '/resumen-ejecutivo';
 }
 
@@ -2680,19 +2821,19 @@ function checkMobile(){
 // ─── USERS & ROLES (RBAC) ───
 const ROLE_PERMISSIONS = {
   visualizador: {
-    views: ['overview','metas','kam','clientes','perfil'],
+    views: ['overview','metas','kam','clientes','perfil','recursos'],
     canExport: false,
     canManageUsers: false,
     label: 'Visualizador'
   },
   comercial: {
-    views: ['overview','metas','kam','clientes','perfil'],
+    views: ['overview','metas','kam','clientes','perfil','recursos'],
     canExport: true,
     canManageUsers: false,
     label: 'Comercial'
   },
   administrativo: {
-    views: ['overview','metas','kam','clientes','operativo','crm','upload','metricas','auditoria','usuarios','perfil','historico'],
+    views: ['overview','metas','kam','clientes','operativo','crm','upload','metricas','auditoria','usuarios','perfil','historico','recursos'],
     canExport: true,
     canManageUsers: true,
     label: 'Administrativo'
@@ -2770,7 +2911,7 @@ function applyRoleRestrictions(){
   if(roleBadge) roleBadge.innerHTML = `<i class="ti ti-shield-check" style="font-size:11px;"></i> ${perms.label}`;
 
   // Show/hide nav items based on role
-  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico'};
+  const viewToRoute = {overview:'/resumen-ejecutivo',metas:'/metas-comerciales',kam:'/desempeno-kam',clientes:'/clientes',operativo:'/comportamiento-operativo',crm:'/pipeline-crm',upload:'/cargar-datos',metricas:'/configurar-metricas',auditoria:'/auditoria',usuarios:'/usuarios-roles',perfil:'/mi-perfil',historico:'/historico',recursos:'/recursos'};
   document.querySelectorAll('.nav-item').forEach(item => {
     const href = item.getAttribute('href');
     if(!href) return;
@@ -3331,6 +3472,263 @@ function exportHistorico(){
   URL.revokeObjectURL(a.href);
   auditLog('Histórico exportado a CSV','data','info','');
   toast('Histórico exportado');
+}
+
+// ─── RECURSOS ───
+let recursosDB = JSON.parse(localStorage.getItem('pibox_recursos') || '[]');
+let resSelectedFile = null;
+let resPreviewId = null;
+
+const RES_TYPE_MAP = {
+  'video/mp4':'video','video/webm':'video','video/ogg':'video','video/quicktime':'video','video/x-msvideo':'video',
+  'image/png':'image','image/jpeg':'image','image/gif':'image','image/webp':'image','image/svg+xml':'image',
+  'application/pdf':'document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'document',
+  'application/vnd.ms-excel':'document','text/csv':'document',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'document','application/msword':'document',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation':'document','application/vnd.ms-powerpoint':'document',
+  'text/plain':'document','application/zip':'document','application/x-rar-compressed':'document'
+};
+
+const RES_ICONS = {
+  video:'ti-video', image:'ti-photo',
+  pdf:'ti-file-type-pdf', xlsx:'ti-file-type-xls', xls:'ti-file-type-xls', csv:'ti-file-type-csv',
+  doc:'ti-file-type-doc', docx:'ti-file-type-doc', ppt:'ti-file-type-ppt', pptx:'ti-file-type-ppt',
+  txt:'ti-file-text', zip:'ti-file-zip', rar:'ti-file-zip', default:'ti-file'
+};
+
+const RES_CAT_LABELS = {onboarding:'Onboarding',producto:'Producto',ventas:'Ventas',procesos:'Procesos',marca:'Marca',otro:'Otro'};
+const RES_CAT_COLORS = {onboarding:'tag-green',producto:'tag-blue',ventas:'tag-amber',procesos:'tag-teal',marca:'tag-red',otro:'tag-blue'};
+
+function saveRecursosDB(){ localStorage.setItem('pibox_recursos', JSON.stringify(recursosDB)); }
+
+function onResFileSelected(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resSelectedFile = file;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icon = RES_ICONS[ext] || RES_ICONS.default;
+  document.getElementById('res-file-preview').innerHTML = `
+    <div class="upload-item">
+      <i class="ti ${icon}" style="font-size:18px;color:var(--accent2)"></i>
+      <span class="upload-item-name">${file.name}</span>
+      <span class="upload-item-size">${formatFileSize(file.size)}</span>
+      <span class="upload-status tag tag-green">Listo</span>
+    </div>`;
+  if(!document.getElementById('res-name').value){
+    document.getElementById('res-name').value = file.name.replace(/\.[^.]+$/,'').replace(/[_-]/g,' ');
+  }
+}
+
+function formatFileSize(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function saveRecurso(){
+  const name = document.getElementById('res-name').value.trim();
+  const category = document.getElementById('res-category').value;
+  const desc = document.getElementById('res-desc').value.trim();
+
+  if(!name){toast('Ingresa un nombre para el recurso');return;}
+  if(!resSelectedFile){toast('Selecciona un archivo');return;}
+
+  const file = resSelectedFile;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const fileType = RES_TYPE_MAP[file.type] || 'document';
+
+  // Read file as base64 for storage (limit ~10MB for localStorage)
+  if(file.size > 10*1024*1024){
+    // For large files, store metadata only with object URL
+    const entry = {
+      id: Date.now(),
+      name: name,
+      desc: desc,
+      category: category,
+      fileType: fileType,
+      ext: ext,
+      fileName: file.name,
+      size: file.size,
+      date: new Date().toISOString().slice(0,10),
+      author: currentUser ? currentUser.name : 'Anónimo',
+      dataUrl: null,
+      isLarge: true
+    };
+    recursosDB.unshift(entry);
+    saveRecursosDB();
+    finishSaveRecurso(entry);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const entry = {
+      id: Date.now(),
+      name: name,
+      desc: desc,
+      category: category,
+      fileType: fileType,
+      ext: ext,
+      fileName: file.name,
+      size: file.size,
+      date: new Date().toISOString().slice(0,10),
+      author: currentUser ? currentUser.name : 'Anónimo',
+      dataUrl: ev.target.result,
+      isLarge: false
+    };
+    recursosDB.unshift(entry);
+    try {
+      saveRecursosDB();
+    } catch(e){
+      // localStorage full — save without dataUrl
+      entry.dataUrl = null;
+      entry.isLarge = true;
+      recursosDB[0] = entry;
+      saveRecursosDB();
+      toast('Archivo muy grande para almacenar — se guardó solo la referencia');
+    }
+    finishSaveRecurso(entry);
+  };
+  reader.readAsDataURL(file);
+}
+
+function finishSaveRecurso(entry){
+  closeModal('recurso-modal');
+  document.getElementById('res-name').value = '';
+  document.getElementById('res-desc').value = '';
+  document.getElementById('res-file-preview').innerHTML = '';
+  resSelectedFile = null;
+  renderRecursos();
+  toast('Recurso subido exitosamente');
+  auditLog(`Recurso subido: <strong>${entry.name}</strong> (${entry.ext.toUpperCase()}, ${formatFileSize(entry.size)})`,'data','success','Categoría: '+RES_CAT_LABELS[entry.category]);
+}
+
+function renderRecursos(){
+  const search = (document.getElementById('res-search')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('res-filter-cat')?.value || 'all';
+  const typeFilter = document.getElementById('res-filter-type')?.value || 'all';
+
+  let filtered = recursosDB;
+  if(search) filtered = filtered.filter(r => r.name.toLowerCase().includes(search) || (r.desc||'').toLowerCase().includes(search));
+  if(catFilter !== 'all') filtered = filtered.filter(r => r.category === catFilter);
+  if(typeFilter !== 'all') filtered = filtered.filter(r => r.fileType === typeFilter);
+
+  // KPIs
+  const el = id => document.getElementById(id);
+  if(el('res-total')) el('res-total').textContent = recursosDB.length;
+  if(el('res-videos')) el('res-videos').textContent = recursosDB.filter(r=>r.fileType==='video').length;
+  if(el('res-docs')) el('res-docs').textContent = recursosDB.filter(r=>r.fileType==='document').length;
+  if(el('res-imgs')) el('res-imgs').textContent = recursosDB.filter(r=>r.fileType==='image').length;
+
+  // Category bar
+  const catBar = document.getElementById('res-cat-bar');
+  if(catBar){
+    const cats = {};
+    recursosDB.forEach(r => { cats[r.category] = (cats[r.category]||0)+1; });
+    catBar.innerHTML = Object.entries(cats).map(([c,n]) =>
+      `<span class="res-cat-btn ${catFilter===c?'active':''}" onclick="document.getElementById('res-filter-cat').value='${c}';renderRecursos()">${RES_CAT_LABELS[c]||c} (${n})</span>`
+    ).join('') + (Object.keys(cats).length > 0 ? `<span class="res-cat-btn ${catFilter==='all'?'active':''}" onclick="document.getElementById('res-filter-cat').value='all';renderRecursos()">Todos</span>` : '');
+  }
+
+  // Grid
+  const grid = document.getElementById('res-grid');
+  if(!grid) return;
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="res-empty" style="grid-column:1/-1;"><i class="ti ti-folder-off"></i><div style="font-size:14px;margin-bottom:4px;">No hay recursos${search||catFilter!=='all'||typeFilter!=='all'?' con estos filtros':''}</div><div style="font-size:12px;">Sube videos, documentos o imágenes para el equipo comercial</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => {
+    const icon = RES_ICONS[r.ext] || RES_ICONS.default;
+    const catClass = RES_CAT_COLORS[r.category] || 'tag-blue';
+    let thumb = '';
+    if(r.fileType === 'image' && r.dataUrl){
+      thumb = `<img src="${r.dataUrl}" alt="${r.name}">`;
+    } else if(r.fileType === 'video' && r.dataUrl){
+      thumb = `<video src="${r.dataUrl}" muted></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><i class="ti ti-player-play-filled" style="font-size:32px;color:#fff;opacity:0.8;"></i></div>`;
+    } else {
+      thumb = `<i class="ti ${icon} res-thumb-icon"></i>`;
+    }
+    const typeColors = {video:'background:rgba(240,84,90,0.85);color:#fff',document:'background:rgba(79,110,247,0.85);color:#fff',image:'background:rgba(34,200,122,0.85);color:#fff'};
+    const typeLabels = {video:'Video',document:'Doc',image:'Imagen'};
+
+    return `
+    <div class="res-card" onclick="openResPreview(${r.id})">
+      <div class="res-thumb">
+        ${thumb}
+        <span class="res-thumb-badge" style="${typeColors[r.fileType]||''}">${r.ext.toUpperCase()}</span>
+      </div>
+      <div class="res-body">
+        <div class="res-title">${r.name}</div>
+        <div class="res-meta">
+          <span class="tag ${catClass}" style="font-size:10px;padding:1px 6px;">${RES_CAT_LABELS[r.category]||r.category}</span>
+          <span>${formatFileSize(r.size)}</span>
+          <span>${r.date}</span>
+        </div>
+        ${r.desc ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.desc}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openResPreview(id){
+  const r = recursosDB.find(x => x.id === id);
+  if(!r) return;
+  resPreviewId = id;
+
+  const content = document.getElementById('res-preview-content');
+  const title = document.getElementById('res-preview-title');
+  const meta = document.getElementById('res-preview-meta');
+
+  title.textContent = r.name;
+  meta.textContent = `${r.ext.toUpperCase()} · ${formatFileSize(r.size)} · ${r.date} · Subido por ${r.author}`;
+
+  if(r.fileType === 'image' && r.dataUrl){
+    content.innerHTML = `<img src="${r.dataUrl}" alt="${r.name}">`;
+  } else if(r.fileType === 'video' && r.dataUrl){
+    content.innerHTML = `<video src="${r.dataUrl}" controls autoplay style="max-width:90vw;max-height:75vh;border-radius:var(--radius);"></video>`;
+  } else if(r.ext === 'pdf' && r.dataUrl){
+    content.innerHTML = `<iframe src="${r.dataUrl}" style="width:80vw;height:75vh;border:none;border-radius:var(--radius);background:#fff;"></iframe>`;
+  } else {
+    const icon = RES_ICONS[r.ext] || RES_ICONS.default;
+    content.innerHTML = `<div style="text-align:center;padding:60px;"><i class="ti ${icon}" style="font-size:64px;color:var(--text3);display:block;margin-bottom:16px;"></i><div style="font-size:14px;color:var(--text2);">Vista previa no disponible para este formato</div><div style="font-size:12px;color:var(--text3);margin-top:4px;">${r.isLarge?'Archivo demasiado grande para almacenar en el navegador':'Haz clic en Descargar para ver el archivo'}</div></div>`;
+  }
+
+  document.getElementById('res-preview').classList.add('open');
+}
+
+function closeResPreview(){
+  document.getElementById('res-preview').classList.remove('open');
+  // Stop any playing video
+  const vid = document.querySelector('#res-preview-content video');
+  if(vid) vid.pause();
+  resPreviewId = null;
+}
+
+function downloadResource(){
+  const r = recursosDB.find(x => x.id === resPreviewId);
+  if(!r || !r.dataUrl){toast('Archivo no disponible para descarga');return;}
+  const a = document.createElement('a');
+  a.href = r.dataUrl;
+  a.download = r.fileName || r.name + '.' + r.ext;
+  a.click();
+  auditLog(`Recurso descargado: <strong>${r.name}</strong>`,'data','info','');
+}
+
+function deleteResource(){
+  if(!resPreviewId) return;
+  const r = recursosDB.find(x => x.id === resPreviewId);
+  if(currentUser && currentUser.role !== 'administrativo'){
+    toast('Solo un administrador puede eliminar recursos');
+    return;
+  }
+  recursosDB = recursosDB.filter(x => x.id !== resPreviewId);
+  saveRecursosDB();
+  closeResPreview();
+  renderRecursos();
+  toast('Recurso eliminado');
+  if(r) auditLog(`Recurso eliminado: <strong>${r.name}</strong>`,'data','warning','');
 }
 
 // ─── INIT ───
