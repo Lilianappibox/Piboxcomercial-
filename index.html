@@ -120,9 +120,15 @@
   .kpi-card[draggable="true"]:active { cursor: grabbing; }
   .kpi-card.dragging { opacity: 0.4; transform: scale(0.95); }
   .kpi-card.drag-over { border-color: var(--accent); box-shadow: 0 0 12px rgba(79,110,247,0.3); }
-  .drag-handle { position: absolute; top: 6px; right: 8px; color: var(--text3); font-size: 14px; opacity: 0; transition: opacity 0.15s; cursor: grab; }
+  .drag-handle { position: absolute; top: 6px; right: 8px; color: var(--text3); font-size: 14px; opacity: 0; transition: opacity 0.15s; cursor: grab; z-index: 5; }
   .kpi-card:hover .drag-handle { opacity: 0.6; }
   .kpi-card:hover .drag-handle:hover { opacity: 1; color: var(--accent2); }
+  .view-block { position: relative; transition: transform 0.15s, opacity 0.15s; }
+  .view-block.vb-dragging { opacity: 0.3; transform: scale(0.98); }
+  .view-block.vb-over { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: var(--radius); }
+  .view-block .vb-handle { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 13px; cursor: grab; opacity: 0; transition: opacity 0.15s; z-index: 5; }
+  .view-block:hover .vb-handle { opacity: 0.7; }
+  .view-block .vb-handle:hover { opacity: 1; color: var(--accent2); border-color: var(--accent); }
   .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: var(--radius) var(--radius) 0 0; }
   .kpi-card.blue::before { background: var(--accent); }
   .kpi-card.green::before { background: var(--green); }
@@ -5391,111 +5397,112 @@ function deleteResource(){
   if(r) auditLog(`Recurso eliminado: <strong>${r.name}</strong>`,'data','warning','');
 }
 
-// ─── DRAG & DROP CARDS ───
-function getCardOrderKey(gridId){
+// ─── DRAG & DROP (CARDS + BLOCKS) ───
+function getDragKey(id){
   const uid = currentUser ? currentUser.id : 'anon';
-  return 'pibox_card_order_' + uid + '_' + gridId;
+  return 'pibox_drag_' + uid + '_' + id;
 }
 
-function enableDragDrop(gridEl){
+// Card-level drag within grids
+function enableCardDrag(gridEl){
   if(!gridEl) return;
   const cards = [...gridEl.querySelectorAll('.kpi-card, .meta-card, .chart-card')];
   if(cards.length < 2) return;
-
-  const gridId = gridEl.id || gridEl.closest('[id]')?.id || '';
-
-  cards.forEach((card, idx) => {
-    card.setAttribute('draggable','true');
-    card.dataset.dragIdx = idx;
-    // Add handle icon
-    if(!card.querySelector('.drag-handle')){
-      const handle = document.createElement('span');
-      handle.className = 'drag-handle';
-      handle.innerHTML = '<i class="ti ti-grip-vertical"></i>';
-      card.appendChild(handle);
+  const gid = gridEl.id || gridEl.closest('[id]')?.id || '';
+  cards.forEach((c,i) => {
+    c.setAttribute('draggable','true');
+    c.dataset.dragIdx = i;
+    if(!c.querySelector('.drag-handle')){
+      const h = document.createElement('span');
+      h.className = 'drag-handle';
+      h.innerHTML = '<i class="ti ti-grip-vertical"></i>';
+      c.appendChild(h);
     }
-
-    card.addEventListener('dragstart', e => {
-      card.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', idx);
-      gridEl._dragSrcIdx = idx;
-    });
-    card.addEventListener('dragend', () => {
-      card.classList.remove('dragging');
-      gridEl.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-    });
-    card.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      card.classList.add('drag-over');
-    });
-    card.addEventListener('dragleave', () => {
-      card.classList.remove('drag-over');
-    });
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      const fromIdx = gridEl._dragSrcIdx;
-      const toIdx = parseInt(card.dataset.dragIdx);
-      if(fromIdx === toIdx) return;
-      const items = [...gridEl.children];
-      const draggedEl = items[fromIdx];
-      if(!draggedEl) return;
-      if(fromIdx < toIdx) gridEl.insertBefore(draggedEl, items[toIdx].nextSibling);
-      else gridEl.insertBefore(draggedEl, items[toIdx]);
-      // Re-index
-      [...gridEl.children].forEach((c,i) => c.dataset.dragIdx = i);
-      // Save order
-      saveCardOrder(gridEl, gridId);
-    });
+    c.ondragstart = e => { e.stopPropagation(); c.classList.add('dragging'); gridEl._srcI = i; e.dataTransfer.effectAllowed='move'; };
+    c.ondragend = () => { c.classList.remove('dragging'); gridEl.querySelectorAll('.drag-over').forEach(x=>x.classList.remove('drag-over')); };
+    c.ondragover = e => { e.preventDefault(); e.stopPropagation(); c.classList.add('drag-over'); };
+    c.ondragleave = () => c.classList.remove('drag-over');
+    c.ondrop = e => { e.preventDefault(); e.stopPropagation(); c.classList.remove('drag-over');
+      const fi=gridEl._srcI, ti=parseInt(c.dataset.dragIdx); if(fi===ti)return;
+      const items=[...gridEl.children], d=items[fi]; if(!d)return;
+      fi<ti ? gridEl.insertBefore(d,items[ti].nextSibling) : gridEl.insertBefore(d,items[ti]);
+      [...gridEl.children].forEach((x,j)=>x.dataset.dragIdx=j);
+      saveDragOrder(gridEl.children, gid);
+    };
   });
-
-  // Restore saved order
-  restoreCardOrder(gridEl, gridId);
+  restoreDragOrder(gridEl, gid);
 }
 
-function saveCardOrder(gridEl, gridId){
-  const key = getCardOrderKey(gridId);
-  const order = [...gridEl.children].map(c => c.dataset.cardId || c.querySelector('.kpi-label,.meta-month,.chart-title')?.textContent?.trim() || '');
+// Block-level drag within views
+function enableViewBlockDrag(viewEl){
+  if(!viewEl) return;
+  const blocks = [...viewEl.children].filter(c => !c.classList.contains('section-head') && !c.classList.contains('module-filter'));
+  if(blocks.length < 2) return;
+  const vid = viewEl.id || '';
+  blocks.forEach((b,i) => {
+    b.classList.add('view-block');
+    b.dataset.vbIdx = i;
+    if(!b.querySelector('.vb-handle')){
+      const h = document.createElement('div');
+      h.className = 'vb-handle';
+      h.setAttribute('draggable','true');
+      h.innerHTML = '<i class="ti ti-arrows-move"></i>';
+      h.ondragstart = e => { e.stopPropagation(); b.classList.add('vb-dragging'); viewEl._vbSrc=i; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain','vb'); };
+      b.style.position = 'relative';
+      b.insertBefore(h, b.firstChild);
+    }
+    b.ondragend = () => { b.classList.remove('vb-dragging'); viewEl.querySelectorAll('.vb-over').forEach(x=>x.classList.remove('vb-over')); };
+    b.ondragover = e => {
+      if(!e.dataTransfer.types.includes('text/plain')) return;
+      e.preventDefault(); b.classList.add('vb-over');
+    };
+    b.ondragleave = () => b.classList.remove('vb-over');
+    b.ondrop = e => {
+      e.preventDefault(); b.classList.remove('vb-over');
+      const fi = viewEl._vbSrc, ti = parseInt(b.dataset.vbIdx);
+      if(fi === undefined || fi === ti) return;
+      const allBlocks = [...viewEl.children].filter(c => c.classList.contains('view-block'));
+      const dragged = allBlocks[fi]; if(!dragged) return;
+      const target = allBlocks[ti];
+      if(fi < ti) target.after(dragged); else viewEl.insertBefore(dragged, target);
+      [...viewEl.querySelectorAll('.view-block')].forEach((x,j) => x.dataset.vbIdx = j);
+      saveDragOrder(viewEl.querySelectorAll('.view-block'), vid);
+    };
+  });
+  restoreDragOrder(viewEl, vid, '.view-block');
+}
+
+function getBlockId(el){
+  return el.dataset.blockId || (el.dataset.blockId =
+    el.querySelector('.section-title,.table-header-title,.chart-title,.insight-head-text,.kpi-label')?.textContent?.trim().slice(0,40) ||
+    el.id || el.className.split(' ')[0] || '');
+}
+
+function saveDragOrder(elements, id){
+  const key = getDragKey(id);
+  const order = [...elements].map(c => getBlockId(c));
   localStorage.setItem(key, JSON.stringify(order));
 }
 
-function restoreCardOrder(gridEl, gridId){
-  const key = getCardOrderKey(gridId);
+function restoreDragOrder(container, id, selector){
+  const key = getDragKey(id);
   const saved = JSON.parse(localStorage.getItem(key) || 'null');
   if(!saved || !Array.isArray(saved)) return;
-
-  const children = [...gridEl.children];
-  // Tag each child with identifier
-  children.forEach(c => {
-    if(!c.dataset.cardId){
-      c.dataset.cardId = c.querySelector('.kpi-label,.meta-month,.chart-title')?.textContent?.trim() || '';
-    }
-  });
-
-  // Reorder based on saved
+  const children = selector ? [...container.querySelectorAll(selector)] : [...container.children];
+  children.forEach(c => getBlockId(c));
   const ordered = [];
-  saved.forEach(id => {
-    const found = children.find(c => c.dataset.cardId === id && !ordered.includes(c));
-    if(found) ordered.push(found);
-  });
-  // Append any remaining not in saved
+  saved.forEach(sid => { const f = children.find(c => c.dataset.blockId === sid && !ordered.includes(c)); if(f) ordered.push(f); });
   children.forEach(c => { if(!ordered.includes(c)) ordered.push(c); });
-
-  // Apply order
-  ordered.forEach(c => gridEl.appendChild(c));
-  [...gridEl.children].forEach((c,i) => c.dataset.dragIdx = i);
+  const ref = selector ? children[0]?.parentElement : container;
+  if(ref) ordered.forEach(c => ref.appendChild(c));
 }
 
 function enableAllDragDrop(){
-  // Enable on all kpi-grids and meta-grids
-  document.querySelectorAll('.kpi-grid').forEach(g => enableDragDrop(g));
-  // Also on chart grids
-  document.querySelectorAll('.charts-grid').forEach(g => enableDragDrop(g));
+  document.querySelectorAll('.kpi-grid').forEach(g => enableCardDrag(g));
+  document.querySelectorAll('.charts-grid').forEach(g => enableCardDrag(g));
+  document.querySelectorAll('.view').forEach(v => enableViewBlockDrag(v));
 }
 
-// Re-enable after DOM updates
 const _origApplyFilters = applyFilters;
 applyFilters = function(){
   _origApplyFilters();
