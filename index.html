@@ -2725,6 +2725,18 @@ function toggleETLEntry(id){
   auditLog(`Archivo ${entry.active?'activado':'desactivado'}: <strong>${entry.file}</strong>`,'data',entry.active?'success':'warning','');
 }
 
+function deleteETLEntry(id){
+  const entry = etlHistory.find(h => h.id === id);
+  if(!entry) return;
+  const fileName = entry.file;
+  etlHistory = etlHistory.filter(h => h.id !== id);
+  saveETLHistory();
+  rebuildFromHistory();
+  renderETLHistory();
+  toast(`${fileName} eliminado del historial`);
+  auditLog(`Archivo eliminado: <strong>${fileName}</strong> — datos desasociados del tablero`,'data','error','');
+}
+
 function rebuildFromHistory(){
   // Reset DATA to empty baseline
   resetDataToEmpty();
@@ -3512,7 +3524,10 @@ function renderETLHistory(){
       <td>${homoTag}</td>
       <td>${(h.applied||[]).map(a => `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;margin:1px;">${a}</span>`).join(' ')}</td>
       <td>${statusTag}</td>
-      <td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;${toggleColor}" onclick="toggleETLEntry(${h.id})"><i class="ti ti-${h.active?'player-pause':'player-play'}" style="font-size:12px"></i> ${toggleLabel}</button></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;${toggleColor}" onclick="toggleETLEntry(${h.id})"><i class="ti ti-${h.active?'player-pause':'player-play'}" style="font-size:12px"></i> ${toggleLabel}</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--red);" onclick="deleteETLEntry(${h.id})"><i class="ti ti-trash" style="font-size:12px"></i> Eliminar</button>
+      </td>
     </tr>`;
   }).join('');
 }
