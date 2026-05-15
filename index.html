@@ -371,7 +371,145 @@
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div id="loginScreen" style="display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg);">
+  <div style="background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:48px 40px; width:100%; max-width:380px; text-align:center;">
+    <div style="margin-bottom:24px;">
+      <svg width="56" height="56" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#6C3AE0"/><stop offset="1" stop-color="#4F6EF7"/></linearGradient></defs>
+        <rect width="120" height="120" rx="26" fill="url(#lg)"/>
+        <path d="M35 52L60 40L85 52V82C85 84.2 83.2 86 81 86H39C36.8 86 35 84.2 35 82V52Z" fill="#fff" opacity=".95"/>
+        <path d="M35 52L60 40L85 52L60 62Z" fill="#fff"/>
+      </svg>
+    </div>
+    <h2 style="font-size:20px; font-weight:600; color:var(--text); margin-bottom:8px;">Pibox Dashboard</h2>
+    <p style="font-size:13px; color:var(--text2); margin-bottom:28px;">Ingresa tus credenciales para acceder</p>
+    <input id="loginEmail" type="email" placeholder="Correo electrónico"
+      style="width:100%; padding:12px 16px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); color:var(--text); font-size:14px; font-family:inherit; outline:none; margin-bottom:10px;"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"
+    />
+    <input id="loginInput" type="password" placeholder="Contraseña"
+      style="width:100%; padding:12px 16px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); color:var(--text); font-size:14px; font-family:inherit; outline:none; margin-bottom:12px;"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"
+    />
+    <p id="loginError" style="color:var(--red); font-size:12px; margin-bottom:12px; display:none;">Correo o contraseña incorrectos</p>
+    <button id="loginBtn" onclick="checkLogin()"
+      style="width:100%; padding:12px; border:none; border-radius:8px; background:linear-gradient(135deg,#6C3AE0,#4F6EF7); color:#fff; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer;">
+      Ingresar
+    </button>
+    <div style="margin-top:16px;">
+      <a href="#" onclick="showRecovery(event)" style="font-size:12px; color:var(--accent2); text-decoration:none;">Olvidé mi contraseña</a>
+    </div>
+
+    <!-- Recovery panel -->
+    <div id="recoveryPanel" style="display:none; margin-top:20px; text-align:left; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:20px;">
+      <p style="font-size:13px; color:var(--text); font-weight:600; margin-bottom:12px;">Recuperar contraseña</p>
+      <p style="font-size:12px; color:var(--text2); margin-bottom:14px;">Ingresa tu correo registrado y te enviaremos la clave de acceso.</p>
+      <input id="recoveryEmail" type="email" placeholder="correo@ejemplo.com"
+        style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border2); background:var(--bg); color:var(--text); font-size:13px; font-family:inherit; outline:none; margin-bottom:10px;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'"
+      />
+      <p id="recoveryError" style="color:var(--red); font-size:11px; margin-bottom:8px; display:none;"></p>
+      <p id="recoverySuccess" style="color:var(--green); font-size:11px; margin-bottom:8px; display:none;"></p>
+      <div style="display:flex; gap:8px;">
+        <button onclick="sendRecovery()"
+          style="flex:1; padding:10px; border:none; border-radius:8px; background:linear-gradient(135deg,#6C3AE0,#4F6EF7); color:#fff; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer;">
+          Enviar clave
+        </button>
+        <button onclick="hideRecovery()"
+          style="padding:10px 16px; border:1px solid var(--border2); border-radius:8px; background:transparent; color:var(--text2); font-size:13px; font-family:inherit; cursor:pointer;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+var USERS = [
+  {email:'lpena@pibox.app', password:'Liliana1981', name:'Liliana Peña'},
+  {email:'miguelacuna@picap.co', password:'pibox2026', name:'Miguel Acuña'}
+];
+
+function checkLogin() {
+  var emailInput = document.getElementById('loginEmail');
+  var passInput = document.getElementById('loginInput');
+  var email = emailInput.value.trim().toLowerCase();
+  var pass = passInput.value;
+  var user = USERS.find(function(u){ return u.email === email && u.password === pass; });
+  if (user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appMain').style.display = 'flex';
+    sessionStorage.setItem('pibox_auth', '1');
+    sessionStorage.setItem('pibox_user', user.name);
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    passInput.value = '';
+    passInput.focus();
+  }
+}
+
+function showRecovery(e) {
+  e.preventDefault();
+  document.getElementById('recoveryPanel').style.display = 'block';
+  document.getElementById('recoveryError').style.display = 'none';
+  document.getElementById('recoverySuccess').style.display = 'none';
+  document.getElementById('recoveryEmail').value = '';
+  document.getElementById('recoveryEmail').focus();
+}
+
+function hideRecovery() {
+  document.getElementById('recoveryPanel').style.display = 'none';
+}
+
+function sendRecovery() {
+  var email = document.getElementById('recoveryEmail').value.trim().toLowerCase();
+  var errEl = document.getElementById('recoveryError');
+  var okEl = document.getElementById('recoverySuccess');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent = 'Ingresa un correo electrónico.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'El formato del correo no es válido.';
+    errEl.style.display = 'block';
+    return;
+  }
+  var user = USERS.find(function(u){ return u.email === email; });
+  if (!user) {
+    errEl.textContent = 'Este correo no está registrado.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Send email via mailto (opens email client with the password)
+  var subject = encodeURIComponent('Pibox Dashboard — Recuperación de contraseña');
+  var body = encodeURIComponent('Hola ' + user.name + ',\n\nTu contraseña del Pibox Dashboard es:\n\n' + user.password + '\n\nIngresa a: http://localhost:8080\n\n— Pibox Dashboard');
+  window.open('mailto:' + email + '?subject=' + subject + '&body=' + body, '_blank');
+
+  okEl.textContent = 'Se abrió tu cliente de correo con la contraseña. Revisa tu bandeja.';
+  okEl.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var emailField = document.getElementById('loginEmail');
+  var passField = document.getElementById('loginInput');
+  if (emailField) emailField.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); passField.focus(); } });
+  if (passField) passField.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkLogin(); });
+  var recInput = document.getElementById('recoveryEmail');
+  if (recInput) recInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') sendRecovery(); });
+  if (sessionStorage.getItem('pibox_auth') === '1') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appMain').style.display = 'flex';
+  }
+});
+</script>
+
+<div class="app" id="appMain" style="display:none;">
 
 <!-- ─── SIDEBAR ─── -->
 <aside class="sidebar" id="sidebar">
@@ -872,6 +1010,88 @@
       </div>
       <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFiles(event)">
       <div class="upload-list" id="upload-list"></div>
+    </div>
+
+    <!-- Guía de carga de datos -->
+    <div class="chart-card" style="margin-bottom:16px; border-left:3px solid var(--accent);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <i class="ti ti-info-circle" style="font-size:22px;color:var(--accent);"></i>
+        <div class="chart-title" style="margin:0;">Guía: Cómo subir archivos correctamente</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+        <!-- Estructura del archivo -->
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:10px;"><i class="ti ti-file-spreadsheet" style="margin-right:4px;"></i> Estructura del archivo</div>
+          <ul style="font-size:12px;color:var(--text2);line-height:1.8;list-style:none;padding:0;">
+            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">1.</span> La <strong style="color:var(--text);">primera fila</strong> debe contener los encabezados (nombres de columnas).</li>
+            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">2.</span> A partir de la <strong style="color:var(--text);">fila 2</strong> deben ir los datos.</li>
+            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">3.</span> No dejes filas en blanco entre los datos.</li>
+            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">4.</span> Formatos: <span class="tag tag-green" style="font-size:10px;">CSV</span> <span class="tag tag-blue" style="font-size:10px;">XLSX</span> <span class="tag tag-amber" style="font-size:10px;">XLS</span> — máx. 50MB.</li>
+          </ul>
+        </div>
+
+        <!-- Columnas reconocidas -->
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:10px;"><i class="ti ti-columns-3" style="margin-right:4px;"></i> Nombres de columna recomendados</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.7;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">
+              <span><strong style="color:var(--text);">Mes:</strong> mes, periodo, fecha</span>
+              <span><strong style="color:var(--text);">GMV:</strong> gmv, valor, ventas</span>
+              <span><strong style="color:var(--text);">Bookings:</strong> bookings, reservas</span>
+              <span><strong style="color:var(--text);">Packages:</strong> packages, envios</span>
+              <span><strong style="color:var(--text);">KAM:</strong> kam, ejecutivo, asesor</span>
+              <span><strong style="color:var(--text);">Cliente:</strong> cliente, empresa</span>
+              <span><strong style="color:var(--text);">Meta:</strong> meta, objetivo</span>
+              <span><strong style="color:var(--text);">Real:</strong> real, cumplido</span>
+              <span><strong style="color:var(--text);">Efectividad:</strong> efectividad, tasa</span>
+              <span><strong style="color:var(--text);">Ciudad:</strong> ciudad, ubicacion</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formatos de fecha -->
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:10px;"><i class="ti ti-calendar" style="margin-right:4px;"></i> Formatos de fecha aceptados (columna Mes)</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.8;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Ene25</span> Abreviado + año corto</span>
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Enero 2025</span> Nombre completo + año</span>
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">2025-03</span> Año-mes ISO</span>
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">03/2025</span> Mes/Año</span>
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">2025-03-15</span> Fecha completa ISO</span>
+              <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">15/03/2025</span> DD/MM/YYYY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
+          <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:10px;"><i class="ti ti-bulb" style="margin-right:4px;"></i> Tips para mejores resultados</div>
+          <ul style="font-size:12px;color:var(--text2);line-height:1.8;list-style:none;padding:0;">
+            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Incluye siempre la columna <strong style="color:var(--text);">Mes/Periodo</strong> — es la clave para alimentar gráficos y tablas.</li>
+            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Usa <strong style="color:var(--text);">ID Compañía</strong> para homologar clientes entre distintos archivos.</li>
+            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Los valores numéricos (GMV, Bookings) no deben tener símbolos de moneda — solo números.</li>
+            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Revisa el <strong style="color:var(--text);">mapeo de columnas</strong> después de cargar — el sistema auto-detecta, pero verifica que sea correcto.</li>
+            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Puedes cargar <strong style="color:var(--text);">múltiples archivos</strong> — se combinan automáticamente por mes y cliente.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Módulos que alimenta cada columna -->
+      <div style="margin-top:14px;background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:10px;"><i class="ti ti-hierarchy" style="margin-right:4px;"></i> ¿Qué columnas alimentan cada módulo?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:11px;color:var(--text2);">
+          <div><strong style="color:var(--text);font-size:12px;">Resumen Ejecutivo</strong><br>Mes, GMV, KAM, Cliente, Ciudad, Bookings, Packages, Efectividad, Clientes Nuevos, Clientes Perdidos</div>
+          <div><strong style="color:var(--text);font-size:12px;">Metas Comerciales</strong><br>Mes, Meta, Real, KAM, Utilidad Bruta</div>
+          <div><strong style="color:var(--text);font-size:12px;">Desempeño KAM</strong><br>Mes, KAM, GMV, Meta, Real, Cliente, Bookings, Clientes Nuevos, Clientes Perdidos</div>
+          <div><strong style="color:var(--text);font-size:12px;">Clientes</strong><br>Cliente, ID Compañía, GMV, Completados, Cancelados, Clientes Nuevos</div>
+          <div><strong style="color:var(--text);font-size:12px;">Comportamiento Operativo</strong><br>Mes, Bookings, Packages, Completados, Cancelados, Efectividad</div>
+          <div><strong style="color:var(--text);font-size:12px;">Pipeline CRM</strong><br>Record ID, Cliente, KAM, GMV, Mes</div>
+        </div>
+      </div>
     </div>
 
     <!-- Preview Panel (hidden until file loaded) -->
@@ -2078,29 +2298,62 @@ function refreshInsights(){
 // Maps labels like "Ene25","Feb26","Ene","Febrero" to {year, month} for filtering
 const MONTH_MAP = {ene:1,feb:2,mar:3,abr:4,may:5,jun:6,jul:7,ago:8,sep:9,oct:10,nov:11,dic:12,
   enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12,
-  jan:1,feb_en:2,mar_en:3,apr:4,may_en:5,jun_en:6,jul_en:7,aug:8,sep_en:9,oct_en:10,nov_en:11,dec:12};
+  jan:1,january:1,february:2,march:3,apr:4,april:4,june:6,july:7,aug:8,august:8,september:9,oct:10,october:10,november:11,dec:12,december:12};
+const MONTH_ABBR = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 function parseLabelDate(label){
   if(!label) return null;
-  const s = String(label).trim().toLowerCase();
-  // "Ene25", "Mar26"
-  const m1 = s.match(/^([a-záéíóú]+)\s*(\d{2,4})$/);
+  const s = String(label).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  // "Ene25", "Mar26", "Ene-25", "Mar 26"
+  const m1 = s.match(/^([a-z]+)[\s\-_]*(\d{2,4})$/);
   if(m1){
     const mon = MONTH_MAP[m1[1]];
     let yr = parseInt(m1[2]);
     if(yr < 100) yr += 2000;
     if(mon) return {year:yr, month:mon};
   }
-  // "Ene", "Febrero" (assume current context year)
+  // "Ene", "Febrero" (assume current year)
   const mon2 = MONTH_MAP[s];
-  if(mon2) return {year:2026, month:mon2};
+  if(mon2) return {year:new Date().getFullYear(), month:mon2};
   // "2025-03", "2026-01"
-  const m3 = s.match(/^(\d{4})-(\d{2})$/);
+  const m3 = s.match(/^(\d{4})[\-\/](\d{1,2})$/);
   if(m3) return {year:parseInt(m3[1]), month:parseInt(m3[2])};
-  // "01/2026"
-  const m4 = s.match(/^(\d{2})\/(\d{4})$/);
+  // "2025-03-15", "2026/01/20" (full date - extract year+month)
+  const m3b = s.match(/^(\d{4})[\-\/](\d{1,2})[\-\/]\d{1,2}$/);
+  if(m3b) return {year:parseInt(m3b[1]), month:parseInt(m3b[2])};
+  // "01/2026", "03/2025"
+  const m4 = s.match(/^(\d{1,2})[\-\/](\d{4})$/);
   if(m4) return {year:parseInt(m4[2]), month:parseInt(m4[1])};
+  // "15/03/2025" DD/MM/YYYY
+  const m5 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m5){ const d=parseInt(m5[1]),m=parseInt(m5[2]),y=parseInt(m5[3]); if(m>=1&&m<=12) return {year:y, month:m}; }
+  // "Marzo 2025", "Enero 2026", "March 2025"
+  const m6 = s.match(/^([a-z]+)\s+(\d{4})$/);
+  if(m6){ const mon6=MONTH_MAP[m6[1]]; if(mon6) return {year:parseInt(m6[2]), month:mon6}; }
+  // "2025 Marzo", "2026 Ene"
+  const m7 = s.match(/^(\d{4})\s+([a-z]+)$/);
+  if(m7){ const mon7=MONTH_MAP[m7[2]]; if(mon7) return {year:parseInt(m7[1]), month:mon7}; }
+  // Excel serial date number (days since 1900-01-01)
+  const num = Number(s);
+  if(!isNaN(num) && num > 30000 && num < 60000){
+    const d = new Date((num - 25569) * 86400000);
+    if(!isNaN(d.getTime())) return {year:d.getFullYear(), month:d.getMonth()+1};
+  }
+  // Date object stringified: "Mon Mar 15 2025..." or ISO "2025-03-15T..."
+  const dParsed = Date.parse(label);
+  if(!isNaN(dParsed)){
+    const dd = new Date(dParsed);
+    if(dd.getFullYear() >= 2020 && dd.getFullYear() <= 2040) return {year:dd.getFullYear(), month:dd.getMonth()+1};
+  }
   return null;
+}
+
+function normalizeMonthLabel(raw){
+  const parsed = parseLabelDate(raw);
+  if(!parsed) return String(raw).trim();
+  const yrShort = String(parsed.year).slice(-2);
+  return MONTH_ABBR[parsed.month] + yrShort;
 }
 
 function filterArray(arr, indices){ return indices.map(i => arr[i]).filter(v => v !== undefined); }
@@ -2748,7 +3001,7 @@ function autoMapColumns(){
   const patterns = {
     id_compania:['id compania','id_compania','company_id','id empresa','company id','nit','id cliente'],
     record_id:  ['record id','record_id','recordid','id registro','lead_id','lead id','id lead','id negocio','deal_id'],
-    mes:        ['mes','periodo','period','month','fecha','date'],
+    mes:        ['mes','periodo','period','month','fecha','date','mes/periodo','mes_periodo','periodo_mes','month_year','año_mes','anio_mes'],
     gmv:        ['gmv','valor','revenue','ingreso','monto','amount','ventas','sales'],
     bookings:   ['booking','bookings','reservas','reserva','ordenes','orders'],
     packages:   ['package','packages','paquetes','paquete','envios','shipments'],
@@ -3147,7 +3400,8 @@ function rebuildFromHistory(){
     const data = entry.data;
     const ids = etlGetStrCol(data, map, 'id_compania');
     const recordIds = etlGetStrCol(data, map, 'record_id');
-    const months = etlGetStrCol(data, map, 'mes');
+    const monthsRaw = etlGetStrCol(data, map, 'mes');
+    const months = monthsRaw ? monthsRaw.map(m => normalizeMonthLabel(m)) : null;
     const gmvs = etlGetNumCol(data, map, 'gmv');
     const bookings = etlGetNumCol(data, map, 'bookings');
     const packages = etlGetNumCol(data, map, 'packages');
@@ -3195,7 +3449,7 @@ function rebuildFromHistory(){
       }
 
       // Monthly aggregation (current month override for same label)
-      if(months && months[i]){
+      if(months && months[i] && months[i].trim() !== ''){
         const mKey = months[i];
         if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, perdidos:0, utilidad:0, leadsMkt:0, leadsPropios:0};
         if(gmvs) monthlyData[mKey].gmv += gmvs[i] || 0;
@@ -3244,8 +3498,12 @@ function rebuildFromHistory(){
     });
   });
 
-  // Apply monthly data to DATA.ops
-  const monthLabels = Object.keys(monthlyData);
+  // Apply monthly data to DATA.ops (sorted chronologically)
+  const monthLabels = Object.keys(monthlyData).sort((a,b) => {
+    const pa = parseLabelDate(a), pb = parseLabelDate(b);
+    if(pa && pb) return (pa.year*100+pa.month) - (pb.year*100+pb.month);
+    return a.localeCompare(b);
+  });
   if(monthLabels.length > 0){
     DATA.ops.labels = monthLabels;
     DATA.ops.gmv = monthLabels.map(m => monthlyData[m].gmv);
@@ -3267,7 +3525,7 @@ function rebuildFromHistory(){
   if(nuevosLabels.length > 0){
     DATA.nuevos.labels = nuevosLabels;
     DATA.nuevos.count = nuevosLabels.map(m => monthlyData[m].nuevos);
-    DATA.nuevos.gmv = nuevosLabels.map(() => 0);
+    DATA.nuevos.gmv = nuevosLabels.map(m => monthlyData[m].gmv || 0);
   }
 
   // Apply perdidos
@@ -3275,7 +3533,7 @@ function rebuildFromHistory(){
   if(perdidosLabels.length > 0){
     DATA.perdidos.labels = perdidosLabels;
     DATA.perdidos.count = perdidosLabels.map(m => monthlyData[m].perdidos);
-    DATA.perdidos.gmv = perdidosLabels.map(() => 0);
+    DATA.perdidos.gmv = perdidosLabels.map(m => monthlyData[m].gmv || 0);
   }
 
   // Apply utilidad
