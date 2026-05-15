@@ -885,33 +885,19 @@
         <div class="chart-sub" style="margin-bottom:12px;">Define el destino, período y tabla para aplicar los datos.</div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
-          <!-- 1. Módulos destino -->
+          <!-- 1. Módulos destino (dinámico) -->
           <div class="form-group">
             <label class="form-label">Módulos destino</label>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;max-height:140px;overflow-y:auto;" id="etl-modules-list">
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="all" checked onchange="etlToggleAllModules(this)" style="accent-color:var(--accent);"> <strong>Todos los módulos</strong></label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="resumen" checked class="etl-mod-cb"> Resumen Ejecutivo</label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="metas" checked class="etl-mod-cb"> Metas Comerciales</label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="kam" checked class="etl-mod-cb"> Desempeño KAM</label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="clientes" checked class="etl-mod-cb"> Clientes</label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="operativo" checked class="etl-mod-cb"> Comportamiento Operativo</label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;"><input type="checkbox" value="historico" checked class="etl-mod-cb"> Histórico Pibox</label>
-            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;max-height:160px;overflow-y:auto;" id="etl-modules-list"></div>
           </div>
 
-          <!-- 2. Período -->
+          <!-- 2. Período (dinámico) -->
           <div class="form-group">
             <label class="form-label">Período de los datos</label>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div>
                 <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px;">Año</label>
-                <select class="form-select" id="etl-year" style="width:100%;">
-                  <option value="auto">Auto-detectar del archivo</option>
-                  <option value="2024">2024</option>
-                  <option value="2025">2025</option>
-                  <option value="2026" selected>2026</option>
-                  <option value="2027">2027</option>
-                </select>
+                <select class="form-select" id="etl-year" style="width:100%;"></select>
               </div>
               <div>
                 <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px;">Mes (si aplica a un solo mes)</label>
@@ -926,24 +912,15 @@
             </div>
           </div>
 
-          <!-- 3. Tabla destino -->
+          <!-- 3. Tabla destino (dinámico) -->
           <div class="form-group">
             <label class="form-label">Tabla / Dataset destino</label>
-            <select class="form-select" id="etl-target-table" style="width:100%;margin-bottom:8px;">
-              <option value="auto">Auto-detectar</option>
-              <option value="gmv_mensual">GMV Mensual</option>
-              <option value="metas">Metas Comerciales</option>
-              <option value="clientes">Clientes</option>
-              <option value="kam">Desempeño KAM</option>
-              <option value="operativo">Comportamiento Operativo</option>
-              <option value="leads">Leads / CRM</option>
-              <option value="utilidad">Utilidad Bruta</option>
-            </select>
+            <select class="form-select" id="etl-target-table" style="width:100%;margin-bottom:8px;"></select>
             <div id="etl-table-suggestion" style="font-size:11px;color:var(--teal);display:none;">
               <i class="ti ti-bulb" style="font-size:12px;margin-right:2px;"></i> <span id="etl-suggestion-text"></span>
             </div>
             <div style="margin-top:8px;font-size:11px;color:var(--text3);">
-              <i class="ti ti-info-circle" style="font-size:12px;margin-right:2px;"></i> La tabla se sugiere según el nombre del archivo
+              <i class="ti ti-info-circle" style="font-size:12px;margin-right:2px;"></i> Tablas filtradas por módulos seleccionados
             </div>
           </div>
         </div>
@@ -2487,8 +2464,92 @@ const ETL_FIELDS = [
   {key:'leads_propios',label:'Leads Propios',       desc:'Leads generados por el equipo comercial'}
 ];
 
+// ─── DYNAMIC ETL CONFIG ───
+const ETL_MODULES = [
+  {value:'resumen', label:'Resumen Ejecutivo', tables:['gmv_mensual','clientes','utilidad','ciudad']},
+  {value:'metas', label:'Metas Comerciales', tables:['metas','utilidad']},
+  {value:'kam', label:'Desempeño KAM', tables:['kam','clientes']},
+  {value:'clientes', label:'Clientes', tables:['clientes']},
+  {value:'operativo', label:'Comportamiento Operativo', tables:['operativo']},
+  {value:'crm', label:'Pipeline CRM', tables:['leads']},
+  {value:'historico', label:'Histórico Pibox', tables:['gmv_mensual','metas','utilidad']},
+  {value:'recursos', label:'Recursos', tables:[]}
+];
+
+const ETL_TABLES = [
+  {value:'auto', label:'Auto-detectar', modules:[]},
+  {value:'gmv_mensual', label:'GMV Mensual', modules:['resumen','historico']},
+  {value:'metas', label:'Metas Comerciales', modules:['metas','historico']},
+  {value:'clientes', label:'Clientes', modules:['resumen','kam','clientes']},
+  {value:'kam', label:'Desempeño KAM', modules:['kam']},
+  {value:'operativo', label:'Comportamiento Operativo', modules:['operativo']},
+  {value:'leads', label:'Leads / CRM', modules:['crm']},
+  {value:'utilidad', label:'Utilidad Bruta', modules:['resumen','metas','historico']},
+  {value:'ciudad', label:'GMV por Ciudad', modules:['resumen']}
+];
+
+function renderETLModules(){
+  const container = document.getElementById('etl-modules-list');
+  if(!container) return;
+  const cbStyle = 'display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0;';
+  let html = `<label style="${cbStyle}"><input type="checkbox" value="all" checked onchange="etlToggleAllModules(this)" style="accent-color:var(--accent);"> <strong>Todos los módulos</strong></label>`;
+  ETL_MODULES.forEach(m => {
+    html += `<label style="${cbStyle}"><input type="checkbox" value="${m.value}" checked class="etl-mod-cb" onchange="onETLModuleChange()"> ${m.label}</label>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderETLYears(){
+  const sel = document.getElementById('etl-year');
+  if(!sel) return;
+  const currentYear = new Date().getFullYear();
+  let html = '<option value="auto">Auto-detectar del archivo</option>';
+  for(let y = 2021; y <= currentYear; y++){
+    html += `<option value="${y}" ${y===currentYear?'selected':''}>${y}</option>`;
+  }
+  sel.innerHTML = html;
+}
+
+function renderETLTables(){
+  const sel = document.getElementById('etl-target-table');
+  if(!sel) return;
+  const selectedMods = getSelectedModuleValues();
+  const prev = sel.value;
+
+  let html = '<option value="auto">Auto-detectar</option>';
+  ETL_TABLES.forEach(t => {
+    if(t.value === 'auto') return;
+    const visible = selectedMods === 'all' || t.modules.some(m => selectedMods.includes(m));
+    if(visible) html += `<option value="${t.value}">${t.label}</option>`;
+  });
+  sel.innerHTML = html;
+
+  // Try to restore previous selection
+  if([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+function getSelectedModuleValues(){
+  const allCb = document.querySelector('#etl-modules-list input[value="all"]');
+  if(allCb && allCb.checked) return 'all';
+  return [...document.querySelectorAll('.etl-mod-cb:checked')].map(cb => cb.value);
+}
+
 function etlToggleAllModules(el){
   document.querySelectorAll('.etl-mod-cb').forEach(cb => cb.checked = el.checked);
+  renderETLTables();
+}
+
+function onETLModuleChange(){
+  const cbs = document.querySelectorAll('.etl-mod-cb');
+  const allCb = document.querySelector('#etl-modules-list input[value="all"]');
+  if(allCb) allCb.checked = [...cbs].every(cb => cb.checked);
+  renderETLTables();
+}
+
+function initETLConfig(){
+  renderETLModules();
+  renderETLYears();
+  renderETLTables();
 }
 
 function etlSuggestTable(){
@@ -2522,9 +2583,7 @@ function etlSuggestTable(){
 }
 
 function getSelectedModules(){
-  const allCb = document.querySelector('#etl-modules-list input[value="all"]');
-  if(allCb && allCb.checked) return 'all';
-  return [...document.querySelectorAll('.etl-mod-cb:checked')].map(cb => cb.value);
+  return getSelectedModuleValues();
 }
 
 function getETLPeriod(){
@@ -2617,6 +2676,7 @@ function showETLPreview(){
     document.getElementById('etl-sheet-selector').style.display = 'none';
   }
 
+  initETLConfig();
   etlSuggestTable();
   renderColumnMapping();
   renderPreviewTable();
@@ -2950,7 +3010,19 @@ function editETLEntry(id){
   document.getElementById('etl-sheet-names').textContent = '—';
   document.getElementById('etl-sheet-selector').style.display = 'none';
 
-  // Restore config
+  // Init dynamic config
+  initETLConfig();
+
+  // Restore modules first (affects table options)
+  const modules = entry.modules || 'all';
+  const allModCb = document.querySelector('#etl-modules-list input[value="all"]');
+  if(allModCb) allModCb.checked = modules === 'all';
+  document.querySelectorAll('.etl-mod-cb').forEach(cb => {
+    cb.checked = modules === 'all' || (Array.isArray(modules) && modules.includes(cb.value));
+  });
+  renderETLTables(); // refresh tables based on modules
+
+  // Restore period and table
   const prd = entry.period || {};
   const yearEl = document.getElementById('etl-year');
   if(yearEl) yearEl.value = prd.year || 'auto';
@@ -2958,14 +3030,6 @@ function editETLEntry(id){
   if(monthEl) monthEl.value = prd.month || 'auto';
   const tableEl = document.getElementById('etl-target-table');
   if(tableEl) tableEl.value = entry.targetTable || 'auto';
-
-  // Restore modules
-  const modules = entry.modules || 'all';
-  const allModCb = document.querySelector('#etl-modules-list input[value="all"]');
-  if(allModCb) allModCb.checked = modules === 'all';
-  document.querySelectorAll('.etl-mod-cb').forEach(cb => {
-    cb.checked = modules === 'all' || (Array.isArray(modules) && modules.includes(cb.value));
-  });
 
   // Hide suggestion since we're editing
   const sugEl = document.getElementById('etl-table-suggestion');
