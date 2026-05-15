@@ -2779,6 +2779,7 @@ function cancelETL(){
   etlHeaders = [];
   etlFileName = '';
   etlColumnMap = {};
+  editingETLId = null;
 }
 
 // Helper functions for ETL
@@ -2815,34 +2816,53 @@ function runETL(){
   const tableLabels = {auto:'Auto',gmv_mensual:'GMV Mensual',metas:'Metas',clientes:'Clientes',kam:'KAM',operativo:'Operativo',leads:'Leads',utilidad:'Utilidad'};
   const modLabels = selectedModules === 'all' ? 'Todos' : (Array.isArray(selectedModules) ? selectedModules.join(', ') : 'Todos');
 
-  // Save to history WITH parsed data for activate/deactivate
-  const entry = {
-    id: Date.now(),
-    date: new Date().toISOString().slice(0,10),
-    time: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
-    file: etlFileName,
-    rows: etlParsedData.length,
-    applied: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k),
-    active: true,
-    homoType: homoType,
-    modules: selectedModules,
-    period: period,
-    targetTable: targetTable,
-    targetTableLabel: tableLabels[targetTable] || targetTable,
-    columnMap: {...etlColumnMap},
-    data: etlParsedData.slice(0, 5000)
-  };
-  etlHistory.unshift(entry);
-  if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
-  saveETLHistory();
-
-  // Apply data
-  rebuildFromHistory();
-
-  renderETLHistory();
   const periodLabel = period.year !== 'auto' ? period.year + (period.month !== 'auto' ? '/'+period.month : '') : 'Auto';
-  toast(`Datos aplicados: ${entry.targetTableLabel} · ${periodLabel}`);
-  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Tabla: ${entry.targetTableLabel} · Período: ${periodLabel} · Módulos: ${modLabels}`,'data','success','');
+
+  if(editingETLId){
+    // Update existing entry
+    const existing = etlHistory.find(h => h.id === editingETLId);
+    if(existing){
+      existing.applied = mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k);
+      existing.homoType = homoType;
+      existing.modules = selectedModules;
+      existing.period = period;
+      existing.targetTable = targetTable;
+      existing.targetTableLabel = tableLabels[targetTable] || targetTable;
+      existing.columnMap = {...etlColumnMap};
+      existing.data = etlParsedData.slice(0, 5000);
+      saveETLHistory();
+      rebuildFromHistory();
+      renderETLHistory();
+      toast(`Configuración actualizada: ${existing.file}`);
+      auditLog(`ETL editado: <strong>${existing.file}</strong> — Tabla: ${existing.targetTableLabel} · Período: ${periodLabel}`,'data','success','');
+    }
+    editingETLId = null;
+  } else {
+    // Create new entry
+    const entry = {
+      id: Date.now(),
+      date: new Date().toISOString().slice(0,10),
+      time: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+      file: etlFileName,
+      rows: etlParsedData.length,
+      applied: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k),
+      active: true,
+      homoType: homoType,
+      modules: selectedModules,
+      period: period,
+      targetTable: targetTable,
+      targetTableLabel: tableLabels[targetTable] || targetTable,
+      columnMap: {...etlColumnMap},
+      data: etlParsedData.slice(0, 5000)
+    };
+    etlHistory.unshift(entry);
+    if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
+    saveETLHistory();
+    rebuildFromHistory();
+    renderETLHistory();
+    toast(`Datos aplicados: ${entry.targetTableLabel} · ${periodLabel}`);
+    auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Tabla: ${entry.targetTableLabel} · Período: ${periodLabel} · Módulos: ${modLabels}`,'data','success','');
+  }
 
   // Clean up
   document.getElementById('etl-preview-panel').style.display = 'none';
@@ -2882,6 +2902,82 @@ function deleteETLEntry(id){
   renderETLHistory();
   toast(`${fileName} eliminado del historial`);
   auditLog(`Archivo eliminado: <strong>${fileName}</strong> — datos desasociados del tablero`,'data','error','');
+}
+
+let editingETLId = null;
+
+function editETLEntry(id){
+  const entry = etlHistory.find(h => h.id === id);
+  if(!entry || !entry.data || entry.data.length === 0){
+    toast('No se pueden editar archivos sin datos almacenados');
+    return;
+  }
+
+  editingETLId = id;
+
+  // Restore parsed data and headers from entry
+  etlFileName = entry.file;
+  etlParsedData = entry.data;
+  etlColumnMap = {...(entry.columnMap || {})};
+
+  // Reconstruct headers from first row keys or column indices
+  const maxCols = Math.max(...etlParsedData.map(r => r.length));
+  etlHeaders = [];
+  for(let i = 0; i < maxCols; i++){
+    // Try to find the mapped field name for this column
+    const mappedField = Object.entries(etlColumnMap).find(([k,v]) => v === i);
+    if(mappedField){
+      const field = ETL_FIELDS.find(f => f.key === mappedField[0]);
+      etlHeaders[i] = field ? field.label : 'Col ' + (i+1);
+    } else {
+      // Use first data row as header hint
+      const firstVal = etlParsedData[0] ? String(etlParsedData[0][i] || '') : '';
+      etlHeaders[i] = firstVal && isNaN(Number(firstVal)) ? firstVal : 'Col ' + (i+1);
+    }
+  }
+
+  // Show preview panel
+  const panel = document.getElementById('etl-preview-panel');
+  panel.style.display = 'block';
+
+  // File info KPIs
+  document.getElementById('etl-file-name').textContent = etlFileName + ' (editando)';
+  document.getElementById('etl-file-meta').textContent = 'Edición de configuración';
+  document.getElementById('etl-row-count').textContent = etlParsedData.length.toLocaleString();
+  document.getElementById('etl-col-count').textContent = etlHeaders.length;
+  document.getElementById('etl-col-names').textContent = etlHeaders.slice(0,5).join(', ') + (etlHeaders.length > 5 ? '...' : '');
+  document.getElementById('etl-sheet-count').textContent = '1';
+  document.getElementById('etl-sheet-names').textContent = '—';
+  document.getElementById('etl-sheet-selector').style.display = 'none';
+
+  // Restore config
+  const prd = entry.period || {};
+  const yearEl = document.getElementById('etl-year');
+  if(yearEl) yearEl.value = prd.year || 'auto';
+  const monthEl = document.getElementById('etl-month');
+  if(monthEl) monthEl.value = prd.month || 'auto';
+  const tableEl = document.getElementById('etl-target-table');
+  if(tableEl) tableEl.value = entry.targetTable || 'auto';
+
+  // Restore modules
+  const modules = entry.modules || 'all';
+  const allModCb = document.querySelector('#etl-modules-list input[value="all"]');
+  if(allModCb) allModCb.checked = modules === 'all';
+  document.querySelectorAll('.etl-mod-cb').forEach(cb => {
+    cb.checked = modules === 'all' || (Array.isArray(modules) && modules.includes(cb.value));
+  });
+
+  // Hide suggestion since we're editing
+  const sugEl = document.getElementById('etl-table-suggestion');
+  if(sugEl) sugEl.style.display = 'none';
+
+  renderColumnMapping();
+  renderPreviewTable();
+  runValidation();
+
+  // Scroll to preview
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+  toast(`Editando configuración de "${entry.file}"`);
 }
 
 function rebuildFromHistory(){
@@ -3670,6 +3766,7 @@ function renderETLHistory(){
       <td>${homoTag}</td>
       <td>${statusTag}</td>
       <td style="white-space:nowrap;">
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="editETLEntry(${h.id})"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
         <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;${toggleColor}" onclick="toggleETLEntry(${h.id})"><i class="ti ti-${h.active?'player-pause':'player-play'}" style="font-size:12px"></i> ${toggleLabel}</button>
         <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--red);" onclick="deleteETLEntry(${h.id})"><i class="ti ti-trash" style="font-size:12px"></i> Eliminar</button>
       </td>
