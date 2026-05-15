@@ -669,6 +669,32 @@
         <tbody id="kam-breakdown-body"></tbody>
       </table>
     </div>
+
+    <!-- Utilidad Bruta por Mes -->
+    <div class="table-card" style="margin-top:20px">
+      <div class="table-header">
+        <div class="table-header-title">Utilidad Bruta por Mes</div>
+        <span class="tag tag-blue" style="font-size:11px;" id="utilidad-table-tag">Año en curso</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Mes</th><th>GMV</th><th>Utilidad Bruta</th><th>Margen %</th><th>Crecimiento $</th><th>Crecimiento %</th><th>Tendencia</th></tr></thead>
+          <tbody id="utilidad-month-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Insights Mensuales -->
+    <div class="insight-panel" style="margin-top:20px;">
+      <div class="insight-head">
+        <i class="ti ti-chart-dots-3"></i>
+        <div>
+          <div class="insight-head-text">Insights Mensuales — Análisis de tendencias</div>
+          <div class="insight-head-sub">Clientes, KAMs y comportamiento comercial · Año en curso</div>
+        </div>
+      </div>
+      <div class="insights-grid" id="metas-monthly-insights"></div>
+    </div>
   </div>
 
   <!-- ────────────────── KAM VIEW ────────────────── -->
@@ -2934,6 +2960,158 @@ function renderKamDynamic(){
   ).join('');
 }
 
+function renderUtilidadTable(){
+  const tbody = document.getElementById('utilidad-month-body');
+  if(!tbody) return;
+
+  const year = new Date().getFullYear();
+  const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  // Build monthly lookup
+  const monthGmv = {};
+  const monthUtil = {};
+  DATA.ops.labels.forEach((label, i) => {
+    const p = parseLabelDate(label);
+    if(p && p.year === year) monthGmv[p.month-1] = DATA.ops.gmv[i] || 0;
+  });
+  if(DATA.utilidad && DATA.utilidad.labels){
+    DATA.utilidad.labels.forEach((label, i) => {
+      const p = parseLabelDate(label);
+      if(p && p.year === year) monthUtil[p.month-1] = DATA.utilidad.data[i] || 0;
+    });
+  }
+
+  const rows = [];
+  let prevUtil = null;
+  for(let m = 0; m < 12; m++){
+    const gmv = monthGmv[m];
+    const util = monthUtil[m];
+    const hasData = gmv !== undefined || util !== undefined;
+    const margen = gmv && util ? ((util/gmv)*100).toFixed(1) : null;
+    const crecPesos = prevUtil !== null && util !== undefined ? util - prevUtil : null;
+    const crecPct = prevUtil !== null && prevUtil > 0 && util !== undefined ? (((util - prevUtil)/prevUtil)*100).toFixed(1) : null;
+    const trend = crecPesos !== null ? (crecPesos > 0 ? '📈' : crecPesos < 0 ? '📉' : '➡️') : '—';
+    const crecColor = crecPesos !== null ? (crecPesos >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
+
+    rows.push(`<tr${!hasData?' style="opacity:0.4;"':''}>
+      <td class="bold">${allMonths[m]}</td>
+      <td style="font-family:'DM Mono',monospace;">${gmv !== undefined ? fmtMoneyShort(gmv) : 'NA'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green);">${util !== undefined ? fmtMoneyShort(util) : 'NA'}</td>
+      <td>${margen !== null ? margen+'%' : 'NA'}</td>
+      <td style="font-family:'DM Mono',monospace;color:${crecColor};">${crecPesos !== null ? (crecPesos>=0?'+':'')+fmtMoneyShort(crecPesos) : 'NA'}</td>
+      <td style="color:${crecColor};">${crecPct !== null ? (parseFloat(crecPct)>=0?'+':'')+crecPct+'%' : 'NA'}</td>
+      <td style="font-size:16px;">${trend}</td>
+    </tr>`);
+
+    if(util !== undefined) prevUtil = util;
+  }
+
+  tbody.innerHTML = rows.join('');
+}
+
+function renderMetasMonthlyInsights(){
+  const container = document.getElementById('metas-monthly-insights');
+  if(!container) return;
+
+  const year = new Date().getFullYear();
+  const insights = [];
+
+  // No data check
+  if(DATA.ops.labels.length === 0){
+    container.innerHTML = '<div class="insight-item"><div class="insight-type info">Info</div><div class="insight-text">Carga datos para generar insights mensuales automáticos.</div></div>';
+    return;
+  }
+
+  // Build monthly GMV for current year
+  const monthGmv = {};
+  DATA.ops.labels.forEach((label, i) => {
+    const p = parseLabelDate(label);
+    if(p && p.year === year) monthGmv[p.month-1] = {gmv: DATA.ops.gmv[i]||0, label};
+  });
+  const activeMonths = Object.keys(monthGmv).map(Number).sort((a,b)=>a-b);
+
+  // Best and worst month
+  if(activeMonths.length >= 2){
+    let bestM = activeMonths[0], worstM = activeMonths[0];
+    activeMonths.forEach(m => {
+      if(monthGmv[m].gmv > monthGmv[bestM].gmv) bestM = m;
+      if(monthGmv[m].gmv < monthGmv[worstM].gmv) worstM = m;
+    });
+    const mNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    insights.push({type:'opportunity', text:`<strong>${mNames[bestM]}</strong> fue el mejor mes con ${fmtMoneyShort(monthGmv[bestM].gmv)} GMV.`, meta:'Mejor desempeño del año'});
+    if(bestM !== worstM) insights.push({type:'critical', text:`<strong>${mNames[worstM]}</strong> fue el mes más bajo con ${fmtMoneyShort(monthGmv[worstM].gmv)} GMV.`, meta:'Requiere análisis de causas'});
+
+    // MoM growth trend
+    const lastM = activeMonths[activeMonths.length-1];
+    const prevM = activeMonths.length >= 2 ? activeMonths[activeMonths.length-2] : null;
+    if(prevM !== null){
+      const growth = ((monthGmv[lastM].gmv - monthGmv[prevM].gmv)/monthGmv[prevM].gmv*100).toFixed(1);
+      const gType = parseFloat(growth) >= 0 ? 'opportunity' : 'warning';
+      insights.push({type:gType, text:`Crecimiento mes a mes: <strong>${parseFloat(growth)>=0?'+':''}${growth}%</strong> (${mNames[prevM]} → ${mNames[lastM]}).`, meta:'Tendencia de GMV'});
+    }
+  }
+
+  // Top client insight
+  if(DATA.topClients.length > 0){
+    const top = DATA.topClients[0];
+    const totalGmv = DATA.topClients.reduce((a,c) => a+c.gmv, 0);
+    const topPct = totalGmv > 0 ? ((top.gmv/totalGmv)*100).toFixed(1) : 0;
+    insights.push({type:'info', text:`Top cliente: <strong>${top.name}</strong> concentra ${topPct}% del GMV total de clientes (${fmtMoneyShort(top.gmv)}).`, meta:'Concentración de cartera'});
+    if(parseFloat(topPct) > 30){
+      insights.push({type:'warning', text:`Alta concentración: el cliente principal representa más del 30% del GMV. Riesgo de dependencia.`, meta:'Diversificación recomendada'});
+    }
+  }
+
+  // KAM insights
+  if(DATA.kamGMV.labels.length >= 2){
+    const topKam = DATA.kamGMV.labels[0];
+    const topKamGmv = DATA.kamGMV.data[0];
+    const totalKam = DATA.kamGMV.data.reduce((a,b)=>a+b,0);
+    const kamPct = totalKam > 0 ? ((topKamGmv/totalKam)*100).toFixed(1) : 0;
+    insights.push({type:'info', text:`KAM líder: <strong>${topKam}</strong> con ${fmtMoneyShort(topKamGmv)} (${kamPct}% del total). ${DATA.kamGMV.labels.length} KAMs activos.`, meta:'Desempeño por KAM'});
+
+    // KAM gap
+    const lastKam = DATA.kamGMV.labels[DATA.kamGMV.labels.length-1];
+    const lastKamGmv = DATA.kamGMV.data[DATA.kamGMV.data.length-1];
+    const gap = topKamGmv - lastKamGmv;
+    insights.push({type:'warning', text:`Brecha entre top y último KAM: ${fmtMoneyShort(gap)}. <strong>${lastKam}</strong> tiene el menor GMV (${fmtMoneyShort(lastKamGmv)}).`, meta:'Oportunidad de coaching'});
+  }
+
+  // Nuevos vs Perdidos
+  const totalNuevos = DATA.nuevos.count ? DATA.nuevos.count.reduce((a,b)=>a+b,0) : 0;
+  const totalPerdidos = DATA.perdidos.count ? DATA.perdidos.count.reduce((a,b)=>a+b,0) : 0;
+  if(totalNuevos > 0 || totalPerdidos > 0){
+    const net = totalNuevos - totalPerdidos;
+    const netType = net >= 0 ? 'opportunity' : 'critical';
+    insights.push({type:netType, text:`Balance de clientes: <strong>${net>=0?'+':''}${net}</strong> neto (${totalNuevos} nuevos vs ${totalPerdidos} perdidos).`, meta:'Tasa de retención'});
+  }
+
+  // Utilidad trend
+  if(DATA.utilidad && DATA.utilidad.data && DATA.utilidad.data.length >= 2){
+    const utilArr = DATA.utilidad.data;
+    const lastUtil = utilArr[utilArr.length-1];
+    const prevUtil = utilArr[utilArr.length-2];
+    const utilGrowth = prevUtil > 0 ? (((lastUtil-prevUtil)/prevUtil)*100).toFixed(1) : null;
+    if(utilGrowth !== null){
+      const uType = parseFloat(utilGrowth) >= 0 ? 'opportunity' : 'critical';
+      insights.push({type:uType, text:`Utilidad bruta: <strong>${parseFloat(utilGrowth)>=0?'+':''}${utilGrowth}%</strong> vs mes anterior (${fmtMoneyShort(lastUtil)}).`, meta:'Tendencia de rentabilidad'});
+    }
+  }
+
+  if(insights.length === 0){
+    container.innerHTML = '<div class="insight-item"><div class="insight-type info">Info</div><div class="insight-text">Se requieren al menos 2 meses de datos para generar insights.</div></div>';
+    return;
+  }
+
+  const typeIcons = {critical:'Alerta',warning:'Atención',opportunity:'Oportunidad',info:'Info'};
+  container.innerHTML = insights.map(ins => `
+    <div class="insight-item">
+      <div class="insight-type ${ins.type}">${typeIcons[ins.type]}</div>
+      <div class="insight-text">${ins.text}</div>
+      <div class="insight-meta">${ins.meta}</div>
+    </div>`).join('');
+}
+
 function renderOverviewKamTable(){
   const tbody = document.getElementById('overview-kam-body');
   if(!tbody) return;
@@ -3250,6 +3428,8 @@ function initMainCharts(){
 
 function initMetasChart(){
   renderMetasCards();
+  renderUtilidadTable();
+  renderMetasMonthlyInsights();
   destroyChart('metas');
   const ctx = document.getElementById('chart-metas');
   if(!ctx) return;
