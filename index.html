@@ -733,21 +733,20 @@
     <div class="section-head">
       <div>
         <div class="section-title">Desempeño KAM</div>
-        <div class="section-sub">Indicadores individuales · Prospección, activación, retención</div>
+        <div class="section-sub">Indicadores individuales · Meta, GMV, Cumplimiento, Clientes</div>
       </div>
     </div>
     <div class="filter-bar module-filter" id="filter-kam" style="margin-bottom:16px;"></div>
-    <!-- KAM tabs are now dynamic -->
-    <div id="kam-content">
-      <div id="kam-dynamic-kpis" class="kpi-grid" style="margin-bottom:16px;"></div>
-      <div class="chart-card">
-        <div class="chart-title" id="kam-chart-title">Desempeño KAM</div>
-        <div class="chart-sub">GMV por KAM · Carga datos para visualizar</div>
-        <div class="chart-canvas-wrap" style="height:240px;">
-          <canvas id="chart-kam-bar"></canvas>
-        </div>
+    <!-- GMV general chart -->
+    <div class="chart-card" style="margin-bottom:20px;">
+      <div class="chart-title">GMV por KAM</div>
+      <div class="chart-sub">Distribución acumulada</div>
+      <div class="chart-canvas-wrap" style="height:220px;">
+        <canvas id="chart-kam-bar"></canvas>
       </div>
     </div>
+    <!-- KAM sections rendered dynamically -->
+    <div id="kam-sections"></div>
   </div>
 
   <!-- ────────────────── CLIENTES VIEW ────────────────── -->
@@ -1676,6 +1675,7 @@ const DATA = {
   ops: { labels: [], gmv: [], efect: [], bookings: [], packages: [] },
   topClients: [],
   kamGMV: {labels:[], data:[]},
+  kamDetail: {},
   nuevos: {labels:[], count:[], gmv:[]},
   perdidos: {labels:[], count:[], gmv:[]},
   ciudades: {},
@@ -2822,8 +2822,30 @@ function rebuildFromHistory(){
       }
 
       // KAM aggregation
-      if(kams && kams[i] && gmvs){
-        kamData[kams[i]] = (kamData[kams[i]]||0) + (gmvs[i]||0);
+      if(kams && kams[i]){
+        const kamName = kams[i];
+        if(gmvs) kamData[kamName] = (kamData[kamName]||0) + (gmvs[i]||0);
+        // KAM detail
+        if(!DATA.kamDetail[kamName]) DATA.kamDetail[kamName] = {months:{}, clients:{}, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0};
+        const kd = DATA.kamDetail[kamName];
+        const mLabel = months ? months[i] : null;
+        if(mLabel){
+          if(!kd.months[mLabel]) kd.months[mLabel] = {gmv:0, meta:0, real:0, bookings:0};
+          if(gmvs) kd.months[mLabel].gmv += gmvs[i]||0;
+          if(metas) kd.months[mLabel].meta = metas[i]||kd.months[mLabel].meta;
+          if(reals) kd.months[mLabel].real += reals[i]||0;
+          if(bookings) kd.months[mLabel].bookings += bookings[i]||0;
+        }
+        if(clients && clients[i]){
+          const cid = ids && ids[i] ? ids[i] : clients[i];
+          if(!kd.clients[cid]) kd.clients[cid] = {name:clients[i], id:cid, gmv:0};
+          kd.clients[cid].name = clients[i];
+          if(gmvs) kd.clients[cid].gmv += gmvs[i]||0;
+        }
+        if(nuevos) kd.nuevos += nuevos[i]||0;
+        if(gmvNuevos) kd.gmvNuevos += gmvNuevos[i]||0;
+        if(perdidos) kd.perdidos += perdidos[i]||0;
+        if(gmvPerdidos) kd.gmvPerdidos += gmvPerdidos[i]||0;
       }
     });
   });
@@ -2902,6 +2924,7 @@ function resetDataToEmpty(){
   DATA.topClients = [];
   DATA.kamGMV.labels = [];
   DATA.kamGMV.data = [];
+  DATA.kamDetail = {};
   DATA.nuevos.labels = [];
   DATA.nuevos.count = [];
   DATA.nuevos.gmv = [];
@@ -2993,17 +3016,145 @@ function generateDynamicInsights(){
   container.innerHTML = insights.map(ins => `<div class="insight-item"><div class="insight-type ${ins.type}">${typeIcons[ins.type]}</div><div class="insight-text">${ins.text}</div><div class="insight-meta">${ins.meta}</div></div>`).join('');
 }
 
-function renderKamDynamic(){
-  const container = document.getElementById('kam-dynamic-kpis');
+function renderKamDynamic(){ renderKamSections(); }
+
+function renderKamSections(){
+  const container = document.getElementById('kam-sections');
   if(!container) return;
+
   if(DATA.kamGMV.labels.length === 0){
-    container.innerHTML = '<div class="kpi-card blue" style="grid-column:1/-1;text-align:center;"><div class="kpi-label">Sin datos de KAM</div><div class="kpi-value" style="font-size:14px;">Carga datos con el campo KAM</div></div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-users" style="font-size:32px;display:block;margin-bottom:8px;"></i>Carga datos con el campo KAM para ver el desempeño individual</div>';
     return;
   }
-  const colors = ['blue','green','amber','teal','red'];
-  container.innerHTML = DATA.kamGMV.labels.map((name, i) =>
-    `<div class="kpi-card ${colors[i%colors.length]}"><div class="kpi-label">${name}</div><div class="kpi-value" style="font-size:18px;">${fmtMoneyShort(DATA.kamGMV.data[i])}</div><div class="kpi-sub">GMV acumulado</div></div>`
-  ).join('');
+
+  // Lookup user info
+  const userLookup = {};
+  usersDB.forEach(u => { userLookup[u.name.toLowerCase()] = u; });
+
+  const year = new Date().getFullYear();
+  const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const kamColors = ['var(--accent)','var(--green)','var(--amber)','var(--teal)','var(--red)'];
+
+  let html = '';
+  DATA.kamGMV.labels.forEach((kamName, ki) => {
+    const detail = DATA.kamDetail[kamName] || {months:{}, clients:{}, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0};
+    const totalGmv = DATA.kamGMV.data[ki] || 0;
+    const color = kamColors[ki % kamColors.length];
+
+    // User info
+    const user = userLookup[kamName.toLowerCase()];
+    const profile = user ? user.profile : 'NA';
+    const months2 = user ? calcMonthsActive(user.joinDate) : null;
+    const seniority = months2 !== null ? (Math.floor(months2/12) > 0 ? Math.floor(months2/12)+'a '+months2%12+'m' : months2+'m') : 'NA';
+
+    // Monthly data
+    const monthKeys = Object.keys(detail.months).sort((a,b) => {
+      const pa = parseLabelDate(a), pb = parseLabelDate(b);
+      if(pa && pb) return (pa.year*100+pa.month)-(pb.year*100+pb.month);
+      return 0;
+    });
+
+    // Meta cards row
+    let metaHtml = '';
+    allMonths.forEach((mName, mi) => {
+      const mData = Object.entries(detail.months).find(([k]) => {
+        const p = parseLabelDate(k);
+        return p && p.year === year && p.month === mi+1;
+      });
+      const d = mData ? mData[1] : null;
+      const gmv = d ? d.gmv : 0;
+      const meta = d ? d.meta : 0;
+      const pct = meta > 0 && gmv > 0 ? (gmv/meta*100).toFixed(1) : null;
+      const clr = pct !== null ? cumplColor(parseFloat(pct)) : 'var(--text3)';
+      metaHtml += `<td style="text-align:center;padding:6px 8px;">
+        <div style="font-size:10px;color:var(--text3);">${mName}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;margin:2px 0;">${gmv>0?fmtMoneyShort(gmv):'NA'}</div>
+        <div style="font-size:9px;color:var(--text3);">Meta: ${meta>0?fmtMoneyShort(meta):'NA'}</div>
+        <div style="font-size:11px;font-weight:600;color:${clr};">${pct!==null?pct+'%':'NA'}</div>
+      </td>`;
+    });
+
+    // Growth table
+    let growthHtml = '';
+    let prevGmv = null;
+    monthKeys.forEach(mKey => {
+      const d = detail.months[mKey];
+      const crecP = prevGmv !== null ? d.gmv - prevGmv : null;
+      const crecPct = prevGmv !== null && prevGmv > 0 ? ((d.gmv-prevGmv)/prevGmv*100).toFixed(1) : null;
+      const crecClr = crecP !== null ? (crecP >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
+      growthHtml += `<tr>
+        <td class="bold">${mKey}</td>
+        <td style="font-family:'DM Mono',monospace;">${fmtMoneyShort(d.gmv)}</td>
+        <td style="font-family:'DM Mono',monospace;color:${crecClr};">${crecP!==null?(crecP>=0?'+':'')+fmtMoneyShort(crecP):'NA'}</td>
+        <td style="color:${crecClr};">${crecPct!==null?(parseFloat(crecPct)>=0?'+':'')+crecPct+'%':'NA'}</td>
+        <td style="font-size:16px;">${crecP!==null?(crecP>0?'📈':crecP<0?'📉':'➡️'):'—'}</td>
+      </tr>`;
+      prevGmv = d.gmv;
+    });
+
+    // Clients table
+    const clientArr = Object.values(detail.clients).sort((a,b) => b.gmv - a.gmv);
+    let clientsHtml = clientArr.length > 0 ? clientArr.map(c =>
+      `<tr><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);">${c.id}</td><td class="bold">${c.name}</td><td style="font-family:'DM Mono',monospace;">${fmtMoneyShort(c.gmv)}</td><td style="font-size:14px;">${c.gmv>0?'📈':'➡️'}</td></tr>`
+    ).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:12px;">NA</td></tr>';
+
+    html += `
+    <div style="margin-bottom:28px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;border-top:3px solid ${color};">
+      <!-- Header -->
+      <div style="padding:16px 20px;background:var(--bg2);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="width:44px;height:44px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;">${kamName.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+        <div style="flex:1;min-width:150px;">
+          <div style="font-size:16px;font-weight:600;">${kamName}</div>
+          <div style="font-size:12px;color:var(--text3);display:flex;gap:12px;margin-top:2px;">
+            <span><i class="ti ti-briefcase" style="font-size:12px;margin-right:2px;"></i>${profile}</span>
+            <span><i class="ti ti-clock" style="font-size:12px;margin-right:2px;"></i>${seniority}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--text3);">GMV Acumulado</div>
+          <div style="font-size:18px;font-weight:600;font-family:'DM Mono',monospace;">${fmtMoneyShort(totalGmv)}</div>
+        </div>
+      </div>
+
+      <div style="padding:16px 20px;">
+        <!-- Monthly meta/gmv/cumplimiento -->
+        <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;">META · GMV · CUMPLIMIENTO POR MES</div>
+        <div style="overflow-x:auto;margin-bottom:16px;">
+          <table style="min-width:700px;"><tbody><tr>${metaHtml}</tr></tbody></table>
+        </div>
+
+        <!-- Clientes Nuevos vs Perdidos -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+          <div class="kpi-card green" style="margin:0;">
+            <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
+            <div class="kpi-value" style="font-size:20px;">${detail.nuevos > 0 ? detail.nuevos : 'NA'}</div>
+            <div class="kpi-sub">${detail.gmvNuevos > 0 ? 'GMV: '+fmtMoneyShort(detail.gmvNuevos) : 'Sin datos'}</div>
+          </div>
+          <div class="kpi-card red" style="margin:0;">
+            <div class="kpi-label"><i class="ti ti-users-minus"></i> Clientes Perdidos</div>
+            <div class="kpi-value" style="font-size:20px;">${detail.perdidos > 0 ? detail.perdidos : 'NA'}</div>
+            <div class="kpi-sub">${detail.gmvPerdidos > 0 ? 'GMV: '+fmtMoneyShort(detail.gmvPerdidos) : 'Sin datos'}</div>
+          </div>
+        </div>
+
+        <!-- Growth table -->
+        <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;">CRECIMIENTO GMV MES A MES</div>
+        <div class="table-card" style="margin-bottom:16px;">
+          <table><thead><tr><th>Mes</th><th>GMV</th><th>Crecimiento $</th><th>Crecimiento %</th><th></th></tr></thead>
+          <tbody>${growthHtml || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:12px;">NA</td></tr>'}</tbody></table>
+        </div>
+
+        <!-- Clients table -->
+        <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;">CLIENTES ASIGNADOS</div>
+        <div class="table-card">
+          <table><thead><tr><th>ID Cliente</th><th>Cliente</th><th>GMV Año</th><th>Tendencia</th></tr></thead>
+          <tbody>${clientsHtml}</tbody></table>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 function renderUtilidadTable(){
