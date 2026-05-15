@@ -1187,6 +1187,26 @@
         </div>
       </div>
 
+      <!-- Change Password Card -->
+      <div class="profile-card">
+        <div class="profile-card-title"><i class="ti ti-lock" style="color:var(--red)"></i> Cambiar Contraseña</div>
+        <div class="form-group">
+          <label class="form-label">Contraseña actual</label>
+          <input class="form-input" id="profile-pass-current" type="password" placeholder="Ingresa tu contraseña actual">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nueva contraseña</label>
+          <input class="form-input" id="profile-pass-new" type="password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar nueva contraseña</label>
+          <input class="form-input" id="profile-pass-confirm" type="password" placeholder="Repite la nueva contraseña">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+          <button class="btn btn-primary" onclick="changePassword()"><i class="ti ti-lock-check"></i> Cambiar contraseña</button>
+        </div>
+      </div>
+
       <!-- Role & Profile Info Card (read-only) -->
       <div class="profile-card">
         <div class="profile-card-title"><i class="ti ti-briefcase" style="color:var(--green)"></i> Perfil Comercial y Rol</div>
@@ -3461,6 +3481,36 @@ function saveProfile(){
   loadProfileView();
   toast('Perfil actualizado correctamente');
   auditLog(`Perfil actualizado: <strong>${newName}</strong>`,'profile','success',changes.join(' · ') || 'Sin cambios');
+}
+
+function changePassword(){
+  if(!currentUser) return;
+  const current = document.getElementById('profile-pass-current').value;
+  const newPass = document.getElementById('profile-pass-new').value;
+  const confirm = document.getElementById('profile-pass-confirm').value;
+
+  if(!current){ toast('Ingresa tu contraseña actual'); return; }
+  if(current !== currentUser.password){ toast('La contraseña actual es incorrecta'); return; }
+  if(!newPass || newPass.length < 6){ toast('La nueva contraseña debe tener mínimo 6 caracteres'); return; }
+  if(newPass !== confirm){ toast('Las contraseñas no coinciden'); return; }
+  if(newPass === current){ toast('La nueva contraseña debe ser diferente a la actual'); return; }
+
+  // Update in usersDB
+  const user = usersDB.find(u => u.id === currentUser.id);
+  if(user) user.password = newPass;
+  saveUsersDB();
+
+  // Update session
+  currentUser.password = newPass;
+  sessionStorage.setItem('pibox_current_user', JSON.stringify(currentUser));
+
+  // Clear fields
+  document.getElementById('profile-pass-current').value = '';
+  document.getElementById('profile-pass-new').value = '';
+  document.getElementById('profile-pass-confirm').value = '';
+
+  toast('Contraseña actualizada correctamente');
+  auditLog('Contraseña cambiada por el usuario','profile','success','');
 }
 
 // ─── HISTÓRICO PIBOX ───
