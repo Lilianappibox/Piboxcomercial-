@@ -3984,18 +3984,42 @@ function renderMetasCards(){
   container.innerHTML = html;
 }
 
+function getKamGMVByYear(year){
+  // Rebuild KAM GMV for a specific year from kamDetail
+  const kamTotals = {};
+  Object.entries(DATA.kamDetail).forEach(([kamName, detail]) => {
+    let gmv = 0;
+    Object.entries(detail.months).forEach(([mLabel, mData]) => {
+      const p = parseLabelDate(mLabel);
+      if(p && p.year === year) gmv += mData.gmv || 0;
+    });
+    if(gmv > 0) kamTotals[kamName] = gmv;
+  });
+  // Fallback to global if no detail
+  if(Object.keys(kamTotals).length === 0 && DATA.kamGMV.labels.length > 0){
+    DATA.kamGMV.labels.forEach((k,i) => { kamTotals[k] = DATA.kamGMV.data[i]; });
+  }
+  const sorted = Object.entries(kamTotals).sort((a,b) => b[1] - a[1]);
+  return {labels: sorted.map(s=>s[0]), data: sorted.map(s=>s[1])};
+}
+
 function renderKamBreakdown(){
   const tbody = document.getElementById('kam-breakdown-body');
   if(!tbody) return;
-  const total = DATA.kamGMV.data.reduce((a,b) => a+b, 0);
-  const clients = [189, 177, 156, 98, 32];
-  const maxGmv = Math.max(...DATA.kamGMV.data);
+  const year = getActiveYear('filter-metas');
+  const kamData = getKamGMVByYear(year);
+  if(kamData.labels.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">NA — Sin datos de KAM para '+year+'</td></tr>';
+    return;
+  }
+  const total = kamData.data.reduce((a,b) => a+b, 0);
+  const maxGmv = Math.max(...kamData.data);
 
-  tbody.innerHTML = DATA.kamGMV.labels.map((name, i) => {
-    const gmv = DATA.kamGMV.data[i];
-    const pct = ((gmv/total)*100).toFixed(1);
-    const barW = ((gmv/maxGmv)*100).toFixed(0);
-    const fillClass = pct > 25 ? 'green' : pct > 15 ? '' : pct > 8 ? 'amber' : 'red';
+  tbody.innerHTML = kamData.labels.map((name, i) => {
+    const gmv = kamData.data[i];
+    const pct = total > 0 ? ((gmv/total)*100).toFixed(1) : '0.0';
+    const barW = maxGmv > 0 ? ((gmv/maxGmv)*100).toFixed(0) : 0;
+    const fillClass = parseFloat(pct) > 25 ? 'green' : parseFloat(pct) > 15 ? '' : parseFloat(pct) > 8 ? 'amber' : 'red';
     const rank = i + 1;
     const tagClass = rank === 1 ? 'tag-green' : rank <= 3 ? 'tag-blue' : 'tag-amber';
     const medal = rank === 1 ? '🥇 ' : '';
@@ -4003,7 +4027,7 @@ function renderKamBreakdown(){
       <td class="bold">${name}</td>
       <td class="bold" style="color:${rank===1?'var(--green)':'var(--text)'}">${fmtMoneyShort(gmv)}</td>
       <td>${pct}%<div class="progress-bar" style="margin-left:6px"><div class="progress-fill ${fillClass}" style="width:${barW}%"></div></div></td>
-      <td>${clients[i]||'—'}</td>
+      <td>—</td>
       <td><span class="tag ${tagClass}">${medal}#${rank}</span></td>
     </tr>`;
   }).join('');
@@ -4123,20 +4147,39 @@ function initMainCharts(){
   });
 }
 
+function getMetasByYear(year){
+  const labels=[], meta=[], real=[];
+  DATA.metas.labels.forEach((l,i) => {
+    const p = parseLabelDate(l);
+    if(p && p.year === year){
+      labels.push(l);
+      meta.push(DATA.metas.meta[i]||0);
+      real.push(DATA.metas.real[i]||0);
+    }
+  });
+  return {labels, meta, real};
+}
+
 function initMetasChart(){
   renderMetasCards();
+  renderKamBreakdown();
   renderUtilidadTable();
   renderMetasMonthlyInsights();
+
+  const year = getActiveYear('filter-metas');
+  const md = getMetasByYear(year);
+
   destroyChart('metas');
   const ctx = document.getElementById('chart-metas');
   if(!ctx) return;
+  if(md.labels.length === 0) return;
   charts['metas'] = new Chart(ctx,{
     type:'bar',
     data:{
-      labels: DATA.metas.labels,
+      labels: md.labels,
       datasets:[
-        {label:'Meta',data:DATA.metas.meta,backgroundColor:'rgba(79,110,247,0.2)',borderColor:'#4f6ef7',borderWidth:1.5,borderRadius:4},
-        {label:'Real',data:DATA.metas.real,backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}
+        {label:'Meta',data:md.meta,backgroundColor:'rgba(79,110,247,0.2)',borderColor:'#4f6ef7',borderWidth:1.5,borderRadius:4},
+        {label:'Real',data:md.real,backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4}
       ]
     },
     options:{responsive:true,maintainAspectRatio:false,plugins:chartMoneyOpts(),scales:{x:chartXAxis(),y:chartMoneyAxis()}}
