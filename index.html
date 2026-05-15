@@ -985,7 +985,7 @@
         <div class="section-title">Usuarios y Roles</div>
         <div class="section-sub">Gestión de accesos · Permisos por rol · Control de usuarios</div>
       </div>
-      <button class="btn btn-primary" onclick="showModal('user-modal')"><i class="ti ti-user-plus"></i> Nuevo usuario</button>
+      <button class="btn btn-primary" onclick="resetUserModal();showModal('user-modal')"><i class="ti ti-user-plus"></i> Nuevo usuario</button>
     </div>
 
     <!-- Stats -->
@@ -1471,8 +1471,8 @@
       <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="usr-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="closeModal('user-modal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveUser()"><i class="ti ti-check"></i> Guardar usuario</button>
+      <button class="btn btn-ghost" onclick="closeModal('user-modal');resetUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveOrUpdateUser()"><i class="ti ti-check"></i> Guardar usuario</button>
     </div>
   </div>
 </div>
@@ -3127,8 +3127,9 @@ function renderUsersTable(){
       <td style="color:var(--text3);font-size:12px;">${joinDisplay}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);">${monthsText}</td>
       <td><span class="tag ${u.active?'tag-green':'tag-red'}">${u.active?'Activo':'Inactivo'}</span></td>
-      <td>
+      <td style="white-space:nowrap;">
         ${currentUser && currentUser.role==='administrativo' ? `
+          <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="editUser(${u.id})"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
           <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px" onclick="toggleUserActive(${u.id})">${u.active?'Desactivar':'Activar'}</button>
           <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;color:var(--red)" onclick="deleteUser(${u.id})"><i class="ti ti-trash" style="font-size:12px"></i></button>
         ` : '—'}
@@ -3183,6 +3184,95 @@ function saveUser(){
   renderUsersTable();
   toast('Usuario creado exitosamente');
   auditLog(`Usuario creado: <strong>${name}</strong> (${email}) · Perfil: ${profile} · Rol: ${ROLE_PERMISSIONS[role].label}`,'users','success','Ingreso: '+joinDate);
+}
+
+let editingUserId = null;
+
+function editUser(id){
+  const user = usersDB.find(u => u.id === id);
+  if(!user) return;
+  editingUserId = id;
+  document.getElementById('user-modal-title').textContent = 'Editar Usuario';
+  document.getElementById('usr-name').value = user.name;
+  document.getElementById('usr-email').value = user.email;
+  document.getElementById('usr-role').value = user.role;
+  document.getElementById('usr-profile').value = user.profile || 'KAM';
+  document.getElementById('usr-join-date').value = user.joinDate || '';
+  document.getElementById('usr-pass').value = '';
+  document.getElementById('usr-pass').placeholder = 'Dejar vacío para no cambiar';
+  showModal('user-modal');
+}
+
+function saveOrUpdateUser(){
+  if(editingUserId) return updateUser();
+  return saveUser();
+}
+
+function updateUser(){
+  const user = usersDB.find(u => u.id === editingUserId);
+  if(!user){ editingUserId = null; return; }
+
+  const name = document.getElementById('usr-name').value.trim();
+  const email = document.getElementById('usr-email').value.trim();
+  const role = document.getElementById('usr-role').value;
+  const profile = document.getElementById('usr-profile').value;
+  const joinDate = document.getElementById('usr-join-date').value;
+  const pass = document.getElementById('usr-pass').value;
+
+  if(!name || !email){
+    toast('Nombre y email son obligatorios');
+    return;
+  }
+  if(usersDB.find(u => u.email === email && u.id !== editingUserId)){
+    toast('Ya existe otro usuario con ese email');
+    return;
+  }
+
+  const changes = [];
+  if(user.name !== name) changes.push('Nombre: '+user.name+' → '+name);
+  if(user.email !== email) changes.push('Email: '+user.email+' → '+email);
+  if(user.role !== role) changes.push('Rol: '+ROLE_PERMISSIONS[user.role].label+' → '+ROLE_PERMISSIONS[role].label);
+  if(user.profile !== profile) changes.push('Perfil: '+(user.profile||'—')+' → '+profile);
+  if(user.joinDate !== joinDate) changes.push('Ingreso: '+(user.joinDate||'—')+' → '+joinDate);
+  if(pass) changes.push('Contraseña actualizada');
+
+  user.name = name;
+  user.email = email;
+  user.role = role;
+  user.profile = profile;
+  if(joinDate) user.joinDate = joinDate;
+  if(pass && pass.length >= 6) user.password = pass;
+  else if(pass && pass.length > 0 && pass.length < 6){ toast('La contraseña debe tener mínimo 6 caracteres'); return; }
+
+  saveUsersDB();
+
+  // Update session if editing self
+  if(currentUser && currentUser.id === editingUserId){
+    currentUser.name = name;
+    currentUser.email = email;
+    currentUser.role = role;
+    currentUser.profile = profile;
+    if(joinDate) currentUser.joinDate = joinDate;
+    if(pass && pass.length >= 6) currentUser.password = pass;
+    sessionStorage.setItem('pibox_current_user', JSON.stringify(currentUser));
+    applyRoleRestrictions();
+  }
+
+  closeModal('user-modal');
+  resetUserModal();
+  renderUsersTable();
+  toast('Usuario actualizado');
+  auditLog(`Usuario editado: <strong>${name}</strong> — ${changes.join(' · ') || 'Sin cambios'}`,'users','success','');
+}
+
+function resetUserModal(){
+  editingUserId = null;
+  document.getElementById('user-modal-title').textContent = 'Nuevo Usuario';
+  document.getElementById('usr-name').value = '';
+  document.getElementById('usr-email').value = '';
+  document.getElementById('usr-pass').value = '';
+  document.getElementById('usr-pass').placeholder = 'Mínimo 6 caracteres';
+  document.getElementById('usr-join-date').value = '';
 }
 
 function toggleUserActive(id){
