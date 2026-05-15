@@ -1466,6 +1466,19 @@
     </div>
 
     <!-- AI Insights por mes -->
+    <!-- Utilidad Bruta Histórica -->
+    <div class="table-card" style="margin-top:20px;">
+      <div class="table-header">
+        <div class="table-header-title">Utilidad Bruta por Mes — Histórico</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Año</th><th>Mes</th><th>GMV</th><th>Utilidad Bruta</th><th>Margen %</th><th>Crecimiento $</th><th>Crecimiento %</th><th>Tendencia</th></tr></thead>
+          <tbody id="hist-utilidad-body"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="section-head" style="margin-top:24px;">
       <div>
         <div class="section-title">Análisis de comportamiento por mes</div>
@@ -4546,6 +4559,7 @@ function renderHistorico(){
   renderHistCharts();
   renderPredictions();
   renderEcomInsights();
+  renderHistUtilidadTable();
   renderSeasonalTable();
 }
 
@@ -4777,6 +4791,64 @@ function renderEcomInsights(){
       <div class="ecom-impact"><i class="ti ti-bulb" style="color:var(--amber);font-size:13px;"></i> <strong>Impacto Pibox:</strong>&nbsp;${ins.impact}</div>
     </div>
   `).join('');
+}
+
+function renderHistUtilidadTable(){
+  const tbody = document.getElementById('hist-utilidad-body');
+  if(!tbody) return;
+
+  const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  // Build lookup of GMV and utilidad by year+month from all DATA
+  const rows = [];
+  const gmvByYM = {};
+  const utilByYM = {};
+
+  DATA.ops.labels.forEach((label, i) => {
+    const p = parseLabelDate(label);
+    if(p) gmvByYM[p.year + '-' + p.month] = DATA.ops.gmv[i] || 0;
+  });
+  if(DATA.utilidad && DATA.utilidad.labels){
+    DATA.utilidad.labels.forEach((label, i) => {
+      const p = parseLabelDate(label);
+      if(p) utilByYM[p.year + '-' + p.month] = DATA.utilidad.data[i] || 0;
+    });
+  }
+
+  // Get all years present
+  const years = [...new Set(DATA.ops.labels.map(l => { const p = parseLabelDate(l); return p ? p.year : null; }).filter(Boolean))].sort();
+
+  let prevUtil = null;
+  years.forEach(year => {
+    for(let m = 1; m <= 12; m++){
+      const key = year + '-' + m;
+      const gmv = gmvByYM[key];
+      const util = utilByYM[key];
+      const hasData = gmv !== undefined || util !== undefined;
+      if(!hasData) continue;
+
+      const margen = gmv && util ? ((util/gmv)*100).toFixed(1) : null;
+      const crecP = prevUtil !== null && util !== undefined ? util - prevUtil : null;
+      const crecPct = prevUtil !== null && prevUtil > 0 && util !== undefined ? (((util - prevUtil)/prevUtil)*100).toFixed(1) : null;
+      const trend = crecP !== null ? (crecP > 0 ? '📈' : crecP < 0 ? '📉' : '➡️') : '—';
+      const crecColor = crecP !== null ? (crecP >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text3)';
+
+      rows.push(`<tr>
+        <td class="bold">${year}</td>
+        <td>${allMonths[m-1]}</td>
+        <td style="font-family:'DM Mono',monospace;">${gmv !== undefined ? fmtMoneyShort(gmv) : 'NA'}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--green);">${util !== undefined ? fmtMoneyShort(util) : 'NA'}</td>
+        <td>${margen !== null ? margen+'%' : 'NA'}</td>
+        <td style="font-family:'DM Mono',monospace;color:${crecColor};">${crecP !== null ? (crecP>=0?'+':'')+fmtMoneyShort(crecP) : 'NA'}</td>
+        <td style="color:${crecColor};">${crecPct !== null ? (parseFloat(crecPct)>=0?'+':'')+crecPct+'%' : 'NA'}</td>
+        <td style="font-size:16px;">${trend}</td>
+      </tr>`);
+
+      if(util !== undefined) prevUtil = util;
+    }
+  });
+
+  tbody.innerHTML = rows.length > 0 ? rows.join('') : '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:16px;">NA — Sin datos de utilidad cargados</td></tr>';
 }
 
 function renderSeasonalTable(){
