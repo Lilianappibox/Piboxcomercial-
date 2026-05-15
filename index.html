@@ -644,8 +644,8 @@
   <div class="view" id="view-metas">
     <div class="section-head">
       <div>
-        <div class="section-title">Metas Comerciales 2026</div>
-        <div class="section-sub">Seguimiento mensual de cumplimiento vs objetivo</div>
+        <div class="section-title">Metas Comerciales</div>
+        <div class="section-sub">Seguimiento mensual · Año en curso · Cumplimiento vs objetivo</div>
       </div>
       <button class="btn btn-primary" onclick="showModal('meta-modal')"><i class="ti ti-plus"></i> Nueva meta</button>
     </div>
@@ -2237,8 +2237,7 @@ function applyFilters(){
   if(kpiCumplSub) kpiCumplSub.textContent = hasMeta ? fmtMoneyShort(totalReal) + ' de ' + fmtMoneyShort(totalMeta) : 'Real vs Meta';
   const kpiCumplCard = document.getElementById('kpi-cumpl-card');
   if(kpiCumplCard && cumplPct !== null){
-    const cc = parseFloat(cumplPct);
-    kpiCumplCard.style.borderTopColor = cc >= 90 ? 'var(--green)' : cc >= 80 ? 'var(--amber)' : 'var(--red)';
+    kpiCumplCard.style.borderTopColor = cumplColor(parseFloat(cumplPct));
   }
 
   // KAM cumplimiento table in overview
@@ -3030,30 +3029,77 @@ function updateStaticMoneyValues(){
   });
 }
 
+// Cumplimiento color logic: rojo <80%, amarillo 80-99%, verde >=100%
+function cumplColor(pct){
+  if(pct >= 100) return 'var(--green)';
+  if(pct >= 80) return 'var(--amber)';
+  return 'var(--red)';
+}
+function cumplTagClass(pct){
+  if(pct >= 100) return 'tag-green';
+  if(pct >= 80) return 'tag-amber';
+  return 'tag-red';
+}
+
 function renderMetasCards(){
   const container = document.getElementById('metas-cards-container');
   if(!container) return;
-  const months = ['Enero','Febrero','Marzo','Abril','Mayo'];
-  const reals = [1310990287, 1245169273, 1325916657, 1290610319, 235470949];
-  const targets = [1550000000, 1580000000, 1600000000, 1654000000, 1700000000];
 
-  container.innerHTML = months.map((m, i) => {
-    const pct = i < 4 ? ((reals[i]/targets[i])*100).toFixed(1) : 'Parcial';
-    const pctNum = i < 4 ? (reals[i]/targets[i])*100 : 13.8;
-    const color = pct === 'Parcial' ? 'var(--text3)' : pctNum >= 85 ? 'var(--green)' : pctNum >= 80 ? 'var(--amber)' : 'var(--red)';
-    const barColor = pct === 'Parcial' ? 'var(--accent)' : pctNum >= 85 ? 'var(--green)' : pctNum >= 80 ? 'var(--amber)' : 'var(--red)';
-    const realColor = i < 4 ? 'var(--text)' : 'var(--accent2)';
-    return `
-      <div class="meta-card">
-        <div class="meta-month">${m} 2026</div>
-        <div class="meta-values">
-          <div class="meta-real" style="color:${realColor}">${fmtMoneyShort(reals[i])}</div>
-          <div class="meta-target">/ ${fmtMoneyShort(targets[i])}</div>
-        </div>
-        <div class="meta-pct" style="color:${color}">${pct === 'Parcial' ? pct : pct + '%'}</div>
-        <div class="meta-bar"><div class="meta-bar-fill" style="width:${pctNum}%;background:${barColor}"></div></div>
-      </div>`;
-  }).join('');
+  const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fullNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const year = new Date().getFullYear();
+
+  // Build a lookup from DATA.ops and DATA.metas
+  const monthData = {};
+  DATA.ops.labels.forEach((label, i) => {
+    const p = parseLabelDate(label);
+    if(p && p.year === year){
+      const mIdx = p.month - 1;
+      monthData[mIdx] = {gmv: DATA.ops.gmv[i] || 0};
+    }
+  });
+  DATA.metas.labels.forEach((label, i) => {
+    const p = parseLabelDate(label);
+    if(p && p.year === year){
+      const mIdx = p.month - 1;
+      if(!monthData[mIdx]) monthData[mIdx] = {};
+      monthData[mIdx].meta = DATA.metas.meta[i] || 0;
+      monthData[mIdx].real = DATA.metas.real[i] || 0;
+    }
+  });
+
+  const qLabels = ['Q1 — Ene · Feb · Mar','Q2 — Abr · May · Jun','Q3 — Jul · Ago · Sep','Q4 — Oct · Nov · Dic'];
+
+  let html = '';
+  for(let q = 0; q < 4; q++){
+    html += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">${qLabels[q]}</div><div class="meta-grid" style="grid-template-columns:repeat(3,1fr);">`;
+    for(let m = q*3; m < q*3+3; m++){
+      const d = monthData[m];
+      const hasMeta = d && d.meta > 0;
+      const hasGmv = d && d.gmv > 0;
+      const hasReal = d && d.real > 0;
+      const gmvVal = hasGmv ? d.gmv : (hasReal ? d.real : 0);
+      const metaVal = hasMeta ? d.meta : 0;
+      const pctNum = hasMeta && gmvVal > 0 ? (gmvVal / metaVal) * 100 : 0;
+      const pctText = hasMeta && gmvVal > 0 ? pctNum.toFixed(1) + '%' : 'NA';
+      const color = hasMeta && gmvVal > 0 ? cumplColor(pctNum) : 'var(--text3)';
+      const barW = hasMeta && gmvVal > 0 ? Math.min(pctNum, 120) : 0;
+
+      html += `
+        <div class="meta-card">
+          <div class="meta-month">${fullNames[m]} ${year}</div>
+          <div class="meta-values">
+            <div class="meta-real" style="color:var(--text);font-size:14px;"><span style="font-size:10px;color:var(--text3);display:block;">GMV</span>${hasGmv || hasReal ? fmtMoneyShort(gmvVal) : 'NA'}</div>
+            <div class="meta-target" style="font-size:12px;"><span style="font-size:10px;color:var(--text3);display:block;">Meta</span>${hasMeta ? fmtMoneyShort(metaVal) : 'NA'}</div>
+          </div>
+          <div class="meta-pct" style="color:${color};font-size:18px;">${pctText}</div>
+          <div class="meta-bar"><div class="meta-bar-fill" style="width:${barW}%;background:${color}"></div></div>
+        </div>`;
+    }
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
 }
 
 function renderKamBreakdown(){
@@ -3878,7 +3924,7 @@ function renderHistKPIs(){
   container.innerHTML = `
     <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total ${histSelectedYear}</div><div class="kpi-value">${fmtMoneyShort(totalGMV)}</div><div class="kpi-sub">${d.labels.length} meses</div></div>
     <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-target"></i> Meta Total</div><div class="kpi-value">${fmtMoneyShort(totalMeta)}</div><div class="kpi-sub">Objetivo acumulado</div></div>
-    <div class="kpi-card ${parseFloat(cumpl)>=85?'teal':'amber'}"><div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div><div class="kpi-value">${cumpl}%</div><div class="kpi-sub">Real / Meta</div></div>
+    <div class="kpi-card" style="border-top:2px solid ${cumplColor(parseFloat(cumpl))}"><div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div><div class="kpi-value">${cumpl}%</div><div class="kpi-sub">Real / Meta</div></div>
     <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-check"></i> Efectividad Prom.</div><div class="kpi-value">${avgEfect}%</div><div class="kpi-sub">Sobre ${d.labels.length} meses</div></div>
     <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-trophy"></i> Mejor mes</div><div class="kpi-value">${bestMonth}</div><div class="kpi-sub">${fmtMoneyShort(Math.max(...d.gmv))}</div></div>
   `;
@@ -3896,7 +3942,7 @@ function renderHistTable(){
   tbody.innerHTML = d.labels.map((label, i) => {
     const cumpl = d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : '—';
     const cuplNum = parseFloat(cumpl);
-    const cuplClass = cuplNum >= 90 ? 'tag-green' : cuplNum >= 80 ? 'tag-amber' : 'tag-red';
+    const cuplClass = cumplTagClass(cuplNum);
     const trend = i > 0 ? (d.gmv[i] > d.gmv[i-1] ? '📈' : d.gmv[i] < d.gmv[i-1] ? '📉' : '➡️') : '—';
     return `<tr>
       <td class="bold">${label} ${histSelectedYear}</td>
@@ -3958,7 +4004,7 @@ function renderHistCharts(){
       datasets:[{
         label:'Cumplimiento %',
         data: allCumpl.map(v=>Math.round(v*10)/10),
-        backgroundColor: allCumpl.map(v => v>=90?'rgba(34,200,122,0.7)':v>=80?'rgba(245,166,35,0.7)':'rgba(240,84,90,0.7)'),
+        backgroundColor: allCumpl.map(v => v>=100?'rgba(34,200,122,0.7)':v>=80?'rgba(245,166,35,0.7)':'rgba(240,84,90,0.7)'),
         borderRadius:3
       }]
     },
