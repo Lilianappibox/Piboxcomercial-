@@ -2468,9 +2468,7 @@ const ETL_FIELDS = [
   {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial'},
   {key:'real',      label:'Real / Cumplimiento', desc:'Valor real cumplido'},
   {key:'nuevos',      label:'Clientes Nuevos',    desc:'Cantidad de clientes nuevos'},
-  {key:'gmv_nuevos',  label:'GMV Clientes Nuevos', desc:'GMV generado por clientes nuevos'},
   {key:'perdidos',    label:'Clientes Perdidos',   desc:'Cantidad de clientes perdidos'},
-  {key:'gmv_perdidos',label:'GMV Clientes Perdidos',desc:'GMV perdido por clientes que salieron'},
   {key:'utilidad',    label:'Utilidad Bruta',         desc:'Utilidad bruta (ingresos - costos)'},
   {key:'leads_mkt',   label:'Leads MKT',            desc:'Leads provenientes de marketing'},
   {key:'leads_propios',label:'Leads Propios',       desc:'Leads generados por el equipo comercial'}
@@ -2631,9 +2629,7 @@ function autoMapColumns(){
     meta:       ['meta','target','objetivo','goal'],
     real:       ['real','actual','cumplido','logrado','achieved'],
     nuevos:      ['nuevo','nuevos','new','alta','altas','activado','activados','clientes nuevos'],
-    gmv_nuevos:  ['gmv nuevo','gmv nuevos','gmv_nuevos','gmv clientes nuevos'],
     perdidos:    ['perdido','perdidos','lost','baja','bajas','churn','inactivo','clientes perdidos'],
-    gmv_perdidos:['gmv perdido','gmv perdidos','gmv_perdidos','gmv clientes perdidos'],
     utilidad:     ['utilidad','utilidad bruta','gross profit','margen','margen bruto','profit','ganancia'],
     leads_mkt:   ['leads mkt','lead mkt','marketing','leads marketing','mkt'],
     leads_propios:['leads propios','lead propio','propios','leads comercial','comercial leads']
@@ -2680,13 +2676,22 @@ function renderPreviewTable(){
     return `<th style="${highlight}white-space:nowrap;">${h}${badge}</th>`;
   }).join('');
 
+  const moneyFields = ['gmv','meta','real','utilidad'];
   const preview = etlParsedData.slice(0, 15);
   tbody.innerHTML = preview.map((row, ri) => {
     const cells = etlHeaders.map((_, ci) => {
       const val = row[ci] !== undefined ? row[ci] : '';
       const mapped = Object.entries(etlColumnMap).find(([k,v]) => v === ci);
-      const style = mapped ? 'color:var(--text);font-weight:500;' : 'color:var(--text3);';
-      return `<td style="${style}">${val}</td>`;
+      let style = mapped ? 'color:var(--text);font-weight:500;' : 'color:var(--text3);';
+      let displayVal = val;
+      if(mapped && moneyFields.includes(mapped[0])){
+        const num = Number(String(val).replace(/[,$%\s]/g,''));
+        if(!isNaN(num) && val !== ''){
+          displayVal = fmtMoneyShort(num);
+          style += "font-family:'DM Mono',monospace;color:var(--green);";
+        }
+      }
+      return `<td style="${style}">${displayVal}</td>`;
     }).join('');
     return `<tr><td style="color:var(--text3);font-size:11px;">${ri+1}</td>${cells}</tr>`;
   }).join('');
@@ -2901,9 +2906,7 @@ function rebuildFromHistory(){
     const metas = etlGetNumCol(data, map, 'meta');
     const reals = etlGetNumCol(data, map, 'real');
     const nuevos = etlGetNumCol(data, map, 'nuevos');
-    const gmvNuevos = etlGetNumCol(data, map, 'gmv_nuevos');
     const perdidos = etlGetNumCol(data, map, 'perdidos');
-    const gmvPerdidos = etlGetNumCol(data, map, 'gmv_perdidos');
     const utilidad = etlGetNumCol(data, map, 'utilidad');
     const leadsMkt = etlGetNumCol(data, map, 'leads_mkt');
     const leadsPropios = etlGetNumCol(data, map, 'leads_propios');
@@ -2940,7 +2943,7 @@ function rebuildFromHistory(){
       // Monthly aggregation (current month override for same label)
       if(months && months[i]){
         const mKey = months[i];
-        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0, utilidad:0, leadsMkt:0, leadsPropios:0};
+        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0, perdidos:0, utilidad:0, leadsMkt:0, leadsPropios:0};
         if(gmvs) monthlyData[mKey].gmv += gmvs[i] || 0;
         if(bookings) monthlyData[mKey].bookings += bookings[i] || 0;
         if(packages) monthlyData[mKey].packages += packages[i] || 0;
@@ -2948,9 +2951,7 @@ function rebuildFromHistory(){
         if(metas) monthlyData[mKey].meta = metas[i] || monthlyData[mKey].meta;
         if(reals) monthlyData[mKey].real += reals[i] || 0;
         if(nuevos) monthlyData[mKey].nuevos += nuevos[i] || 0;
-        if(gmvNuevos) monthlyData[mKey].gmvNuevos += gmvNuevos[i] || 0;
         if(perdidos) monthlyData[mKey].perdidos += perdidos[i] || 0;
-        if(gmvPerdidos) monthlyData[mKey].gmvPerdidos += gmvPerdidos[i] || 0;
         if(utilidad) monthlyData[mKey].utilidad += utilidad[i] || 0;
         if(leadsMkt) monthlyData[mKey].leadsMkt += leadsMkt[i] || 0;
         if(leadsPropios) monthlyData[mKey].leadsPropios += leadsPropios[i] || 0;
@@ -2967,7 +2968,7 @@ function rebuildFromHistory(){
         const kamName = kams[i];
         if(gmvs) kamData[kamName] = (kamData[kamName]||0) + (gmvs[i]||0);
         // KAM detail
-        if(!DATA.kamDetail[kamName]) DATA.kamDetail[kamName] = {months:{}, clients:{}, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0};
+        if(!DATA.kamDetail[kamName]) DATA.kamDetail[kamName] = {months:{}, clients:{}, nuevos:0, perdidos:0};
         const kd = DATA.kamDetail[kamName];
         const mLabel = months ? months[i] : null;
         if(mLabel){
@@ -2984,9 +2985,7 @@ function rebuildFromHistory(){
           if(gmvs) kd.clients[cid].gmv += gmvs[i]||0;
         }
         if(nuevos) kd.nuevos += nuevos[i]||0;
-        if(gmvNuevos) kd.gmvNuevos += gmvNuevos[i]||0;
         if(perdidos) kd.perdidos += perdidos[i]||0;
-        if(gmvPerdidos) kd.gmvPerdidos += gmvPerdidos[i]||0;
       }
     });
   });
@@ -3010,19 +3009,19 @@ function rebuildFromHistory(){
   }
 
   // Apply nuevos
-  const nuevosLabels = monthLabels.filter(m => monthlyData[m].nuevos > 0 || monthlyData[m].gmvNuevos > 0);
+  const nuevosLabels = monthLabels.filter(m => monthlyData[m].nuevos > 0);
   if(nuevosLabels.length > 0){
     DATA.nuevos.labels = nuevosLabels;
     DATA.nuevos.count = nuevosLabels.map(m => monthlyData[m].nuevos);
-    DATA.nuevos.gmv = nuevosLabels.map(m => monthlyData[m].gmvNuevos);
+    DATA.nuevos.gmv = nuevosLabels.map(() => 0);
   }
 
   // Apply perdidos
-  const perdidosLabels = monthLabels.filter(m => monthlyData[m].perdidos > 0 || monthlyData[m].gmvPerdidos > 0);
+  const perdidosLabels = monthLabels.filter(m => monthlyData[m].perdidos > 0);
   if(perdidosLabels.length > 0){
     DATA.perdidos.labels = perdidosLabels;
     DATA.perdidos.count = perdidosLabels.map(m => monthlyData[m].perdidos);
-    DATA.perdidos.gmv = perdidosLabels.map(m => monthlyData[m].gmvPerdidos);
+    DATA.perdidos.gmv = perdidosLabels.map(() => 0);
   }
 
   // Apply utilidad
@@ -3178,7 +3177,7 @@ function renderKamSections(){
 
   let html = '';
   DATA.kamGMV.labels.forEach((kamName, ki) => {
-    const detail = DATA.kamDetail[kamName] || {months:{}, clients:{}, nuevos:0, gmvNuevos:0, perdidos:0, gmvPerdidos:0};
+    const detail = DATA.kamDetail[kamName] || {months:{}, clients:{}, nuevos:0, perdidos:0};
     const totalGmv = DATA.kamGMV.data[ki] || 0;
     const color = kamColors[ki % kamColors.length];
 
@@ -3269,12 +3268,12 @@ function renderKamSections(){
           <div class="kpi-card green" style="margin:0;">
             <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
             <div class="kpi-value" style="font-size:20px;">${detail.nuevos > 0 ? detail.nuevos : 'NA'}</div>
-            <div class="kpi-sub">${detail.gmvNuevos > 0 ? 'GMV: '+fmtMoneyShort(detail.gmvNuevos) : 'Sin datos'}</div>
+            <div class="kpi-sub">Clientes ganados</div>
           </div>
           <div class="kpi-card red" style="margin:0;">
             <div class="kpi-label"><i class="ti ti-users-minus"></i> Clientes Perdidos</div>
             <div class="kpi-value" style="font-size:20px;">${detail.perdidos > 0 ? detail.perdidos : 'NA'}</div>
-            <div class="kpi-sub">${detail.gmvPerdidos > 0 ? 'GMV: '+fmtMoneyShort(detail.gmvPerdidos) : 'Sin datos'}</div>
+            <div class="kpi-sub">Clientes perdidos</div>
           </div>
         </div>
 
