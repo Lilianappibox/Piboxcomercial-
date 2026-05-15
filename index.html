@@ -519,28 +519,28 @@
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total</div>
-        <div class="kpi-value" id="kpi-gmv">$5.38B</div>
-        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +12.4%</span> vs. año anterior</div>
+        <div class="kpi-value" id="kpi-gmv">$0</div>
+        <div class="kpi-sub" id="kpi-gmv-sub">Sin datos cargados</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
-        <div class="kpi-value" id="kpi-nuevos">109</div>
-        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +23</span> vs. mes anterior</div>
+        <div class="kpi-value" id="kpi-nuevos">0</div>
+        <div class="kpi-sub">Según datos cargados</div>
       </div>
       <div class="kpi-card red">
         <div class="kpi-label"><i class="ti ti-user-minus"></i> Clientes Perdidos</div>
-        <div class="kpi-value" id="kpi-perdidos">82</div>
-        <div class="kpi-sub"><span class="delta-down"><i class="ti ti-trending-down" style="font-size:12px"></i> -15</span> tasa de churn</div>
+        <div class="kpi-value" id="kpi-perdidos">0</div>
+        <div class="kpi-sub">Según datos cargados</div>
       </div>
       <div class="kpi-card teal">
         <div class="kpi-label"><i class="ti ti-check"></i> Efectividad Ops</div>
-        <div class="kpi-value" id="kpi-efect">97.7%</div>
-        <div class="kpi-sub"><span class="delta-up"><i class="ti ti-trending-up" style="font-size:12px"></i> +0.5pp</span> vs. mes anterior</div>
+        <div class="kpi-value" id="kpi-efect">0.0%</div>
+        <div class="kpi-sub">Promedio operativo</div>
       </div>
       <div class="kpi-card amber">
-        <div class="kpi-label"><i class="ti ti-package"></i> Bookings (May)</div>
-        <div class="kpi-value">7,639</div>
-        <div class="kpi-sub"><span class="delta-neutral">Parcial</span> · Cierra 31 may</div>
+        <div class="kpi-label"><i class="ti ti-package"></i> Bookings</div>
+        <div class="kpi-value" id="kpi-bookings">0</div>
+        <div class="kpi-sub" id="kpi-bookings-sub">Total acumulado</div>
       </div>
     </div>
 
@@ -549,31 +549,16 @@
       <div class="insight-head">
         <i class="ti ti-sparkles"></i>
         <div>
-          <div class="insight-head-text">Resumen Ejecutivo — IA Insights</div>
-          <div class="insight-head-sub">Generado automáticamente · Mayo 2026</div>
+          <div class="insight-head-text">Resumen Ejecutivo — Insights</div>
+          <div class="insight-head-sub">Generado a partir de los datos cargados</div>
         </div>
         <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;" onclick="refreshInsights()"><i class="ti ti-refresh"></i> Actualizar</button>
       </div>
-      <div class="insights-grid">
+      <div class="insights-grid" id="dynamic-insights">
         <div class="insight-item">
-          <div class="insight-type critical">🔴 Crítico</div>
-          <div class="insight-text">Cumplimiento de metas por debajo del 85% en todos los meses de 2026. El mejor mes fue marzo (82.9%). Se requiere revisión del target.</div>
-          <div class="insight-meta">Fuente: METAS COMERCIALES · Confianza 94%</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-type opportunity">🟢 Oportunidad</div>
-          <div class="insight-text">Johana Navarrete lidera con $1.62B GMV (+6.3% sobre Nathy Olivera). Alta concentración en 1 KAM — riesgo de dependencia.</div>
-          <div class="insight-meta">Fuente: GMV por KAM · Confianza 91%</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-type warning">🟡 Atención</div>
-          <div class="insight-text">Clientes nuevos en mayo solo generaron $3.5M GMV vs. $14.5M en abril — posible estacionalidad o pipeline débil de cierre.</div>
-          <div class="insight-meta">Fuente: Clientes Nuevos · Confianza 88%</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-type info">🔵 Positivo</div>
-          <div class="insight-text">Efectividad operativa en 97.7% en abril 2026 — máximo histórico del dataset. Top 3 clientes mantienen >98% de efectividad.</div>
-          <div class="insight-meta">Fuente: Comportamiento Operativo · Confianza 97%</div>
+          <div class="insight-type info">🔵 Info</div>
+          <div class="insight-text">Carga datos desde el módulo <strong>Cargar Datos</strong> para generar insights automáticos sobre GMV, Metas, KAMs y Clientes.</div>
+          <div class="insight-meta">Ve a Cargar Datos para comenzar</div>
         </div>
       </div>
     </div>
@@ -678,39 +663,16 @@
       </div>
     </div>
     <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('kam','juliana')">Juliana Rojas</div>
-      <div class="tab" onclick="switchTab('kam','johana')">Johana Navarrete</div>
-    </div>
-    <div id="kam-juliana">
-    <div class="kpi-grid">
-      <div class="kpi-card blue"><div class="kpi-label">Prospectos Propios</div><div class="kpi-value">53</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card teal"><div class="kpi-label">Prospectos MKT</div><div class="kpi-value">53</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Prospectos Referidos</div><div class="kpi-value">22</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">GMV KAM</div><div class="kpi-value money-val" data-cop="715353919">—</div><div class="kpi-sub">Acumulado 2026</div></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Prospección mensual — Juliana Rojas</div>
-      <div class="chart-sub">Propios · Referidos · MKT</div>
-      <div class="chart-canvas-wrap" style="height:220px;">
-        <canvas id="chart-kam-jul" role="img" aria-label="Prospección mensual Juliana Rojas"></canvas>
+    <!-- KAM tabs are now dynamic -->
+    <div id="kam-content">
+      <div id="kam-dynamic-kpis" class="kpi-grid" style="margin-bottom:16px;"></div>
+      <div class="chart-card">
+        <div class="chart-title" id="kam-chart-title">Desempeño KAM</div>
+        <div class="chart-sub">GMV por KAM · Carga datos para visualizar</div>
+        <div class="chart-canvas-wrap" style="height:240px;">
+          <canvas id="chart-kam-bar"></canvas>
+        </div>
       </div>
-    </div>
-    </div>
-    <div id="kam-johana" style="display:none">
-    <div class="kpi-grid">
-      <div class="kpi-card blue"><div class="kpi-label">Prospectos Propios</div><div class="kpi-value">13</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card teal"><div class="kpi-label">Prospectos MKT</div><div class="kpi-value">15</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Prospectos Referidos</div><div class="kpi-value">32</div><div class="kpi-sub">Ene–Mar 2026</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">GMV KAM</div><div class="kpi-value money-val" data-cop="1623720138">—</div><div class="kpi-sub">Acumulado 2026</div></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Prospección mensual — Johana Navarrete</div>
-      <div class="chart-sub">Propios · Referidos · MKT</div>
-      <div class="chart-canvas-wrap" style="height:220px;">
-        <canvas id="chart-kam-joh" role="img" aria-label="Prospección mensual Johana Navarrete"></canvas>
-      </div>
-    </div>
     </div>
   </div>
 
@@ -729,41 +691,16 @@
     <div id="cli-nuevos">
       <div class="chart-card" style="margin-bottom:16px">
         <div class="chart-title">GMV Clientes Nuevos por Mes</div>
-        <div class="chart-sub">Enero — Mayo 2026</div>
+        <div class="chart-sub">Según datos cargados</div>
         <div class="chart-canvas-wrap" style="height:200px">
-          <canvas id="chart-nuevos" role="img" aria-label="GMV clientes nuevos por mes 2026"></canvas>
+          <canvas id="chart-nuevos" role="img" aria-label="GMV clientes nuevos por mes"></canvas>
         </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header"><div class="table-header-title">Clientes nuevos recientes</div></div>
-        <table>
-          <thead><tr><th>Mes</th><th>Cliente</th><th>KAM</th><th>1er Servicio</th><th>GMV</th></tr></thead>
-          <tbody>
-            <tr><td><span class="tag tag-blue">Abr 2026</span></td><td class="bold">Hell of the north store</td><td>Juliana Rojas</td><td>Ene 2026</td><td class="money-val" data-cop="2580000" style="color:var(--green);font-family:'DM Mono',monospace">—</td></tr>
-            <tr><td><span class="tag tag-teal">Mar 2026</span></td><td class="bold">Hell of the north store</td><td>Juliana Rojas</td><td>Ene 2026</td><td class="money-val" data-cop="3550000" style="color:var(--green);font-family:'DM Mono',monospace">—</td></tr>
-            <tr><td><span class="tag tag-teal">Mar 2026</span></td><td class="bold">— Más clientes —</td><td>Varios</td><td>—</td><td style="color:var(--text3)">—</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
     <div id="cli-perdidos" style="display:none">
-      <div class="kpi-grid">
-        <div class="kpi-card red"><div class="kpi-label">Ene 2026</div><div class="kpi-value money-val" data-cop="1570000">—</div><div class="kpi-sub">GMV perdido</div></div>
-        <div class="kpi-card red"><div class="kpi-label">Feb 2026</div><div class="kpi-value money-val" data-cop="410000">—</div><div class="kpi-sub">GMV perdido</div></div>
-        <div class="kpi-card red"><div class="kpi-label">Mar 2026</div><div class="kpi-value money-val" data-cop="3760000">—</div><div class="kpi-sub">GMV perdido</div></div>
-        <div class="kpi-card red"><div class="kpi-label">Abr 2026</div><div class="kpi-value money-val" data-cop="2130000">—</div><div class="kpi-sub">GMV perdido</div></div>
-      </div>
-      <div class="table-card">
-        <div class="table-header"><div class="table-header-title">Clientes perdidos</div></div>
-        <table>
-          <thead><tr><th>Mes</th><th>Cliente</th><th>País</th><th>KAM</th><th>GMV Anterior</th></tr></thead>
-          <tbody>
-            <tr><td>Ene 2026</td><td class="bold">GRUPO DE INVERSIONES COLOMBIANO SAS</td><td>CO</td><td>Pibox</td><td class="money-val" data-cop="754000" style="color:var(--red)">—</td></tr>
-            <tr><td>Ene 2026</td><td class="bold">Cigarrillos Ancied</td><td>CO</td><td>Pibox</td><td class="money-val" data-cop="215000" style="color:var(--red)">—</td></tr>
-            <tr><td>Ene 2026</td><td class="bold">Atabares</td><td>CO</td><td>Pibox</td><td class="money-val" data-cop="167000" style="color:var(--red)">—</td></tr>
-            <tr><td>Mar 2026</td><td class="bold">Varios</td><td>—</td><td>—</td><td class="money-val" data-cop="3760000" style="color:var(--red)">—</td></tr>
-          </tbody>
-        </table>
+      <div style="text-align:center;padding:40px;color:var(--text3);">
+        <i class="ti ti-users-minus" style="font-size:32px;display:block;margin-bottom:8px;"></i>
+        Carga datos con el campo "Clientes Perdidos" para ver esta sección
       </div>
     </div>
     <div id="cli-top" style="display:none">
@@ -781,11 +718,11 @@
   <div class="view" id="view-operativo">
     <div class="section-head"><div><div class="section-title">Comportamiento Operativo</div><div class="section-sub">Efectividad · Bookings · Packages · GMV mensual</div></div></div>
     <div class="filter-bar period-filter-bar" style="margin-bottom:16px;"></div>
-    <div class="kpi-grid">
-      <div class="kpi-card teal"><div class="kpi-label">Efectividad Promedio 2025</div><div class="kpi-value">96.1%</div><div class="kpi-sub">Sobre 12 meses</div></div>
-      <div class="kpi-card blue"><div class="kpi-label">Bookings Totales 2025</div><div class="kpi-value">638K</div><div class="kpi-sub">Suma anual</div></div>
-      <div class="kpi-card green"><div class="kpi-label">Packages 2025</div><div class="kpi-value">1.43M</div><div class="kpi-sub">Total entregado</div></div>
-      <div class="kpi-card amber"><div class="kpi-label">Mejor mes</div><div class="kpi-value">Dic 2025</div><div class="kpi-sub"><span class="money-val" data-cop="1765460744">—</span> GMV</div></div>
+    <div class="kpi-grid" id="ops-kpis">
+      <div class="kpi-card teal"><div class="kpi-label">Efectividad Promedio</div><div class="kpi-value" id="ops-efect-avg">0.0%</div><div class="kpi-sub">Sobre datos cargados</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Bookings Totales</div><div class="kpi-value" id="ops-bookings-total">0</div><div class="kpi-sub">Suma acumulada</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Packages Totales</div><div class="kpi-value" id="ops-packages-total">0</div><div class="kpi-sub">Total entregado</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Períodos</div><div class="kpi-value" id="ops-periods">0</div><div class="kpi-sub">Meses con datos</div></div>
     </div>
     <div class="charts-grid">
       <div class="chart-card">
@@ -1594,30 +1531,13 @@
 <script>
 // ─── DATA ───
 const DATA = {
-  ops: {
-    labels: ['Ene25','Feb25','Mar25','Abr25','May25','Jun25','Jul25','Ago25','Sep25','Oct25','Nov25','Dic25','Ene26','Feb26','Mar26','Abr26','May26'],
-    gmv: [1201914698,1195805469,1348109585,1310516436,1456794651,1367139572,1595604072,1543415578,1426171979,1413384857,1489506405,1765460744,1301592891,1236711990,1318575524,1291401190,235470949],
-    efect: [97.04,97.14,96.68,97.05,96.24,96.27,96.28,96.16,96.26,95.64,94.54,93.97,96.48,97.05,97.60,97.68,96.69],
-    bookings: [51798,51434,55913,51650,57063,50417,59174,55534,56132,55805,54307,57427,45329,44557,46355,43545,7639],
-    packages: [106498,110323,118357,106431,123387,114223,143646,136433,129281,124287,122023,127582,103675,91703,95909,94799,16867]
-  },
-  topClients: [
-    {name:'TADA MG Viernes - Domingo', gmv:256601009, completed:2145, canceled:29, total:2268, eff:0.9298},
-    {name:'Cruz Verde Mostrador Nac.', gmv:141863650, completed:10054, canceled:969, total:11023, eff:0.9770},
-    {name:'TADA MG Lunes-Jueves ⚡', gmv:121084375, completed:1173, canceled:31, total:1226, eff:0.9871},
-    {name:'Cruz Verde Integración', gmv:100333444, completed:null, canceled:null, total:null, eff:0.9844},
-    {name:'Dislicores', gmv:86091816, completed:null, canceled:null, total:null, eff:0.9906},
-    {name:'Drogueria Cutis SA', gmv:80261600, completed:null, canceled:null, total:null, eff:0.9914},
-    {name:'FUXION', gmv:69957100, completed:null, canceled:null, total:null, eff:1.0},
-    {name:'Calypso', gmv:45567600, completed:null, canceled:null, total:null, eff:0.9228},
-    {name:'HORTIFRUT COLOMBIA', gmv:43740950, completed:null, canceled:null, total:null, eff:0.9927},
-    {name:'Colanta', gmv:39064950, completed:null, canceled:null, total:null, eff:0.8864}
-  ],
-  kamGMV: {labels:['Johana Navarrete','Nathy Olivera','Pipe Pibox','Juliana Rojas','Pibox'], data:[1623720138,1526571107,1246344507,715353919,270133899]},
-  nuevos: {labels:['Ene','Feb','Mar','Abr','May'], data:[2769950,7061800,12599600,14523100,3541800]},
-  metas: {labels:['Ene','Feb','Mar','Abr'], meta:[1550000000,1580000000,1600000000,1654000000], real:[1310990287,1245169273,1325916657,1290610319]},
-  kamJul: {labels:['Ene','Feb','Mar'], propios:[29,6,24], referidos:[6,7,9], mkt:[14,21,18]},
-  kamJoh: {labels:['Ene','Feb','Mar'], propios:[10,2,1], referidos:[2,8,22], mkt:[0,0,15]}
+  ops: { labels: [], gmv: [], efect: [], bookings: [], packages: [] },
+  topClients: [],
+  kamGMV: {labels:[], data:[]},
+  nuevos: {labels:[], data:[]},
+  metas: {labels:[], meta:[], real:[]},
+  kamJul: {labels:[], propios:[], referidos:[], mkt:[]},
+  kamJoh: {labels:[], propios:[], referidos:[], mkt:[]}
 };
 
 // ─── CURRENCY SYSTEM ───
@@ -2615,11 +2535,35 @@ function resetDataToEmpty(){
 
 function refreshDashboard(){
   const totalGMV = DATA.ops.gmv.reduce((a,b) => a+b, 0);
-  const kpiGmv = document.getElementById('kpi-gmv');
-  if(kpiGmv) kpiGmv.textContent = fmtMoneyShort(totalGMV);
+  const totalBookings = DATA.ops.bookings.reduce((a,b) => a+b, 0);
+  const totalPackages = DATA.ops.packages.reduce((a,b) => a+b, 0);
   const avgEfect = DATA.ops.efect.length > 0 ? (DATA.ops.efect.reduce((a,b)=>a+b,0)/DATA.ops.efect.length).toFixed(1) : '0.0';
+
+  // Resumen ejecutivo KPIs
+  const kpiGmv = document.getElementById('kpi-gmv');
+  if(kpiGmv) kpiGmv.textContent = totalGMV > 0 ? fmtMoneyShort(totalGMV) : '$0';
   const kpiEfect = document.getElementById('kpi-efect');
   if(kpiEfect) kpiEfect.textContent = avgEfect + '%';
+  const kpiBookings = document.getElementById('kpi-bookings');
+  if(kpiBookings) kpiBookings.textContent = totalBookings.toLocaleString('es-CO');
+  const kpiGmvSub = document.getElementById('kpi-gmv-sub');
+  if(kpiGmvSub) kpiGmvSub.textContent = DATA.ops.labels.length > 0 ? DATA.ops.labels.length + ' períodos cargados' : 'Sin datos cargados';
+
+  // Operativo KPIs
+  const opsEfect = document.getElementById('ops-efect-avg');
+  if(opsEfect) opsEfect.textContent = avgEfect + '%';
+  const opsBookings = document.getElementById('ops-bookings-total');
+  if(opsBookings) opsBookings.textContent = totalBookings.toLocaleString('es-CO');
+  const opsPackages = document.getElementById('ops-packages-total');
+  if(opsPackages) opsPackages.textContent = totalPackages.toLocaleString('es-CO');
+  const opsPeriods = document.getElementById('ops-periods');
+  if(opsPeriods) opsPeriods.textContent = DATA.ops.labels.length;
+
+  // Dynamic insights
+  generateDynamicInsights();
+
+  // KAM dynamic
+  renderKamDynamic();
 
   setTimeout(()=>{
     initMainCharts();
@@ -2628,6 +2572,56 @@ function refreshDashboard(){
     initClienteCharts();
     updateStaticMoneyValues();
   }, 200);
+}
+
+function generateDynamicInsights(){
+  const container = document.getElementById('dynamic-insights');
+  if(!container) return;
+  if(DATA.ops.labels.length === 0){
+    container.innerHTML = '<div class="insight-item"><div class="insight-type info">🔵 Info</div><div class="insight-text">Carga datos desde el módulo <strong>Cargar Datos</strong> para generar insights automáticos.</div><div class="insight-meta">Ve a Cargar Datos para comenzar</div></div>';
+    return;
+  }
+  const insights = [];
+  const totalGMV = DATA.ops.gmv.reduce((a,b)=>a+b,0);
+  const avgGMV = totalGMV / DATA.ops.labels.length;
+
+  // GMV insight
+  insights.push({type:'info',text:`GMV total acumulado: <strong>${fmtMoneyShort(totalGMV)}</strong> en ${DATA.ops.labels.length} períodos. Promedio mensual: ${fmtMoneyShort(avgGMV)}.`,meta:'Fuente: Datos cargados'});
+
+  // Metas
+  if(DATA.metas.labels.length > 0){
+    const totalMeta = DATA.metas.meta.reduce((a,b)=>a+b,0);
+    const totalReal = DATA.metas.real.reduce((a,b)=>a+b,0);
+    const cumpl = totalMeta > 0 ? ((totalReal/totalMeta)*100).toFixed(1) : 0;
+    const type = cumpl >= 90 ? 'opportunity' : cumpl >= 80 ? 'warning' : 'critical';
+    insights.push({type,text:`Cumplimiento de metas: <strong>${cumpl}%</strong>. Real: ${fmtMoneyShort(totalReal)} vs Meta: ${fmtMoneyShort(totalMeta)}.`,meta:'Fuente: Metas comerciales'});
+  }
+
+  // Top KAM
+  if(DATA.kamGMV.labels.length > 0){
+    insights.push({type:'opportunity',text:`Top KAM: <strong>${DATA.kamGMV.labels[0]}</strong> con ${fmtMoneyShort(DATA.kamGMV.data[0])} GMV. ${DATA.kamGMV.labels.length} KAMs activos.`,meta:'Fuente: Desempeño KAM'});
+  }
+
+  // Top client
+  if(DATA.topClients.length > 0){
+    insights.push({type:'info',text:`Principal cliente: <strong>${DATA.topClients[0].name}</strong> con ${fmtMoneyShort(DATA.topClients[0].gmv)} GMV. ${DATA.topClients.length} clientes en el ranking.`,meta:'Fuente: Top Clientes'});
+  }
+
+  const typeIcons = {critical:'🔴 Crítico',warning:'🟡 Atención',opportunity:'🟢 Oportunidad',info:'🔵 Positivo'};
+  container.innerHTML = insights.map(ins => `<div class="insight-item"><div class="insight-type ${ins.type}">${typeIcons[ins.type]}</div><div class="insight-text">${ins.text}</div><div class="insight-meta">${ins.meta}</div></div>`).join('');
+}
+
+function renderKamDynamic(){
+  const container = document.getElementById('kam-dynamic-kpis');
+  if(!container) return;
+  if(DATA.kamGMV.labels.length === 0){
+    container.innerHTML = '<div class="kpi-card blue" style="grid-column:1/-1;text-align:center;"><div class="kpi-label">Sin datos de KAM</div><div class="kpi-value" style="font-size:14px;">Carga datos con el campo KAM</div></div>';
+    return;
+  }
+  const colors = ['blue','green','amber','teal','red'];
+  container.innerHTML = DATA.kamGMV.labels.map((name, i) =>
+    `<div class="kpi-card ${colors[i%colors.length]}"><div class="kpi-label">${name}</div><div class="kpi-value" style="font-size:18px;">${fmtMoneyShort(DATA.kamGMV.data[i])}</div><div class="kpi-sub">GMV acumulado</div></div>`
+  ).join('');
 }
 
 // ── FORMAT (reset all) ──
@@ -2916,25 +2910,21 @@ function initOpsCharts(){
   });
 }
 
-function initKamCharts(){ initKamChart('jul'); }
-function initKamChart(k){
-  const id = 'kam-'+k;
-  destroyChart(id);
-  const d = k==='jul'?DATA.kamJul:DATA.kamJoh;
-  const ctx = document.getElementById('chart-'+id);
+function initKamCharts(){
+  destroyChart('kam-bar');
+  if(DATA.kamGMV.labels.length === 0) return;
+  const ctx = document.getElementById('chart-kam-bar');
   if(!ctx) return;
-  charts[id] = new Chart(ctx,{
+  const colors = ['rgba(79,110,247,0.8)','rgba(34,200,122,0.7)','rgba(245,166,35,0.7)','rgba(0,205,184,0.7)','rgba(240,84,90,0.7)'];
+  charts['kam-bar'] = new Chart(ctx,{
     type:'bar',
     data:{
-      labels: d.labels,
-      datasets:[
-        {label:'Propios',data:d.propios,backgroundColor:'rgba(79,110,247,0.8)',borderRadius:4},
-        {label:'Referidos',data:d.referidos,backgroundColor:'rgba(34,200,122,0.7)',borderRadius:4},
-        {label:'MKT',data:d.mkt,backgroundColor:'rgba(0,205,184,0.6)',borderRadius:4}
-      ]
+      labels: DATA.kamGMV.labels,
+      datasets:[{label:'GMV',data:DATA.kamGMV.data,backgroundColor:DATA.kamGMV.labels.map((_,i)=>colors[i%colors.length]),borderRadius:4}]
     },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#555d74'},grid:{color:'rgba(255,255,255,0.04)'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:chartMoneyOpts(),scales:{x:chartXAxis(),y:chartMoneyAxis()}}
   });
+  renderKamDynamic();
 }
 
 function initClienteCharts(){
@@ -3308,24 +3298,27 @@ function saveProfile(){
 }
 
 // ─── HISTÓRICO PIBOX ───
-const HIST_DATA = {
-  2025: {
-    labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
-    gmv: [1201914698,1195805469,1348109585,1310516436,1456794651,1367139572,1595604072,1543415578,1426171979,1413384857,1489506405,1765460744],
-    meta: [1200000000,1200000000,1300000000,1300000000,1400000000,1350000000,1500000000,1500000000,1400000000,1400000000,1450000000,1700000000],
-    bookings: [51798,51434,55913,51650,57063,50417,59174,55534,56132,55805,54307,57427],
-    packages: [106498,110323,118357,106431,123387,114223,143646,136433,129281,124287,122023,127582],
-    efect: [97.04,97.14,96.68,97.05,96.24,96.27,96.28,96.16,96.26,95.64,94.54,93.97]
-  },
-  2026: {
-    labels: ['Ene','Feb','Mar','Abr','May'],
-    gmv: [1301592891,1236711990,1318575524,1291401190,235470949],
-    meta: [1550000000,1580000000,1600000000,1654000000,1700000000],
-    bookings: [45329,44557,46355,43545,7639],
-    packages: [103675,91703,95909,94799,16867],
-    efect: [96.48,97.05,97.60,97.68,96.69]
-  }
-};
+// HIST_DATA se alimenta dinámicamente desde DATA.ops al renderizar
+function buildHistData(){
+  const hist = {};
+  if(DATA.ops.labels.length === 0) return hist;
+  DATA.ops.labels.forEach((label, i) => {
+    const parsed = parseLabelDate(label);
+    const year = parsed ? parsed.year : 2026;
+    if(!hist[year]) hist[year] = {labels:[],gmv:[],meta:[],bookings:[],packages:[],efect:[]};
+    const monthName = parsed ? ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][parsed.month-1] : label;
+    hist[year].labels.push(monthName);
+    hist[year].gmv.push(DATA.ops.gmv[i]||0);
+    hist[year].bookings.push(DATA.ops.bookings[i]||0);
+    hist[year].packages.push(DATA.ops.packages[i]||0);
+    hist[year].efect.push(DATA.ops.efect[i]||0);
+    // Match metas by label
+    const metaIdx = DATA.metas.labels.indexOf(label) !== -1 ? DATA.metas.labels.indexOf(label) :
+      DATA.metas.labels.indexOf(monthName) !== -1 ? DATA.metas.labels.indexOf(monthName) : -1;
+    hist[year].meta.push(metaIdx !== -1 ? (DATA.metas.meta[metaIdx]||0) : 0);
+  });
+  return hist;
+}
 
 const SEASONAL_PATTERNS = [
   {month:'Enero', pattern:'Inicio de año lento. Recuperación post-festividades. Empresas ajustan presupuestos.', ecom:'Rebajas de temporada, liqwidaciones de inventario enero. Bajo volumen general vs diciembre (-40% promedio CCCE).', impact:'Medio-Bajo', impactClass:'tag-amber', rec:'Enfoque en retención de clientes existentes. Campañas de reactivación post-navidad.'},
@@ -3357,7 +3350,8 @@ function renderHistorico(){
 function renderHistYearTabs(){
   const container = document.getElementById('hist-year-tabs');
   if(!container) return;
-  const years = Object.keys(HIST_DATA).sort();
+  const hd = buildHistData();
+  const years = Object.keys(hd).sort();
   container.innerHTML = years.map(y =>
     `<div class="hist-year-tab ${parseInt(y)===histSelectedYear?'active':''}" onclick="histSelectedYear=${y};renderHistorico()">${y}</div>`
   ).join('');
@@ -3366,7 +3360,8 @@ function renderHistYearTabs(){
 function renderHistKPIs(){
   const container = document.getElementById('hist-kpis');
   if(!container) return;
-  const d = HIST_DATA[histSelectedYear];
+  const hd = buildHistData();
+  const d = hd[histSelectedYear];
   if(!d) return;
 
   const totalGMV = d.gmv.reduce((a,b)=>a+b,0);
@@ -3389,7 +3384,8 @@ function renderHistTable(){
   const tbody = document.getElementById('hist-table-body');
   const tag = document.getElementById('hist-table-tag');
   if(!tbody) return;
-  const d = HIST_DATA[histSelectedYear];
+  const hd = buildHistData();
+  const d = hd[histSelectedYear];
   if(!d) return;
 
   tag.textContent = histSelectedYear;
@@ -3418,8 +3414,9 @@ function renderHistCharts(){
   const allMeta = [];
   const allCumpl = [];
 
-  Object.keys(HIST_DATA).sort().forEach(year => {
-    const d = HIST_DATA[year];
+  const hd2 = buildHistData();
+  Object.keys(hd2).sort().forEach(year => {
+    const d = hd2[year];
     d.labels.forEach((l, i) => {
       allLabels.push(l + ' ' + String(year).slice(2));
       allGmv.push(d.gmv[i]);
@@ -3469,8 +3466,9 @@ function getPredictions(){
   // Build monthly averages from all historical data
   const monthlyGmv = {};
   const monthlyGrowth = {};
-  Object.keys(HIST_DATA).forEach(year => {
-    const d = HIST_DATA[year];
+  const hd = buildHistData();
+  Object.keys(hd).forEach(year => {
+    const d = hd[year];
     d.labels.forEach((l, i) => {
       const mIdx = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].indexOf(l);
       if(mIdx === -1) return;
@@ -3496,20 +3494,25 @@ function getPredictions(){
   };
 
   // YoY growth trend
-  const gmv2025Total = HIST_DATA[2025].gmv.reduce((a,b)=>a+b,0);
-  const gmv2026Partial = HIST_DATA[2026].gmv.reduce((a,b)=>a+b,0);
-  const months2026 = HIST_DATA[2026].labels.length;
-  const avgMonthly2026 = gmv2026Partial / months2026;
-  const avgMonthly2025 = gmv2025Total / 12;
-  const yoyGrowth = avgMonthly2026 / avgMonthly2025;
+  const allYears = Object.keys(hd).sort();
+  const latestYear = allYears[allYears.length-1];
+  const prevYear = allYears.length > 1 ? allYears[allYears.length-2] : null;
+  const latestData = hd[latestYear];
+  const prevData = prevYear ? hd[prevYear] : null;
+  const totalLatest = latestData ? latestData.gmv.reduce((a,b)=>a+b,0) : 0;
+  const totalPrev = prevData ? prevData.gmv.reduce((a,b)=>a+b,0) : totalLatest;
+  const monthsLatest = latestData ? latestData.labels.length : 1;
+  const avgMonthlyLatest = totalLatest / Math.max(monthsLatest, 1);
+  const avgMonthlyPrev = totalPrev / Math.max(prevData ? prevData.labels.length : 1, 1);
+  const yoyGrowth = avgMonthlyPrev > 0 ? avgMonthlyLatest / avgMonthlyPrev : 1;
 
-  // Generate predictions for remaining 2026 months
-  const lastDataMonth = months2026 - 1; // May = 4
+  // Generate predictions for remaining months of latest year
   const predictions = [];
   const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  if(!latestData || monthsLatest >= 12) return predictions;
 
-  for(let m = months2026; m < 12; m++){
-    const historicalAvg = monthlyGmv[m] ? monthlyGmv[m].reduce((a,b)=>a+b,0)/monthlyGmv[m].length : avgMonthly2025;
+  for(let m = monthsLatest; m < 12; m++){
+    const historicalAvg = monthlyGmv[m] ? monthlyGmv[m].reduce((a,b)=>a+b,0)/monthlyGmv[m].length : avgMonthlyPrev;
     const predicted = Math.round(historicalAvg * yoyGrowth * ecomMultipliers[m]);
     const confidence = monthlyGmv[m] && monthlyGmv[m].length >= 1 ? 85 : 70;
 
@@ -3591,8 +3594,9 @@ function renderSeasonalTable(){
 
 function exportHistorico(){
   const csv = ['Año,Mes,GMV,Meta,Cumplimiento%,Bookings,Packages,Efectividad%'];
-  Object.keys(HIST_DATA).sort().forEach(year => {
-    const d = HIST_DATA[year];
+  const hd2 = buildHistData();
+  Object.keys(hd2).sort().forEach(year => {
+    const d = hd2[year];
     d.labels.forEach((l, i) => {
       const cumpl = d.meta[i]>0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : '0';
       csv.push(`${year},${l},${d.gmv[i]},${d.meta[i]},${cumpl},${d.bookings[i]},${d.packages[i]},${d.efect[i]}`);
