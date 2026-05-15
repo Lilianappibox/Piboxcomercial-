@@ -586,6 +586,37 @@
       </div>
     </div>
 
+    <!-- GMV por Ciudad -->
+    <div class="charts-grid" style="margin-bottom:20px;">
+      <div class="chart-card">
+        <div class="chart-title">GMV por Ciudad</div>
+        <div class="chart-sub">Participación y distribución geográfica</div>
+        <div class="chart-canvas-wrap" style="height:280px">
+          <canvas id="chart-city-gmv"></canvas>
+        </div>
+      </div>
+      <div class="chart-card" style="position:relative;overflow:hidden;">
+        <div class="chart-title">Mapa de presencia — Colombia</div>
+        <div class="chart-sub">Toca una ciudad para ver el GMV</div>
+        <div id="map-container" style="position:relative;width:100%;height:280px;display:flex;align-items:center;justify-content:center;">
+          <svg id="colombia-map" viewBox="0 0 400 500" style="height:100%;max-width:100%;" xmlns="http://www.w3.org/2000/svg">
+            <!-- Colombia silhouette simplified -->
+            <path d="M180 20C160 25 140 40 120 65C100 90 85 110 80 140C75 160 70 180 75 200C72 220 65 240 60 260C55 275 58 290 65 310C70 325 80 340 85 360C90 375 100 390 115 400C130 410 145 415 160 420C170 425 180 430 190 435C200 440 210 438 220 430C230 420 240 408 250 395C260 380 268 365 275 345C280 325 285 305 288 285C290 265 292 245 290 225C288 205 285 185 280 165C278 150 275 135 270 120C265 105 258 90 248 78C238 65 225 55 212 45C200 35 190 25 180 20Z" fill="var(--bg3)" stroke="var(--border2)" stroke-width="1.5"/>
+            <!-- Department borders (simplified) -->
+            <path d="M140 140C155 135 170 130 185 135M120 200C140 195 160 192 180 195M100 260C120 255 145 252 165 255M130 320C150 315 170 312 190 315" stroke="var(--border)" stroke-width="0.5" fill="none" opacity="0.4"/>
+          </svg>
+          <!-- City dots will be rendered here by JS -->
+          <div id="map-dots" style="position:absolute;inset:0;pointer-events:none;"></div>
+          <!-- Tooltip -->
+          <div id="map-tooltip" style="display:none;position:absolute;background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:8px 12px;z-index:10;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+            <div id="map-tip-city" style="font-size:13px;font-weight:600;color:var(--text);"></div>
+            <div id="map-tip-gmv" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--green);margin-top:2px;"></div>
+            <div id="map-tip-pct" style="font-size:11px;color:var(--text3);margin-top:1px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Top Clients Table -->
     <div class="table-card">
       <div class="table-header">
@@ -1647,6 +1678,7 @@ const DATA = {
   kamGMV: {labels:[], data:[]},
   nuevos: {labels:[], count:[], gmv:[]},
   perdidos: {labels:[], count:[], gmv:[]},
+  ciudades: {},
   utilidad: {labels:[], data:[]},
   leads: {labels:[], mkt:[], propios:[]},
   metas: {labels:[], meta:[], real:[]},
@@ -2266,6 +2298,10 @@ function applyFilters(){
     kpiCumplCard.style.borderTopColor = cumplColor(parseFloat(cumplPct));
   }
 
+  // City chart & map
+  renderCityChart();
+  renderCityMap();
+
   // KAM cumplimiento table in overview
   renderOverviewKamTable();
 
@@ -2356,6 +2392,7 @@ const ETL_FIELDS = [
   {key:'efect',     label:'Efectividad %',    desc:'Porcentaje de efectividad'},
   {key:'kam',       label:'KAM',              desc:'Nombre del KAM'},
   {key:'cliente',   label:'Cliente',          desc:'Nombre del cliente'},
+  {key:'ciudad',    label:'Ciudad',           desc:'Ciudad de operación'},
   {key:'completados',label:'Completados',     desc:'Servicios completados'},
   {key:'cancelados', label:'Cancelados',      desc:'Servicios cancelados'},
   {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial'},
@@ -2471,6 +2508,7 @@ function autoMapColumns(){
     efect:      ['efectividad','effectiveness','efect','cumplimiento','tasa','rate','%'],
     kam:        ['kam','ejecutivo','vendedor','asesor','comercial','sales_rep'],
     cliente:    ['cliente','client','customer','empresa','company','razon_social','nombre'],
+    ciudad:     ['ciudad','city','municipio','sede','ubicacion','location','departamento'],
     completados:['completado','completados','completed','exitoso','exitosos','entregado','entregados'],
     cancelados: ['cancelado','cancelados','canceled','cancelled','fallido','fallidos'],
     meta:       ['meta','target','objetivo','goal'],
@@ -2716,6 +2754,7 @@ function rebuildFromHistory(){
     const efects = etlGetNumCol(data, map, 'efect');
     const kams = etlGetStrCol(data, map, 'kam');
     const clients = etlGetStrCol(data, map, 'cliente');
+    const ciudades = etlGetStrCol(data, map, 'ciudad');
     const completados = etlGetNumCol(data, map, 'completados');
     const cancelados = etlGetNumCol(data, map, 'cancelados');
     const metas = etlGetNumCol(data, map, 'meta');
@@ -2774,6 +2813,12 @@ function rebuildFromHistory(){
         if(utilidad) monthlyData[mKey].utilidad += utilidad[i] || 0;
         if(leadsMkt) monthlyData[mKey].leadsMkt += leadsMkt[i] || 0;
         if(leadsPropios) monthlyData[mKey].leadsPropios += leadsPropios[i] || 0;
+      }
+
+      // City aggregation
+      if(ciudades && ciudades[i] && gmvs){
+        const city = ciudades[i].trim();
+        if(city) DATA.ciudades[city] = (DATA.ciudades[city]||0) + (gmvs[i]||0);
       }
 
       // KAM aggregation
@@ -2860,6 +2905,7 @@ function resetDataToEmpty(){
   DATA.nuevos.labels = [];
   DATA.nuevos.count = [];
   DATA.nuevos.gmv = [];
+  DATA.ciudades = {};
   DATA.perdidos = {labels:[], count:[], gmv:[]};
   DATA.utilidad = {labels:[], data:[]};
   DATA.leads = {labels:[], mkt:[], propios:[]};
@@ -3110,6 +3156,127 @@ function renderMetasMonthlyInsights(){
       <div class="insight-text">${ins.text}</div>
       <div class="insight-meta">${ins.meta}</div>
     </div>`).join('');
+}
+
+// ─── CITY MAP & CHART ───
+const CITY_COORDS = {
+  'bogota':{x:185,y:225},'bogotá':{x:185,y:225},'medellin':{x:145,y:175},'medellín':{x:145,y:175},
+  'cali':{x:135,y:295},'barranquilla':{x:170,y:80},'cartagena':{x:145,y:95},
+  'bucaramanga':{x:200,y:170},'pereira':{x:150,y:230},'manizales':{x:155,y:220},
+  'ibague':{x:165,y:250},'ibagué':{x:165,y:250},'villavicencio':{x:210,y:245},
+  'cucuta':{x:215,y:145},'cúcuta':{x:215,y:145},'santa marta':{x:185,y:65},
+  'pasto':{x:120,y:370},'neiva':{x:160,y:290},'monteria':{x:125,y:130},'montería':{x:125,y:130},
+  'armenia':{x:145,y:240},'popayan':{x:130,y:310},'popayán':{x:130,y:310},
+  'tunja':{x:195,y:200},'sincelejo':{x:140,y:110},'valledupar':{x:200,y:100},
+  'rionegro':{x:155,y:180},'envigado':{x:148,y:178},'sabaneta':{x:146,y:179},
+  'soacha':{x:183,y:230},'chia':{x:187,y:218},'chía':{x:187,y:218},
+  'zipaquira':{x:188,y:212},'zipaquirá':{x:188,y:212},'funza':{x:180,y:223},
+  'mosquera':{x:179,y:226},'girardot':{x:170,y:260}
+};
+
+function renderCityChart(){
+  destroyChart('city-gmv');
+  const ctx = document.getElementById('chart-city-gmv');
+  if(!ctx) return;
+
+  const cities = Object.entries(DATA.ciudades).sort((a,b) => b[1] - a[1]).slice(0, 12);
+  if(cities.length === 0){
+    ctx.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:280px;color:var(--text3);font-size:13px;"><div style="text-align:center;"><i class="ti ti-map-off" style="font-size:32px;display:block;margin-bottom:8px;"></i>Carga datos con el campo "Ciudad" para ver este análisis</div></div>';
+    return;
+  }
+
+  const totalGmv = cities.reduce((a,c) => a + c[1], 0);
+  const colors = ['rgba(79,110,247,0.8)','rgba(34,200,122,0.7)','rgba(245,166,35,0.7)','rgba(0,205,184,0.7)','rgba(240,84,90,0.7)','rgba(107,132,248,0.6)','rgba(34,200,122,0.5)','rgba(245,166,35,0.5)','rgba(0,205,184,0.5)','rgba(240,84,90,0.5)','rgba(79,110,247,0.4)','rgba(34,200,122,0.4)'];
+
+  charts['city-gmv'] = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: cities.map(c => c[0]),
+      datasets:[{
+        label:'GMV',
+        data: cities.map(c => c[1]),
+        backgroundColor: colors.slice(0, cities.length),
+        borderRadius: 4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          label: c => fmtChartVal(c.raw) + ' (' + (totalGmv>0?((c.raw/totalGmv)*100).toFixed(1):'0') + '%)'
+        }}
+      },
+      scales:{x:chartMoneyAxis(), y:{ticks:{color:'#8b92a8',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}}}
+    }
+  });
+}
+
+function renderCityMap(){
+  const dotsContainer = document.getElementById('map-dots');
+  if(!dotsContainer) return;
+
+  const cities = Object.entries(DATA.ciudades);
+  if(cities.length === 0){
+    dotsContainer.innerHTML = '';
+    return;
+  }
+
+  const totalGmv = cities.reduce((a,c) => a + c[1], 0);
+  const maxGmv = Math.max(...cities.map(c => c[1]));
+  const mapEl = document.getElementById('map-container');
+  const svgEl = document.getElementById('colombia-map');
+  if(!mapEl || !svgEl) return;
+
+  const mapW = mapEl.offsetWidth;
+  const mapH = mapEl.offsetHeight;
+  const svgVB = {w:400, h:500};
+  const scale = Math.min(mapW/svgVB.w, mapH/svgVB.h);
+  const offX = (mapW - svgVB.w * scale) / 2;
+  const offY = (mapH - svgVB.h * scale) / 2;
+
+  let html = '';
+  cities.forEach(([name, gmv]) => {
+    const key = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const coord = CITY_COORDS[key];
+    if(!coord) return;
+
+    const px = offX + coord.x * scale;
+    const py = offY + coord.y * scale;
+    const size = Math.max(8, Math.min(24, 8 + (gmv/maxGmv) * 16));
+    const pct = totalGmv > 0 ? ((gmv/totalGmv)*100).toFixed(1) : '0';
+    const opacity = 0.5 + (gmv/maxGmv) * 0.5;
+
+    html += `<div style="position:absolute;left:${px}px;top:${py}px;transform:translate(-50%,-50%);pointer-events:all;cursor:pointer;z-index:5;"
+      onmouseenter="showMapTip(event,'${name.replace(/'/g,"\\'")}','${fmtMoneyShort(gmv)}','${pct}%')"
+      onmouseleave="hideMapTip()"
+      onclick="showMapTip(event,'${name.replace(/'/g,"\\'")}','${fmtMoneyShort(gmv)}','${pct}%')">
+      <div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--accent);opacity:${opacity};border:2px solid rgba(79,110,247,0.9);box-shadow:0 0 ${size}px rgba(79,110,247,0.4);"></div>
+      <div style="position:absolute;top:${size/2+4}px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2);white-space:nowrap;text-align:center;font-weight:500;">${name}</div>
+    </div>`;
+  });
+
+  dotsContainer.innerHTML = html;
+}
+
+function showMapTip(e, city, gmv, pct){
+  const tip = document.getElementById('map-tooltip');
+  if(!tip) return;
+  document.getElementById('map-tip-city').textContent = city;
+  document.getElementById('map-tip-gmv').textContent = gmv;
+  document.getElementById('map-tip-pct').textContent = pct + ' del GMV total';
+  tip.style.display = 'block';
+  const mapEl = document.getElementById('map-container');
+  const rect = mapEl.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  tip.style.left = Math.min(x + 12, rect.width - 160) + 'px';
+  tip.style.top = Math.max(y - 50, 5) + 'px';
+}
+
+function hideMapTip(){
+  const tip = document.getElementById('map-tooltip');
+  if(tip) tip.style.display = 'none';
 }
 
 function renderOverviewKamTable(){
