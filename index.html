@@ -299,8 +299,8 @@
   .profile-field-value { font-size: 14px; color: var(--text); }
 
   /* ─── HISTORICO ─── */
-  .hist-year-tabs { display: flex; gap: 2px; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 20px; width: fit-content; }
-  .hist-year-tab { padding: 7px 18px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .hist-year-tabs { display: flex; align-items: center; gap: 2px; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 20px; width: fit-content; max-width: 100%; overflow-x: auto; }
+  .hist-year-tab { padding: 7px 16px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .hist-year-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
   .pred-card { background: linear-gradient(135deg, rgba(79,110,247,0.06) 0%, rgba(0,205,184,0.04) 100%); border: 1px solid rgba(79,110,247,0.15); border-radius: var(--radius); padding: 16px 18px; }
   .pred-month { font-size: 12px; font-weight: 600; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
@@ -4778,12 +4778,17 @@ function renderHistYearTabs(){
   const container = document.getElementById('hist-year-tabs');
   if(!container) return;
   const hd = buildHistData();
-  const years = Object.keys(hd).sort();
-  if(years.length === 0){ container.innerHTML = ''; return; }
+  const dataYears = Object.keys(hd).map(Number);
+  const currentYear = new Date().getFullYear();
+  const startYear = 2021;
+
   let html = `<div class="hist-year-tab ${histSelectedYear==='all'?'active':''}" onclick="histSelectedYear='all';renderHistorico()">Todos</div>`;
-  html += years.map(y =>
-    `<div class="hist-year-tab ${String(histSelectedYear)===y?'active':''}" onclick="histSelectedYear=${y};renderHistorico()">${y}</div>`
-  ).join('');
+  html += '<div style="width:1px;background:var(--border);margin:4px 6px;"></div>';
+  for(let y = startYear; y <= currentYear; y++){
+    const hasData = dataYears.includes(y);
+    const isActive = String(histSelectedYear) === String(y);
+    html += `<div class="hist-year-tab ${isActive?'active':''}" style="${hasData?'':'opacity:0.4;'}" onclick="histSelectedYear=${y};renderHistorico()">${y}${hasData?'':''}</div>`;
+  }
   container.innerHTML = html;
 }
 
