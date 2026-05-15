@@ -2095,27 +2095,42 @@ function filterArray(arr, indices){ return indices.map(i => arr[i]).filter(v => 
 // ─── MODULE FILTER SYSTEM ───
 const MODULE_FILTERS = ['filter-overview','filter-metas','filter-kam','filter-clientes','filter-operativo','filter-crm'];
 
+function getDataYears(){
+  const years = new Set();
+  DATA.ops.labels.forEach(l => { const p = parseLabelDate(l); if(p) years.add(p.year); });
+  return [...years].sort();
+}
+
 function renderModuleFilter(containerId){
   const el = document.getElementById(containerId);
   if(!el) return;
-  const p = containerId; // prefix for IDs
+  const p = containerId;
   const kamOptions = DATA.kamGMV.labels.length > 0 ? DATA.kamGMV.labels : [];
+  const dataYears = getDataYears();
+  const currentYear = new Date().getFullYear();
+
+  // Build year tabs
+  const prevYear = el.dataset.selYear || String(currentYear);
+  let yearTabsHtml = '';
+  if(dataYears.length > 0){
+    yearTabsHtml = dataYears.map(y =>
+      `<span class="hist-year-tab ${String(y)===prevYear?'active':''}" style="padding:5px 12px;font-size:12px;" onclick="this.parentElement.querySelectorAll('.hist-year-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');this.closest('.module-filter').dataset.selYear='${y}';applyFilters()">${y}</span>`
+    ).join('');
+  }
+
+  el.dataset.selYear = prevYear;
 
   el.innerHTML = `
+    <div class="filter-group" style="display:flex;align-items:center;gap:4px;">
+      <span class="filter-label">Año</span>
+      <div style="display:flex;gap:2px;background:var(--bg4);border-radius:var(--radius-sm);padding:2px;">${yearTabsHtml || '<span style="font-size:12px;color:var(--text3);padding:4px 8px;">Sin datos</span>'}</div>
+    </div>
     <div class="filter-group">
-      <span class="filter-label">Período</span>
+      <span class="filter-label">Detalle</span>
       <select class="filter-select" id="${p}-type" onchange="onModPeriodChange('${p}');applyFilters()">
-        <option value="all">Todo</option>
-        <option value="year">Año</option>
+        <option value="all">Todos los meses</option>
         <option value="quarter">Trimestre</option>
         <option value="month">Mes</option>
-        <option value="range">Rango</option>
-      </select>
-    </div>
-    <div class="filter-group" id="${p}-year-g" style="display:none;">
-      <span class="filter-label">Año</span>
-      <select class="filter-select" id="${p}-year" onchange="applyFilters()">
-        <option value="2026">2026</option><option value="2025">2025</option>
       </select>
     </div>
     <div class="filter-group" id="${p}-quarter-g" style="display:none;">
@@ -2132,12 +2147,6 @@ function renderModuleFilter(containerId){
         <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
         <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
       </select>
-    </div>
-    <div class="date-range-group" id="${p}-range-g">
-      <span class="filter-label">Desde</span>
-      <input type="date" class="filter-date" id="${p}-ds" value="2025-01-01" onchange="applyFilters()">
-      <span class="filter-label">Hasta</span>
-      <input type="date" class="filter-date" id="${p}-de" value="2026-12-31" onchange="applyFilters()">
     </div>
     <div class="filter-group">
       <span class="filter-label">KAM</span>
@@ -2164,14 +2173,10 @@ function renderAllModuleFilters(){
 
 function onModPeriodChange(p){
   const type = document.getElementById(p+'-type')?.value || 'all';
-  const yg = document.getElementById(p+'-year-g');
   const qg = document.getElementById(p+'-quarter-g');
   const mg = document.getElementById(p+'-month-g');
-  const rg = document.getElementById(p+'-range-g');
-  if(yg) yg.style.display = ['year','quarter','month'].includes(type) ? '' : 'none';
   if(qg) qg.style.display = type==='quarter' ? '' : 'none';
   if(mg) mg.style.display = type==='month' ? '' : 'none';
-  if(rg) rg.className = type==='range' ? 'date-range-group visible' : 'date-range-group';
 }
 
 function toggleKamDropdown(p){
@@ -2238,36 +2243,27 @@ function getActiveFilterPrefix(){
 
 function getModFilteredIndices(labels){
   const p = getActiveFilterPrefix();
+  const filterEl = document.getElementById(p);
+  const selYear = filterEl ? parseInt(filterEl.dataset.selYear) : new Date().getFullYear();
   const typeEl = document.getElementById(p+'-type');
   const type = typeEl ? typeEl.value : 'all';
-  if(type === 'all') return labels.map((_,i)=>i);
-
   const parsed = labels.map(l => parseLabelDate(l));
 
-  if(type === 'year'){
-    const yr = parseInt(document.getElementById(p+'-year')?.value || '2026');
-    return parsed.map((px,i) => px && px.year === yr ? i : -1).filter(i => i !== -1);
-  }
+  // Always filter by selected year tab first
+  let indices = parsed.map((px,i) => px && px.year === selYear ? i : -1).filter(i => i !== -1);
+
+  // Then apply period sub-filter within that year
   if(type === 'quarter'){
-    const yr = parseInt(document.getElementById(p+'-year')?.value || '2026');
     const q = document.getElementById(p+'-quarter')?.value || 'q1';
     const qm = {q1:[1,2,3], q2:[4,5,6], q3:[7,8,9], q4:[10,11,12]}[q];
-    return parsed.map((px,i) => px && px.year === yr && qm.includes(px.month) ? i : -1).filter(i => i !== -1);
+    indices = indices.filter(i => parsed[i] && qm.includes(parsed[i].month));
   }
   if(type === 'month'){
-    const yr = parseInt(document.getElementById(p+'-year')?.value || '2026');
     const mon = parseInt(document.getElementById(p+'-month')?.value || '1');
-    return parsed.map((px,i) => px && px.year === yr && px.month === mon ? i : -1).filter(i => i !== -1);
+    indices = indices.filter(i => parsed[i] && parsed[i].month === mon);
   }
-  if(type === 'range'){
-    const ss = document.getElementById(p+'-ds')?.value;
-    const se = document.getElementById(p+'-de')?.value;
-    if(!ss || !se) return labels.map((_,i)=>i);
-    const sd = new Date(ss), ed = new Date(se);
-    const sym = sd.getFullYear()*100+(sd.getMonth()+1), eym = ed.getFullYear()*100+(ed.getMonth()+1);
-    return parsed.map((px,i) => { if(!px) return -1; const ym=px.year*100+px.month; return ym>=sym&&ym<=eym?i:-1; }).filter(i => i !== -1);
-  }
-  return labels.map((_,i)=>i);
+
+  return indices;
 }
 
 // Close KAM dropdowns when clicking outside
@@ -3318,14 +3314,7 @@ function refreshDashboard(){
   // Render module filters
   renderAllModuleFilters();
 
-  // Set overview filter to current year by default
-  setTimeout(()=>{
-    const typeEl = document.getElementById('filter-overview-type');
-    if(typeEl && typeEl.value === 'all' && DATA.ops.labels.length > 0){
-      typeEl.value = 'year';
-      onModPeriodChange('filter-overview');
-    }
-  }, 50);
+  // Year tabs handle the year selection automatically
 
   // Dynamic insights
   generateDynamicInsights();
@@ -3524,7 +3513,7 @@ function renderUtilidadTable(){
   const tbody = document.getElementById('utilidad-month-body');
   if(!tbody) return;
 
-  const year = new Date().getFullYear();
+  const year = getActiveYear('filter-metas');
   const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
   // Build monthly lookup
@@ -3573,7 +3562,7 @@ function renderMetasMonthlyInsights(){
   const container = document.getElementById('metas-monthly-insights');
   if(!container) return;
 
-  const year = new Date().getFullYear();
+  const year = getActiveYear('filter-metas');
   const insights = [];
 
   // No data check
@@ -3908,13 +3897,18 @@ function cumplTagClass(pct){
   return 'tag-red';
 }
 
+function getActiveYear(moduleFilterId){
+  const el = document.getElementById(moduleFilterId);
+  return el ? parseInt(el.dataset.selYear) || new Date().getFullYear() : new Date().getFullYear();
+}
+
 function renderMetasCards(){
   const container = document.getElementById('metas-cards-container');
   if(!container) return;
 
   const allMonths = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const fullNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const year = new Date().getFullYear();
+  const year = getActiveYear('filter-metas');
 
   // Build a lookup from DATA.ops and DATA.metas
   const monthData = {};
