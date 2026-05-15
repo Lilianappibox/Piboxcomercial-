@@ -114,8 +114,15 @@
 
   /* ─── METRIC CARDS ─── */
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
-  .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+  .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.15s, opacity 0.15s; }
   .kpi-card:hover { border-color: var(--border2); }
+  .kpi-card[draggable="true"] { cursor: grab; }
+  .kpi-card[draggable="true"]:active { cursor: grabbing; }
+  .kpi-card.dragging { opacity: 0.4; transform: scale(0.95); }
+  .kpi-card.drag-over { border-color: var(--accent); box-shadow: 0 0 12px rgba(79,110,247,0.3); }
+  .drag-handle { position: absolute; top: 6px; right: 8px; color: var(--text3); font-size: 14px; opacity: 0; transition: opacity 0.15s; cursor: grab; }
+  .kpi-card:hover .drag-handle { opacity: 0.6; }
+  .kpi-card:hover .drag-handle:hover { opacity: 1; color: var(--accent2); }
   .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: var(--radius) var(--radius) 0 0; }
   .kpi-card.blue::before { background: var(--accent); }
   .kpi-card.green::before { background: var(--green); }
@@ -3328,6 +3335,7 @@ function refreshDashboard(){
     initOpsCharts();
     initClienteCharts();
     updateStaticMoneyValues();
+    setTimeout(enableAllDragDrop, 100);
   }, 200);
 }
 
@@ -5383,6 +5391,117 @@ function deleteResource(){
   if(r) auditLog(`Recurso eliminado: <strong>${r.name}</strong>`,'data','warning','');
 }
 
+// ─── DRAG & DROP CARDS ───
+function getCardOrderKey(gridId){
+  const uid = currentUser ? currentUser.id : 'anon';
+  return 'pibox_card_order_' + uid + '_' + gridId;
+}
+
+function enableDragDrop(gridEl){
+  if(!gridEl) return;
+  const cards = [...gridEl.querySelectorAll('.kpi-card, .meta-card, .chart-card')];
+  if(cards.length < 2) return;
+
+  const gridId = gridEl.id || gridEl.closest('[id]')?.id || '';
+
+  cards.forEach((card, idx) => {
+    card.setAttribute('draggable','true');
+    card.dataset.dragIdx = idx;
+    // Add handle icon
+    if(!card.querySelector('.drag-handle')){
+      const handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.innerHTML = '<i class="ti ti-grip-vertical"></i>';
+      card.appendChild(handle);
+    }
+
+    card.addEventListener('dragstart', e => {
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+      gridEl._dragSrcIdx = idx;
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      gridEl.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drag-over');
+    });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      const fromIdx = gridEl._dragSrcIdx;
+      const toIdx = parseInt(card.dataset.dragIdx);
+      if(fromIdx === toIdx) return;
+      const items = [...gridEl.children];
+      const draggedEl = items[fromIdx];
+      if(!draggedEl) return;
+      if(fromIdx < toIdx) gridEl.insertBefore(draggedEl, items[toIdx].nextSibling);
+      else gridEl.insertBefore(draggedEl, items[toIdx]);
+      // Re-index
+      [...gridEl.children].forEach((c,i) => c.dataset.dragIdx = i);
+      // Save order
+      saveCardOrder(gridEl, gridId);
+    });
+  });
+
+  // Restore saved order
+  restoreCardOrder(gridEl, gridId);
+}
+
+function saveCardOrder(gridEl, gridId){
+  const key = getCardOrderKey(gridId);
+  const order = [...gridEl.children].map(c => c.dataset.cardId || c.querySelector('.kpi-label,.meta-month,.chart-title')?.textContent?.trim() || '');
+  localStorage.setItem(key, JSON.stringify(order));
+}
+
+function restoreCardOrder(gridEl, gridId){
+  const key = getCardOrderKey(gridId);
+  const saved = JSON.parse(localStorage.getItem(key) || 'null');
+  if(!saved || !Array.isArray(saved)) return;
+
+  const children = [...gridEl.children];
+  // Tag each child with identifier
+  children.forEach(c => {
+    if(!c.dataset.cardId){
+      c.dataset.cardId = c.querySelector('.kpi-label,.meta-month,.chart-title')?.textContent?.trim() || '';
+    }
+  });
+
+  // Reorder based on saved
+  const ordered = [];
+  saved.forEach(id => {
+    const found = children.find(c => c.dataset.cardId === id && !ordered.includes(c));
+    if(found) ordered.push(found);
+  });
+  // Append any remaining not in saved
+  children.forEach(c => { if(!ordered.includes(c)) ordered.push(c); });
+
+  // Apply order
+  ordered.forEach(c => gridEl.appendChild(c));
+  [...gridEl.children].forEach((c,i) => c.dataset.dragIdx = i);
+}
+
+function enableAllDragDrop(){
+  // Enable on all kpi-grids and meta-grids
+  document.querySelectorAll('.kpi-grid').forEach(g => enableDragDrop(g));
+  // Also on chart grids
+  document.querySelectorAll('.charts-grid').forEach(g => enableDragDrop(g));
+}
+
+// Re-enable after DOM updates
+const _origApplyFilters = applyFilters;
+applyFilters = function(){
+  _origApplyFilters();
+  setTimeout(enableAllDragDrop, 300);
+};
+
 // ─── INIT ───
 window.addEventListener('resize', checkMobile);
 window.addEventListener('hashchange', onHashChange);
@@ -5396,6 +5515,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   fetchTRM();
   renderAllModuleFilters();
   setTimeout(initMainCharts, 150);
+  setTimeout(enableAllDragDrop, 500);
   onHashChange();
 });
 </script>
