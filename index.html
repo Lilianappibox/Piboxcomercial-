@@ -2466,26 +2466,48 @@ const ETL_FIELDS = [
 
 // ─── DYNAMIC ETL CONFIG ───
 const ETL_MODULES = [
-  {value:'resumen', label:'Resumen Ejecutivo', tables:['gmv_mensual','clientes','utilidad','ciudad']},
-  {value:'metas', label:'Metas Comerciales', tables:['metas','utilidad']},
-  {value:'kam', label:'Desempeño KAM', tables:['kam','clientes']},
-  {value:'clientes', label:'Clientes', tables:['clientes']},
-  {value:'operativo', label:'Comportamiento Operativo', tables:['operativo']},
-  {value:'crm', label:'Pipeline CRM', tables:['leads']},
-  {value:'historico', label:'Histórico Pibox', tables:['gmv_mensual','metas','utilidad']},
-  {value:'recursos', label:'Recursos', tables:[]}
+  {value:'resumen', label:'Resumen Ejecutivo'},
+  {value:'metas', label:'Metas Comerciales'},
+  {value:'kam', label:'Desempeño KAM'},
+  {value:'clientes', label:'Clientes'},
+  {value:'operativo', label:'Comportamiento Operativo'},
+  {value:'crm', label:'Pipeline CRM'},
+  {value:'historico', label:'Histórico Pibox'},
+  {value:'recursos', label:'Recursos'}
 ];
 
 const ETL_TABLES = [
-  {value:'auto', label:'Auto-detectar', modules:[]},
-  {value:'gmv_mensual', label:'GMV Mensual', modules:['resumen','historico']},
-  {value:'metas', label:'Metas Comerciales', modules:['metas','historico']},
-  {value:'clientes', label:'Clientes', modules:['resumen','kam','clientes']},
-  {value:'kam', label:'Desempeño KAM', modules:['kam']},
-  {value:'operativo', label:'Comportamiento Operativo', modules:['operativo']},
-  {value:'leads', label:'Leads / CRM', modules:['crm']},
-  {value:'utilidad', label:'Utilidad Bruta', modules:['resumen','metas','historico']},
-  {value:'ciudad', label:'GMV por Ciudad', modules:['resumen']}
+  {value:'auto', label:'Auto-detectar', modules:[], type:'auto'},
+  // Resumen Ejecutivo
+  {value:'ov_gmv_trend', label:'GMV Mensual Operativo', modules:['resumen'], type:'chart'},
+  {value:'ov_gmv_kam', label:'GMV por KAM', modules:['resumen','kam'], type:'chart'},
+  {value:'ov_efect', label:'Efectividad Operativa', modules:['resumen'], type:'chart'},
+  {value:'ov_churn', label:'Clientes Nuevos vs Perdidos', modules:['resumen'], type:'chart'},
+  {value:'ov_city', label:'GMV por Ciudad', modules:['resumen'], type:'chart'},
+  {value:'ov_map', label:'Mapa de presencia — Colombia', modules:['resumen'], type:'chart'},
+  {value:'ov_top10', label:'Top 10 Clientes por GMV', modules:['resumen'], type:'table'},
+  {value:'ov_kam_cumpl', label:'Cumplimiento por KAM', modules:['resumen'], type:'table'},
+  // Metas Comerciales
+  {value:'mt_cards', label:'Metas por Mes (Q1–Q4)', modules:['metas'], type:'table'},
+  {value:'mt_chart', label:'Meta vs Cumplimiento Acumulado', modules:['metas'], type:'chart'},
+  {value:'mt_kam', label:'Cumplimiento por KAM', modules:['metas'], type:'table'},
+  {value:'mt_utilidad', label:'Utilidad Bruta por Mes', modules:['metas'], type:'table'},
+  // Desempeño KAM
+  {value:'km_bar', label:'GMV por KAM (gráfico)', modules:['kam'], type:'chart'},
+  {value:'km_sections', label:'Secciones individuales KAM', modules:['kam'], type:'table'},
+  // Clientes
+  {value:'cl_nuevos', label:'GMV Clientes Nuevos por Mes', modules:['clientes'], type:'chart'},
+  {value:'cl_top10', label:'Top 10 Clientes — GMV + Efectividad', modules:['clientes'], type:'table'},
+  // Operativo
+  {value:'op_vol', label:'Bookings & Packages mensuales', modules:['operativo'], type:'chart'},
+  {value:'op_cancel', label:'Top 10 Clientes — Cancelaciones', modules:['operativo'], type:'chart'},
+  // CRM
+  {value:'crm_table', label:'Negocios recientes — CRM', modules:['crm'], type:'table'},
+  // Histórico Pibox
+  {value:'hi_table', label:'Cifras mensuales — GMV, Metas y Cumplimiento', modules:['historico'], type:'table'},
+  {value:'hi_gmv_chart', label:'Evolución GMV Histórico', modules:['historico'], type:'chart'},
+  {value:'hi_cumpl_chart', label:'Cumplimiento Mensual %', modules:['historico'], type:'chart'},
+  {value:'hi_utilidad', label:'Utilidad Bruta por Mes — Histórico', modules:['historico'], type:'table'}
 ];
 
 function renderETLModules(){
@@ -2516,15 +2538,28 @@ function renderETLTables(){
   const selectedMods = getSelectedModuleValues();
   const prev = sel.value;
 
-  let html = '<option value="auto">Auto-detectar</option>';
-  ETL_TABLES.forEach(t => {
-    if(t.value === 'auto') return;
-    const visible = selectedMods === 'all' || t.modules.some(m => selectedMods.includes(m));
-    if(visible) html += `<option value="${t.value}">${t.label}</option>`;
+  // Filter visible tables
+  const visible = ETL_TABLES.filter(t => {
+    if(t.value === 'auto') return true;
+    return selectedMods === 'all' || t.modules.some(m => selectedMods.includes(m));
   });
+
+  const tables = visible.filter(t => t.type === 'table');
+  const charts = visible.filter(t => t.type === 'chart');
+
+  let html = '<option value="auto">Auto-detectar</option>';
+  if(tables.length > 0){
+    html += '<optgroup label="Tablas">';
+    tables.forEach(t => { html += `<option value="${t.value}">${t.label}</option>`; });
+    html += '</optgroup>';
+  }
+  if(charts.length > 0){
+    html += '<optgroup label="Gráficos">';
+    charts.forEach(t => { html += `<option value="${t.value}">${t.label}</option>`; });
+    html += '</optgroup>';
+  }
   sel.innerHTML = html;
 
-  // Try to restore previous selection
   if([...sel.options].some(o => o.value === prev)) sel.value = prev;
 }
 
@@ -2556,22 +2591,37 @@ function etlSuggestTable(){
   if(!etlFileName) return;
   const name = etlFileName.toLowerCase().replace(/\.[^.]+$/,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const suggestions = [
-    {keywords:['gmv','revenue','ingreso','venta','sales','operativo','comportamiento'],table:'gmv_mensual',label:'GMV Mensual'},
-    {keywords:['meta','target','objetivo','goal','cumplimiento'],table:'metas',label:'Metas Comerciales'},
-    {keywords:['cliente','client','customer','empresa','company'],table:'clientes',label:'Clientes'},
-    {keywords:['kam','ejecutivo','vendedor','asesor','desempeno','performance'],table:'kam',label:'Desempeño KAM'},
-    {keywords:['booking','package','paquete','envio','operativo','efectividad'],table:'operativo',label:'Comportamiento Operativo'},
-    {keywords:['lead','prospecto','crm','pipeline','negocio','deal'],table:'leads',label:'Leads / CRM'},
-    {keywords:['utilidad','margen','profit','ganancia','rentabilidad'],table:'utilidad',label:'Utilidad Bruta'}
+    {keywords:['gmv mensual','gmv operativo','gmv trend'],table:'ov_gmv_trend'},
+    {keywords:['cifras mensual','historico cifras'],table:'hi_table'},
+    {keywords:['evolucion gmv','gmv historico'],table:'hi_gmv_chart'},
+    {keywords:['cumplimiento mensual','cumplimiento %'],table:'hi_cumpl_chart'},
+    {keywords:['utilidad historico','utilidad bruta historico'],table:'hi_utilidad'},
+    {keywords:['meta','target','objetivo','goal','cumplimiento','metas'],table:'mt_cards'},
+    {keywords:['utilidad','margen','profit','ganancia','rentabilidad'],table:'mt_utilidad'},
+    {keywords:['top 10','top cliente','ranking'],table:'ov_top10'},
+    {keywords:['gmv ciudad','ciudad','city','geografic'],table:'ov_city'},
+    {keywords:['kam','ejecutivo','vendedor','asesor','desempeno','performance'],table:'km_sections'},
+    {keywords:['booking','package','paquete','envio'],table:'op_vol'},
+    {keywords:['cancelacion','cancel'],table:'op_cancel'},
+    {keywords:['lead','prospecto','crm','pipeline','negocio','deal'],table:'crm_table'},
+    {keywords:['cliente nuevo','nuevos'],table:'cl_nuevos'},
+    {keywords:['cliente','client','customer','empresa','company'],table:'ov_top10'},
+    {keywords:['gmv','revenue','ingreso','venta','sales','operativo'],table:'ov_gmv_trend'},
+    {keywords:['efectividad','effectiveness'],table:'ov_efect'}
   ];
 
+  const sel = document.getElementById('etl-target-table');
   for(const s of suggestions){
     if(s.keywords.some(k => name.includes(k))){
-      document.getElementById('etl-target-table').value = s.table;
+      // Check if the option exists in current select
+      if([...sel.options].some(o => o.value === s.table)){
+        sel.value = s.table;
+      } else { sel.value = 'auto'; }
+      const matched = ETL_TABLES.find(t => t.value === s.table);
       const sugEl = document.getElementById('etl-table-suggestion');
       const sugText = document.getElementById('etl-suggestion-text');
-      if(sugEl && sugText){
-        sugText.textContent = `Sugerencia: "${s.label}" basada en el nombre del archivo`;
+      if(sugEl && sugText && matched){
+        sugText.textContent = `Sugerencia: "${matched.label}" basada en el nombre del archivo`;
         sugEl.style.display = 'block';
       }
       return;
