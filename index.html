@@ -2801,31 +2801,53 @@ function renderPreviewTable(){
   const tbody = document.querySelector('#etl-preview-table tbody');
   const tag = document.getElementById('etl-preview-tag');
 
-  thead.innerHTML = '<th style="color:var(--text3)">#</th>' + etlHeaders.map((h,i) => {
+  thead.innerHTML = '<th>#</th>' + etlHeaders.map((h,i) => {
     const mapped = Object.entries(etlColumnMap).find(([k,v]) => v === i);
     const highlight = mapped ? 'color:var(--green);' : '';
-    const badge = mapped ? ` <span style="font-size:9px;color:var(--accent2);">[${ETL_FIELDS.find(f=>f.key===mapped[0])?.label||''}]</span>` : '';
-    return `<th style="${highlight}white-space:nowrap;">${h}${badge}</th>`;
+    const badge = mapped ? `<br><span class="tag tag-blue" style="font-size:9px;padding:1px 5px;">${ETL_FIELDS.find(f=>f.key===mapped[0])?.label||''}</span>` : '';
+    return `<th style="${highlight}">${h}${badge}</th>`;
   }).join('');
 
-  const moneyFields = ['gmv','meta','real','utilidad'];
+  const moneyFields = ['gmv','meta','real','utilidad','gmv_nuevos','gmv_perdidos'];
+  const pctFields = ['efect'];
+  const numFields = ['bookings','packages','completados','cancelados','nuevos','perdidos','leads_mkt','leads_propios'];
   const preview = etlParsedData.slice(0, 15);
+
   tbody.innerHTML = preview.map((row, ri) => {
     const cells = etlHeaders.map((_, ci) => {
       const val = row[ci] !== undefined ? row[ci] : '';
       const mapped = Object.entries(etlColumnMap).find(([k,v]) => v === ci);
-      let style = mapped ? 'color:var(--text);font-weight:500;' : 'color:var(--text3);';
+      const key = mapped ? mapped[0] : '';
       let displayVal = val;
-      if(mapped && moneyFields.includes(mapped[0])){
-        const num = Number(String(val).replace(/[,$%\s]/g,''));
-        if(!isNaN(num) && val !== ''){
+      let cls = '';
+
+      if(mapped){
+        const raw = String(val).replace(/[,$%\s]/g,'');
+        const num = Number(raw);
+
+        if(moneyFields.includes(key) && !isNaN(num) && val !== ''){
           displayVal = fmtMoneyShort(num);
-          style += "font-family:'DM Mono',monospace;color:var(--green);";
+          cls = 'style="font-family:\'DM Mono\',monospace;color:var(--green);"';
+        } else if(pctFields.includes(key) && !isNaN(num) && val !== ''){
+          displayVal = num.toFixed(1) + '%';
+          cls = 'style="color:var(--teal);"';
+        } else if(numFields.includes(key) && !isNaN(num) && val !== ''){
+          displayVal = Math.round(num).toLocaleString('es-CO');
+          cls = 'style="font-family:\'DM Mono\',monospace;color:var(--text);"';
+        } else if(key === 'mes' || key === 'kam' || key === 'cliente' || key === 'ciudad'){
+          cls = 'class="bold"';
+        } else if(key === 'id_compania' || key === 'record_id'){
+          cls = 'style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--text3);"';
+        } else {
+          cls = 'style="color:var(--text);"';
         }
+      } else {
+        cls = 'style="color:var(--text3);"';
       }
-      return `<td style="${style}">${displayVal}</td>`;
+
+      return `<td ${cls}>${displayVal}</td>`;
     }).join('');
-    return `<tr><td style="color:var(--text3);font-size:11px;">${ri+1}</td>${cells}</tr>`;
+    return `<tr><td style="color:var(--text3);font-size:11px;font-weight:600;">${ri+1}</td>${cells}</tr>`;
   }).join('');
 
   const mappedCount = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined).length;
