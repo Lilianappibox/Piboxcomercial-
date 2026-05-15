@@ -124,6 +124,7 @@
   .kpi-card.teal::before { background: var(--teal); }
   .kpi-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
   .kpi-value { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+  .kpi-value.compact { font-size: 18px; letter-spacing: -0.3px; word-break: break-all; }
   .kpi-sub { font-size: 12px; color: var(--text3); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
   .delta-up { color: var(--green); }
   .delta-down { color: var(--red); }
@@ -481,55 +482,41 @@
     <!-- KPI Cards -->
     <div class="section-head">
       <div>
-        <div class="section-title">KPIs Principales — 2026</div>
-        <div class="section-sub">Datos consolidados · Actualizado Mayo 2026</div>
+        <div class="section-title" id="overview-title">KPIs Principales</div>
+        <div class="section-sub" id="overview-sub">Datos del año en curso</div>
       </div>
     </div>
 
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total</div>
-        <div class="kpi-value" id="kpi-gmv">$0</div>
+        <div class="kpi-value compact" id="kpi-gmv">NA</div>
         <div class="kpi-sub" id="kpi-gmv-sub">Sin datos cargados</div>
       </div>
       <div class="kpi-card green">
-        <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
-        <div class="kpi-value" id="kpi-nuevos">0</div>
-        <div class="kpi-sub">Según datos cargados</div>
+        <div class="kpi-label"><i class="ti ti-target"></i> Meta Asignada</div>
+        <div class="kpi-value compact" id="kpi-meta">NA</div>
+        <div class="kpi-sub" id="kpi-meta-sub">Sin meta definida</div>
       </div>
-      <div class="kpi-card red">
-        <div class="kpi-label"><i class="ti ti-user-minus"></i> Clientes Perdidos</div>
-        <div class="kpi-value" id="kpi-perdidos">0</div>
-        <div class="kpi-sub">Según datos cargados</div>
+      <div class="kpi-card" id="kpi-cumpl-card" style="border-top:2px solid var(--amber);">
+        <div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div>
+        <div class="kpi-value" id="kpi-cumpl">NA</div>
+        <div class="kpi-sub" id="kpi-cumpl-sub">Real vs Meta</div>
       </div>
       <div class="kpi-card teal">
         <div class="kpi-label"><i class="ti ti-check"></i> Efectividad Ops</div>
-        <div class="kpi-value" id="kpi-efect">0.0%</div>
+        <div class="kpi-value" id="kpi-efect">NA</div>
         <div class="kpi-sub">Promedio operativo</div>
       </div>
       <div class="kpi-card amber">
         <div class="kpi-label"><i class="ti ti-package"></i> Bookings</div>
-        <div class="kpi-value" id="kpi-bookings">0</div>
+        <div class="kpi-value" id="kpi-bookings">NA</div>
         <div class="kpi-sub" id="kpi-bookings-sub">Total acumulado</div>
       </div>
-    </div>
-
-    <!-- Insights -->
-    <div class="insight-panel">
-      <div class="insight-head">
-        <i class="ti ti-sparkles"></i>
-        <div>
-          <div class="insight-head-text">Resumen Ejecutivo — Insights</div>
-          <div class="insight-head-sub">Generado a partir de los datos cargados</div>
-        </div>
-        <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;" onclick="refreshInsights()"><i class="ti ti-refresh"></i> Actualizar</button>
-      </div>
-      <div class="insights-grid" id="dynamic-insights">
-        <div class="insight-item">
-          <div class="insight-type info">🔵 Info</div>
-          <div class="insight-text">Carga datos desde el módulo <strong>Cargar Datos</strong> para generar insights automáticos sobre GMV, Metas, KAMs y Clientes.</div>
-          <div class="insight-meta">Ve a Cargar Datos para comenzar</div>
-        </div>
+      <div class="kpi-card red">
+        <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
+        <div class="kpi-value" id="kpi-nuevos">NA</div>
+        <div class="kpi-sub">Según datos cargados</div>
       </div>
     </div>
 
@@ -537,16 +524,16 @@
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-title">GMV Mensual Operativo</div>
-        <div class="chart-sub">Enero 2025 — Mayo 2026 · Todos los KAMs</div>
+        <div class="chart-sub" id="chart-gmv-sub">Año en curso</div>
         <div class="chart-canvas-wrap" style="height:220px">
-          <canvas id="chart-gmv-trend" role="img" aria-label="GMV mensual de enero 2025 a mayo 2026"></canvas>
+          <canvas id="chart-gmv-trend"></canvas>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">GMV por KAM</div>
-        <div class="chart-sub">Distribución acumulada 2026</div>
+        <div class="chart-sub">Distribución acumulada</div>
         <div class="chart-canvas-wrap" style="height:220px">
-          <canvas id="chart-gmv-kam" role="img" aria-label="GMV por KAM en 2026"></canvas>
+          <canvas id="chart-gmv-kam"></canvas>
         </div>
       </div>
     </div>
@@ -557,14 +544,14 @@
         <div class="chart-title">Efectividad Operativa</div>
         <div class="chart-sub">% entregas completadas por mes</div>
         <div class="chart-canvas-wrap" style="height:200px">
-          <canvas id="chart-efect" role="img" aria-label="Efectividad operativa por mes"></canvas>
+          <canvas id="chart-efect"></canvas>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Clientes Nuevos vs Perdidos</div>
-        <div class="chart-sub">Enero — Mayo 2026</div>
+        <div class="chart-sub">Según datos cargados</div>
         <div class="chart-canvas-wrap" style="height:200px">
-          <canvas id="chart-churn" role="img" aria-label="Clientes nuevos vs perdidos 2026"></canvas>
+          <canvas id="chart-churn"></canvas>
         </div>
       </div>
     </div>
@@ -589,6 +576,36 @@
         </thead>
         <tbody id="top-clients-body"></tbody>
       </table>
+    </div>
+
+    <!-- KAM Cumplimiento Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-header-title">Cumplimiento por KAM</div>
+      </div>
+      <table>
+        <thead><tr><th>KAM</th><th>GMV</th><th>% del Total</th><th>Participación</th></tr></thead>
+        <tbody id="overview-kam-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Insights (at the end) -->
+    <div class="insight-panel" style="margin-top:24px;">
+      <div class="insight-head">
+        <i class="ti ti-sparkles"></i>
+        <div>
+          <div class="insight-head-text">Resumen Ejecutivo — Insights</div>
+          <div class="insight-head-sub">Generado a partir de los datos cargados</div>
+        </div>
+        <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;" onclick="refreshInsights()"><i class="ti ti-refresh"></i> Actualizar</button>
+      </div>
+      <div class="insights-grid" id="dynamic-insights">
+        <div class="insight-item">
+          <div class="insight-type info">Info</div>
+          <div class="insight-text">Carga datos desde el módulo <strong>Cargar Datos</strong> para generar insights automáticos.</div>
+          <div class="insight-meta">Ve a Cargar Datos para comenzar</div>
+        </div>
+      </div>
     </div>
 
   </div><!-- /view-overview -->
@@ -2118,13 +2135,51 @@ function applyFilters(){
   const fPackages = filterArray(DATA.ops.packages, indices);
 
   // Update KPIs
+  const hasData = fGmv.length > 0 && fGmv.some(v => v > 0);
   const totalGMV = fGmv.reduce((a,b) => a+b, 0);
   const kpiGmv = document.getElementById('kpi-gmv');
-  if(kpiGmv) kpiGmv.textContent = fmtMoneyShort(totalGMV);
+  if(kpiGmv) kpiGmv.textContent = hasData ? fmtMoneyShort(totalGMV) : 'NA';
+  const kpiGmvSub = document.getElementById('kpi-gmv-sub');
+  if(kpiGmvSub) kpiGmvSub.textContent = hasData ? fLabels.length + ' períodos' : 'Sin datos cargados';
 
-  const avgEfect = fEfect.length > 0 ? (fEfect.reduce((a,b) => a+b, 0) / fEfect.length).toFixed(1) : '—';
+  const avgEfect = fEfect.length > 0 && fEfect.some(v => v > 0) ? (fEfect.reduce((a,b) => a+b, 0) / fEfect.length).toFixed(1) : null;
   const kpiEfect = document.getElementById('kpi-efect');
-  if(kpiEfect) kpiEfect.textContent = avgEfect + '%';
+  if(kpiEfect) kpiEfect.textContent = avgEfect !== null ? avgEfect + '%' : 'NA';
+
+  const totalBookings = fBookings.reduce((a,b) => a+b, 0);
+  const kpiBookings = document.getElementById('kpi-bookings');
+  if(kpiBookings) kpiBookings.textContent = totalBookings > 0 ? totalBookings.toLocaleString('es-CO') : 'NA';
+
+  const totalNuevos = DATA.nuevos.data.reduce((a,b) => a+b, 0);
+  const kpiNuevos = document.getElementById('kpi-nuevos');
+  if(kpiNuevos) kpiNuevos.textContent = totalNuevos > 0 ? totalNuevos.toLocaleString('es-CO') : 'NA';
+
+  // Meta & Cumplimiento
+  const metaIndicesKpi = getModFilteredIndices(DATA.metas.labels);
+  const fMetaVals = filterArray(DATA.metas.meta, metaIndicesKpi);
+  const fRealVals = filterArray(DATA.metas.real, metaIndicesKpi);
+  const totalMeta = fMetaVals.reduce((a,b) => a+b, 0);
+  const totalReal = fRealVals.reduce((a,b) => a+b, 0);
+  const hasMeta = totalMeta > 0;
+  const cumplPct = hasMeta ? ((totalReal / totalMeta) * 100).toFixed(1) : null;
+
+  const kpiMeta = document.getElementById('kpi-meta');
+  if(kpiMeta) kpiMeta.textContent = hasMeta ? fmtMoneyShort(totalMeta) : 'NA';
+  const kpiMetaSub = document.getElementById('kpi-meta-sub');
+  if(kpiMetaSub) kpiMetaSub.textContent = hasMeta ? fMetaVals.length + ' meses con meta' : 'Sin meta definida';
+
+  const kpiCumpl = document.getElementById('kpi-cumpl');
+  if(kpiCumpl) kpiCumpl.textContent = cumplPct !== null ? cumplPct + '%' : 'NA';
+  const kpiCumplSub = document.getElementById('kpi-cumpl-sub');
+  if(kpiCumplSub) kpiCumplSub.textContent = hasMeta ? fmtMoneyShort(totalReal) + ' de ' + fmtMoneyShort(totalMeta) : 'Real vs Meta';
+  const kpiCumplCard = document.getElementById('kpi-cumpl-card');
+  if(kpiCumplCard && cumplPct !== null){
+    const cc = parseFloat(cumplPct);
+    kpiCumplCard.style.borderTopColor = cc >= 90 ? 'var(--green)' : cc >= 80 ? 'var(--amber)' : 'var(--red)';
+  }
+
+  // KAM cumplimiento table in overview
+  renderOverviewKamTable();
 
   // Rebuild main charts with filtered data (full values)
   destroyChart('gmv-trend');
@@ -2676,33 +2731,31 @@ function resetDataToEmpty(){
 }
 
 function refreshDashboard(){
-  const totalGMV = DATA.ops.gmv.reduce((a,b) => a+b, 0);
   const totalBookings = DATA.ops.bookings.reduce((a,b) => a+b, 0);
   const totalPackages = DATA.ops.packages.reduce((a,b) => a+b, 0);
-  const avgEfect = DATA.ops.efect.length > 0 ? (DATA.ops.efect.reduce((a,b)=>a+b,0)/DATA.ops.efect.length).toFixed(1) : '0.0';
-
-  // Resumen ejecutivo KPIs
-  const kpiGmv = document.getElementById('kpi-gmv');
-  if(kpiGmv) kpiGmv.textContent = totalGMV > 0 ? fmtMoneyShort(totalGMV) : '$0';
-  const kpiEfect = document.getElementById('kpi-efect');
-  if(kpiEfect) kpiEfect.textContent = avgEfect + '%';
-  const kpiBookings = document.getElementById('kpi-bookings');
-  if(kpiBookings) kpiBookings.textContent = totalBookings.toLocaleString('es-CO');
-  const kpiGmvSub = document.getElementById('kpi-gmv-sub');
-  if(kpiGmvSub) kpiGmvSub.textContent = DATA.ops.labels.length > 0 ? DATA.ops.labels.length + ' períodos cargados' : 'Sin datos cargados';
+  const avgEfect = DATA.ops.efect.length > 0 ? (DATA.ops.efect.reduce((a,b)=>a+b,0)/DATA.ops.efect.length).toFixed(1) : null;
 
   // Operativo KPIs
   const opsEfect = document.getElementById('ops-efect-avg');
-  if(opsEfect) opsEfect.textContent = avgEfect + '%';
+  if(opsEfect) opsEfect.textContent = avgEfect !== null ? avgEfect + '%' : 'NA';
   const opsBookings = document.getElementById('ops-bookings-total');
-  if(opsBookings) opsBookings.textContent = totalBookings.toLocaleString('es-CO');
+  if(opsBookings) opsBookings.textContent = totalBookings > 0 ? totalBookings.toLocaleString('es-CO') : 'NA';
   const opsPackages = document.getElementById('ops-packages-total');
-  if(opsPackages) opsPackages.textContent = totalPackages.toLocaleString('es-CO');
+  if(opsPackages) opsPackages.textContent = totalPackages > 0 ? totalPackages.toLocaleString('es-CO') : 'NA';
   const opsPeriods = document.getElementById('ops-periods');
-  if(opsPeriods) opsPeriods.textContent = DATA.ops.labels.length;
+  if(opsPeriods) opsPeriods.textContent = DATA.ops.labels.length || 'NA';
 
   // Render module filters
   renderAllModuleFilters();
+
+  // Set overview filter to current year by default
+  setTimeout(()=>{
+    const typeEl = document.getElementById('filter-overview-type');
+    if(typeEl && typeEl.value === 'all' && DATA.ops.labels.length > 0){
+      typeEl.value = 'year';
+      onModPeriodChange('filter-overview');
+    }
+  }, 50);
 
   // Dynamic insights
   generateDynamicInsights();
@@ -2767,6 +2820,29 @@ function renderKamDynamic(){
   container.innerHTML = DATA.kamGMV.labels.map((name, i) =>
     `<div class="kpi-card ${colors[i%colors.length]}"><div class="kpi-label">${name}</div><div class="kpi-value" style="font-size:18px;">${fmtMoneyShort(DATA.kamGMV.data[i])}</div><div class="kpi-sub">GMV acumulado</div></div>`
   ).join('');
+}
+
+function renderOverviewKamTable(){
+  const tbody = document.getElementById('overview-kam-body');
+  if(!tbody) return;
+  if(DATA.kamGMV.labels.length === 0){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">NA — Sin datos de KAM cargados</td></tr>';
+    return;
+  }
+  const total = DATA.kamGMV.data.reduce((a,b) => a+b, 0);
+  const maxGmv = Math.max(...DATA.kamGMV.data);
+  tbody.innerHTML = DATA.kamGMV.labels.map((name, i) => {
+    const gmv = DATA.kamGMV.data[i];
+    const pct = total > 0 ? ((gmv/total)*100).toFixed(1) : '0.0';
+    const barW = maxGmv > 0 ? ((gmv/maxGmv)*100).toFixed(0) : 0;
+    const fillClass = parseFloat(pct) > 25 ? 'green' : parseFloat(pct) > 15 ? '' : 'amber';
+    return `<tr>
+      <td class="bold">${name}</td>
+      <td style="font-family:'DM Mono',monospace;">${fmtMoneyShort(gmv)}</td>
+      <td>${pct}%</td>
+      <td><div class="progress-bar" style="width:100px;"><div class="progress-fill ${fillClass}" style="width:${barW}%"></div></div></td>
+    </tr>`;
+  }).join('');
 }
 
 // ── FORMAT (reset all) ──
