@@ -4761,7 +4761,7 @@ const SEASONAL_PATTERNS = [
   {month:'Diciembre', pattern:'Mejor mes del año en Pibox. Navidad + Fin de año + bonos salariales.', ecom:'Navidad + primas: TOP 1 fecha eCommerce Colombia. +70% vs promedio anual (CCCE 2025). Máximo histórico de delivery.', impact:'Muy Alto', impactClass:'tag-green', rec:'Capacidad máxima. Anticipar cierres corporativos. Meta más alta del año.'}
 ];
 
-let histSelectedYear = 2026;
+let histSelectedYear = 'all';
 
 function renderHistorico(){
   renderHistYearTabs();
@@ -4779,30 +4779,60 @@ function renderHistYearTabs(){
   if(!container) return;
   const hd = buildHistData();
   const years = Object.keys(hd).sort();
-  container.innerHTML = years.map(y =>
-    `<div class="hist-year-tab ${parseInt(y)===histSelectedYear?'active':''}" onclick="histSelectedYear=${y};renderHistorico()">${y}</div>`
+  if(years.length === 0){ container.innerHTML = ''; return; }
+  let html = `<div class="hist-year-tab ${histSelectedYear==='all'?'active':''}" onclick="histSelectedYear='all';renderHistorico()">Todos</div>`;
+  html += years.map(y =>
+    `<div class="hist-year-tab ${String(histSelectedYear)===y?'active':''}" onclick="histSelectedYear=${y};renderHistorico()">${y}</div>`
   ).join('');
+  container.innerHTML = html;
+}
+
+function getHistYearData(){
+  const hd = buildHistData();
+  if(histSelectedYear === 'all'){
+    // Combine all years
+    const combined = {labels:[], gmv:[], meta:[], bookings:[], packages:[], efect:[]};
+    Object.keys(hd).sort().forEach(yr => {
+      const d = hd[yr];
+      d.labels.forEach((l,i) => {
+        combined.labels.push(l + ' ' + String(yr).slice(2));
+        combined.gmv.push(d.gmv[i]||0);
+        combined.meta.push(d.meta[i]||0);
+        combined.bookings.push(d.bookings[i]||0);
+        combined.packages.push(d.packages[i]||0);
+        combined.efect.push(d.efect[i]||0);
+      });
+    });
+    return combined;
+  }
+  return hd[histSelectedYear] || null;
 }
 
 function renderHistKPIs(){
   const container = document.getElementById('hist-kpis');
   if(!container) return;
-  const hd = buildHistData();
-  const d = hd[histSelectedYear];
-  if(!d) return;
-
+  const d = getHistYearData();
+  if(!d || d.labels.length === 0){
+    container.innerHTML = '<div class="kpi-card blue" style="grid-column:1/-1;text-align:center;"><div class="kpi-label">Sin datos históricos</div><div class="kpi-value" style="font-size:14px;">NA</div></div>';
+    return;
+  }
+  const yearLabel = histSelectedYear === 'all' ? 'Todos los años' : histSelectedYear;
   const totalGMV = d.gmv.reduce((a,b)=>a+b,0);
   const totalMeta = d.meta.reduce((a,b)=>a+b,0);
-  const cumpl = totalMeta > 0 ? ((totalGMV/totalMeta)*100).toFixed(1) : '—';
-  const avgEfect = (d.efect.reduce((a,b)=>a+b,0)/d.efect.length).toFixed(1);
+  const cumpl = totalMeta > 0 ? ((totalGMV/totalMeta)*100).toFixed(1) : 'NA';
+  const avgEfect = d.efect.length > 0 ? (d.efect.reduce((a,b)=>a+b,0)/d.efect.length).toFixed(1) : 'NA';
   const totalBookings = d.bookings.reduce((a,b)=>a+b,0);
-  const bestMonth = d.labels[d.gmv.indexOf(Math.max(...d.gmv))];
+  const bestIdx = d.gmv.indexOf(Math.max(...d.gmv));
+  const bestMonth = d.labels[bestIdx] || 'NA';
+
+  const hd = buildHistData();
+  const yearsCount = Object.keys(hd).length;
 
   container.innerHTML = `
-    <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total ${histSelectedYear}</div><div class="kpi-value">${fmtMoneyShort(totalGMV)}</div><div class="kpi-sub">${d.labels.length} meses</div></div>
-    <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-target"></i> Meta Total</div><div class="kpi-value">${fmtMoneyShort(totalMeta)}</div><div class="kpi-sub">Objetivo acumulado</div></div>
-    <div class="kpi-card" style="border-top:2px solid ${cumplColor(parseFloat(cumpl))}"><div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div><div class="kpi-value">${cumpl}%</div><div class="kpi-sub">Real / Meta</div></div>
-    <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-check"></i> Efectividad Prom.</div><div class="kpi-value">${avgEfect}%</div><div class="kpi-sub">Sobre ${d.labels.length} meses</div></div>
+    <div class="kpi-card blue"><div class="kpi-label"><i class="ti ti-currency-dollar"></i> GMV Total — ${yearLabel}</div><div class="kpi-value compact">${fmtMoneyShort(totalGMV)}</div><div class="kpi-sub">${d.labels.length} meses · ${yearsCount} año(s)</div></div>
+    <div class="kpi-card green"><div class="kpi-label"><i class="ti ti-target"></i> Meta Total</div><div class="kpi-value compact">${totalMeta>0?fmtMoneyShort(totalMeta):'NA'}</div><div class="kpi-sub">Objetivo acumulado</div></div>
+    <div class="kpi-card" style="border-top:2px solid ${cumpl!=='NA'?cumplColor(parseFloat(cumpl)):'var(--text3)'}"><div class="kpi-label"><i class="ti ti-percentage"></i> Cumplimiento</div><div class="kpi-value">${cumpl!=='NA'?cumpl+'%':'NA'}</div><div class="kpi-sub">Real / Meta</div></div>
+    <div class="kpi-card teal"><div class="kpi-label"><i class="ti ti-check"></i> Efectividad Prom.</div><div class="kpi-value">${avgEfect!=='NA'?avgEfect+'%':'NA'}</div><div class="kpi-sub">Sobre ${d.labels.length} meses</div></div>
     <div class="kpi-card amber"><div class="kpi-label"><i class="ti ti-trophy"></i> Mejor mes</div><div class="kpi-value">${bestMonth}</div><div class="kpi-sub">${fmtMoneyShort(Math.max(...d.gmv))}</div></div>
   `;
 }
@@ -4811,46 +4841,40 @@ function renderHistTable(){
   const tbody = document.getElementById('hist-table-body');
   const tag = document.getElementById('hist-table-tag');
   if(!tbody) return;
-  const hd = buildHistData();
-  const d = hd[histSelectedYear];
-  if(!d) return;
+  const d = getHistYearData();
+  if(!d || d.labels.length === 0){
+    tag.textContent = '—';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:16px;">NA — Sin datos cargados</td></tr>';
+    return;
+  }
 
-  tag.textContent = histSelectedYear;
+  tag.textContent = histSelectedYear === 'all' ? 'Todos los años' : histSelectedYear;
   tbody.innerHTML = d.labels.map((label, i) => {
-    const cumpl = d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : '—';
+    const cumpl = d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100).toFixed(1) : 'NA';
     const cuplNum = parseFloat(cumpl);
-    const cuplClass = cumplTagClass(cuplNum);
+    const cuplClass = !isNaN(cuplNum) ? cumplTagClass(cuplNum) : '';
     const trend = i > 0 ? (d.gmv[i] > d.gmv[i-1] ? '📈' : d.gmv[i] < d.gmv[i-1] ? '📉' : '➡️') : '—';
     return `<tr>
-      <td class="bold">${label} ${histSelectedYear}</td>
+      <td class="bold">${label}</td>
       <td style="font-family:'DM Mono',monospace;">${fmtMoneyShort(d.gmv[i])}</td>
-      <td style="color:var(--text3)">${fmtMoneyShort(d.meta[i])}</td>
-      <td><span class="tag ${cuplClass}">${cumpl}%</span></td>
-      <td>${d.bookings[i].toLocaleString('es-CO')}</td>
-      <td>${d.packages[i].toLocaleString('es-CO')}</td>
-      <td>${d.efect[i]}%</td>
+      <td style="color:var(--text3)">${d.meta[i]>0?fmtMoneyShort(d.meta[i]):'NA'}</td>
+      <td>${cuplClass?`<span class="tag ${cuplClass}">${cumpl}%</span>`:'NA'}</td>
+      <td>${d.bookings[i]>0?d.bookings[i].toLocaleString('es-CO'):'NA'}</td>
+      <td>${d.packages[i]>0?d.packages[i].toLocaleString('es-CO'):'NA'}</td>
+      <td>${d.efect[i]>0?d.efect[i].toFixed(1)+'%':'NA'}</td>
       <td style="font-size:16px">${trend}</td>
     </tr>`;
   }).join('');
 }
 
 function renderHistCharts(){
-  // Combine all years for the GMV chart
-  const allLabels = [];
-  const allGmv = [];
-  const allMeta = [];
-  const allCumpl = [];
+  const d = getHistYearData();
+  if(!d || d.labels.length === 0) return;
 
-  const hd2 = buildHistData();
-  Object.keys(hd2).sort().forEach(year => {
-    const d = hd2[year];
-    d.labels.forEach((l, i) => {
-      allLabels.push(l + ' ' + String(year).slice(2));
-      allGmv.push(d.gmv[i]);
-      allMeta.push(d.meta[i]);
-      allCumpl.push(d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100) : 0);
-    });
-  });
+  const allLabels = d.labels;
+  const allGmv = d.gmv;
+  const allMeta = d.meta;
+  const allCumpl = d.labels.map((_,i) => d.meta[i] > 0 ? ((d.gmv[i]/d.meta[i])*100) : 0);
 
   // Add predictions
   const predMonths = getPredictions();
