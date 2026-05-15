@@ -907,11 +907,37 @@
 
     <!-- Upload History -->
     <div class="table-card">
-      <div class="table-header"><div class="table-header-title">Historial de cargas</div></div>
+      <div class="table-header">
+        <div class="table-header-title">Historial de cargas</div>
+        <button class="btn btn-ghost" style="color:var(--red);font-size:12px;" onclick="showFormatConfirm()"><i class="ti ti-trash"></i> FORMATEAR</button>
+      </div>
       <table>
-        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Columnas aplicadas</th><th>Estado</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Homologación</th><th>Columnas aplicadas</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody id="etl-history-body"></tbody>
       </table>
+    </div>
+
+    <!-- Format confirmation modal -->
+    <div class="modal-overlay" id="format-modal" onclick="closeModal('format-modal')">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width:460px;">
+        <div class="modal-head"><div class="modal-title" style="color:var(--red);"><i class="ti ti-alert-triangle" style="margin-right:6px;"></i>FORMATEAR TABLERO</div><span class="modal-close" onclick="closeModal('format-modal')"><i class="ti ti-x"></i></span></div>
+        <div style="background:var(--red-bg);border:1px solid rgba(240,84,90,0.3);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;">
+          <div style="font-size:13px;color:var(--red);font-weight:600;margin-bottom:6px;">Esta acción eliminará TODA la información numérica del tablero</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Se borrarán: GMV, Bookings, Packages, Efectividad, Metas, Clientes, KAMs y todo el historial de cargas. El tablero quedará en blanco para cargar datos nuevos.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Para confirmar, escribe FORMATEAR</label>
+          <input class="form-input" id="format-confirm-input" placeholder="Escribe FORMATEAR" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña de administrador</label>
+          <input class="form-input" id="format-confirm-pass" type="password" placeholder="Tu contraseña">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="closeModal('format-modal')">Cancelar</button>
+          <button class="btn" style="background:var(--red);color:#fff;" onclick="executeFormat()"><i class="ti ti-trash"></i> Confirmar formateo</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2116,6 +2142,8 @@ let etlColumnMap = {};
 let etlHistory = JSON.parse(localStorage.getItem('pibox_etl_history') || '[]');
 
 const ETL_FIELDS = [
+  {key:'id_compania', label:'ID Compañía',     desc:'Identificador único del cliente para homologación'},
+  {key:'record_id',   label:'Record ID',       desc:'Identificador de lead/registro CRM para homologación'},
   {key:'mes',       label:'Mes / Período',    desc:'Ene25, Feb26, etc.'},
   {key:'gmv',       label:'GMV',              desc:'Valor monetario operativo'},
   {key:'bookings',  label:'Bookings',         desc:'Total de reservas'},
@@ -2224,6 +2252,8 @@ function autoMapColumns(){
   etlColumnMap = {};
   const headerLower = etlHeaders.map(h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
   const patterns = {
+    id_compania:['id compania','id_compania','company_id','id empresa','company id','nit','id cliente'],
+    record_id:  ['record id','record_id','recordid','id registro','lead_id','lead id','id lead','id negocio','deal_id'],
     mes:        ['mes','periodo','period','month','fecha','date'],
     gmv:        ['gmv','valor','revenue','ingreso','monto','amount','ventas','sales'],
     bookings:   ['booking','bookings','reservas','reserva','ordenes','orders'],
@@ -2363,172 +2393,56 @@ function cancelETL(){
   etlColumnMap = {};
 }
 
+// Helper functions for ETL
+function etlGetNumCol(data, map, key){
+  const ci = map[key];
+  if(ci === undefined) return null;
+  return data.map(row => {
+    const v = row[ci];
+    if(v === '' || v === null || v === undefined) return 0;
+    const n = Number(String(v).replace(/[,$%\s]/g,''));
+    return isNaN(n) ? 0 : n;
+  });
+}
+function etlGetStrCol(data, map, key){
+  const ci = map[key];
+  if(ci === undefined) return null;
+  return data.map(row => String(row[ci] ?? '').trim());
+}
+
 function runETL(){
   const mappedKeys = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined);
-  if(mappedKeys.length === 0){
-    toast('Mapea al menos una columna antes de procesar');
-    return;
-  }
-  if(etlParsedData.length === 0){
-    toast('No hay datos para procesar');
-    return;
-  }
+  if(mappedKeys.length === 0){toast('Mapea al menos una columna antes de procesar');return;}
+  if(etlParsedData.length === 0){toast('No hay datos para procesar');return;}
 
-  const applied = [];
+  // Detect homologation keys
+  const hasIdCompania = etlColumnMap.id_compania !== undefined;
+  const hasRecordId = etlColumnMap.record_id !== undefined;
+  const homoType = hasIdCompania ? 'ID Compañía' : hasRecordId ? 'Record ID' : 'Ninguna';
 
-  // Helper: extract numeric column
-  function getNumCol(key){
-    const ci = etlColumnMap[key];
-    if(ci === undefined) return null;
-    return etlParsedData.map(row => {
-      const v = row[ci];
-      if(v === '' || v === null || v === undefined) return 0;
-      const n = Number(String(v).replace(/[,$%\s]/g,''));
-      return isNaN(n) ? 0 : n;
-    });
-  }
-  function getStrCol(key){
-    const ci = etlColumnMap[key];
-    if(ci === undefined) return null;
-    return etlParsedData.map(row => String(row[ci] ?? '').trim());
-  }
-
-  // ── Apply: GMV time series ──
-  if(etlColumnMap.mes !== undefined && etlColumnMap.gmv !== undefined){
-    const labels = getStrCol('mes');
-    const gmv = getNumCol('gmv');
-    if(labels && gmv){
-      DATA.ops.labels = labels;
-      DATA.ops.gmv = gmv;
-      applied.push('GMV mensual');
-    }
-  }
-
-  // ── Apply: Bookings ──
-  if(etlColumnMap.bookings !== undefined && etlColumnMap.mes !== undefined){
-    const bookings = getNumCol('bookings');
-    if(bookings){
-      DATA.ops.bookings = bookings;
-      applied.push('Bookings');
-    }
-  }
-
-  // ── Apply: Packages ──
-  if(etlColumnMap.packages !== undefined && etlColumnMap.mes !== undefined){
-    const packages = getNumCol('packages');
-    if(packages){
-      DATA.ops.packages = packages;
-      applied.push('Packages');
-    }
-  }
-
-  // ── Apply: Efectividad ──
-  if(etlColumnMap.efect !== undefined && etlColumnMap.mes !== undefined){
-    const efect = getNumCol('efect');
-    if(efect){
-      DATA.ops.efect = efect;
-      applied.push('Efectividad');
-    }
-  }
-
-  // ── Apply: Top Clients ──
-  if(etlColumnMap.cliente !== undefined && etlColumnMap.gmv !== undefined){
-    const nombres = getStrCol('cliente');
-    const gmvs = getNumCol('gmv');
-    const completados = getNumCol('completados');
-    const cancelados = getNumCol('cancelados');
-    const efects = getNumCol('efect');
-
-    if(nombres && gmvs){
-      // Aggregate by client
-      const clientMap = {};
-      nombres.forEach((name, i) => {
-        if(!name) return;
-        if(!clientMap[name]) clientMap[name] = {name, gmv:0, completed:0, canceled:0, total:0};
-        clientMap[name].gmv += gmvs[i] || 0;
-        if(completados) clientMap[name].completed += completados[i] || 0;
-        if(cancelados) clientMap[name].canceled += cancelados[i] || 0;
-      });
-      const sorted = Object.values(clientMap)
-        .map(c => { c.total = c.completed + c.canceled; c.eff = c.total > 0 ? c.completed / c.total : 1; return c; })
-        .sort((a,b) => b.gmv - a.gmv)
-        .slice(0, 10);
-      DATA.topClients = sorted;
-      applied.push('Top Clientes');
-    }
-  }
-
-  // ── Apply: KAM GMV ──
-  if(etlColumnMap.kam !== undefined && etlColumnMap.gmv !== undefined){
-    const kams = getStrCol('kam');
-    const gmvs = getNumCol('gmv');
-    if(kams && gmvs){
-      const kamMap = {};
-      kams.forEach((k, i) => { if(k) kamMap[k] = (kamMap[k]||0) + (gmvs[i]||0); });
-      const sorted = Object.entries(kamMap).sort((a,b) => b[1] - a[1]);
-      DATA.kamGMV.labels = sorted.map(s => s[0]);
-      DATA.kamGMV.data = sorted.map(s => s[1]);
-      applied.push('GMV por KAM');
-    }
-  }
-
-  // ── Apply: Metas ──
-  if(etlColumnMap.mes !== undefined && etlColumnMap.meta !== undefined && etlColumnMap.real !== undefined){
-    const labels = getStrCol('mes');
-    const meta = getNumCol('meta');
-    const real = getNumCol('real');
-    if(labels && meta && real){
-      DATA.metas.labels = labels;
-      DATA.metas.meta = meta;
-      DATA.metas.real = real;
-      applied.push('Metas comerciales');
-    }
-  }
-
-  // ── Apply: Clientes nuevos ──
-  if(etlColumnMap.mes !== undefined && etlColumnMap.nuevos !== undefined){
-    const labels = getStrCol('mes');
-    const nuevos = getNumCol('nuevos');
-    if(labels && nuevos){
-      DATA.nuevos.labels = labels;
-      DATA.nuevos.data = nuevos;
-      applied.push('Clientes nuevos');
-    }
-  }
-
-  if(applied.length === 0){
-    toast('No se encontraron datos aplicables con el mapeo actual');
-    return;
-  }
-
-  // Recalculate KPIs
-  const totalGMV = DATA.ops.gmv.reduce((a,b) => a+b, 0);
-  const kpiGmv = document.getElementById('kpi-gmv');
-  if(kpiGmv) kpiGmv.textContent = fmtMoneyShort(totalGMV);
-
-  // Rebuild all charts
-  setTimeout(()=>{
-    initMainCharts();
-    initMetasChart();
-    initOpsCharts();
-    initClienteCharts();
-  }, 200);
-
-  // Save to history
+  // Save to history WITH parsed data for activate/deactivate
   const entry = {
+    id: Date.now(),
     date: new Date().toISOString().slice(0,10),
     time: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
     file: etlFileName,
     rows: etlParsedData.length,
-    applied: applied
+    applied: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k),
+    active: true,
+    homoType: homoType,
+    columnMap: {...etlColumnMap},
+    data: etlParsedData.slice(0, 5000) // Cap at 5000 rows for storage
   };
   etlHistory.unshift(entry);
   if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
-  localStorage.setItem('pibox_etl_history', JSON.stringify(etlHistory));
+  saveETLHistory();
+
+  // Apply data
+  rebuildFromHistory();
 
   renderETLHistory();
-  toast(`Datos aplicados: ${applied.join(', ')}`);
-  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Aplicado: ${applied.join(', ')}`,'data','success','');
+  toast(`Datos aplicados: ${entry.applied.join(', ')}${hasIdCompania || hasRecordId ? ' · Homologación: '+homoType : ''}`);
+  auditLog(`ETL procesado: <strong>${etlFileName}</strong> — ${etlParsedData.length} filas · Homologación: ${homoType}`,'data','success','Campos: '+entry.applied.join(', '));
 
   // Clean up
   document.getElementById('etl-preview-panel').style.display = 'none';
@@ -2537,21 +2451,247 @@ function runETL(){
   etlParsedData = [];
 }
 
+function saveETLHistory(){
+  try {
+    localStorage.setItem('pibox_etl_history', JSON.stringify(etlHistory));
+  } catch(e){
+    // If too large, remove data from oldest entries
+    etlHistory.slice(5).forEach(h => { h.data = []; });
+    localStorage.setItem('pibox_etl_history', JSON.stringify(etlHistory));
+  }
+}
+
+function toggleETLEntry(id){
+  const entry = etlHistory.find(h => h.id === id);
+  if(!entry) return;
+  entry.active = !entry.active;
+  saveETLHistory();
+  rebuildFromHistory();
+  renderETLHistory();
+  toast(entry.active ? `${entry.file} activado — datos aplicados` : `${entry.file} desactivado — datos retirados`);
+  auditLog(`Archivo ${entry.active?'activado':'desactivado'}: <strong>${entry.file}</strong>`,'data',entry.active?'success':'warning','');
+}
+
+function rebuildFromHistory(){
+  // Reset DATA to empty baseline
+  resetDataToEmpty();
+
+  // Get all active entries (oldest first so newest overwrites)
+  const activeEntries = etlHistory.filter(h => h.active && h.data && h.data.length > 0).reverse();
+  if(activeEntries.length === 0){
+    refreshDashboard();
+    return;
+  }
+
+  // Merge all active entries with homologation
+  const clientRegistry = {};  // keyed by id_compania
+  const leadRegistry = {};    // keyed by record_id
+  const monthlyData = {};     // keyed by month label
+  const kamData = {};
+
+  activeEntries.forEach(entry => {
+    const map = entry.columnMap;
+    const data = entry.data;
+    const ids = etlGetStrCol(data, map, 'id_compania');
+    const recordIds = etlGetStrCol(data, map, 'record_id');
+    const months = etlGetStrCol(data, map, 'mes');
+    const gmvs = etlGetNumCol(data, map, 'gmv');
+    const bookings = etlGetNumCol(data, map, 'bookings');
+    const packages = etlGetNumCol(data, map, 'packages');
+    const efects = etlGetNumCol(data, map, 'efect');
+    const kams = etlGetStrCol(data, map, 'kam');
+    const clients = etlGetStrCol(data, map, 'cliente');
+    const completados = etlGetNumCol(data, map, 'completados');
+    const cancelados = etlGetNumCol(data, map, 'cancelados');
+    const metas = etlGetNumCol(data, map, 'meta');
+    const reals = etlGetNumCol(data, map, 'real');
+    const nuevos = etlGetNumCol(data, map, 'nuevos');
+
+    data.forEach((row, i) => {
+      // Homologate clients by ID Compañía
+      if(ids && ids[i] && clients && clients[i]){
+        const key = ids[i];
+        if(!clientRegistry[key]) clientRegistry[key] = {id:key, name:clients[i], gmv:0, completed:0, canceled:0};
+        clientRegistry[key].name = clients[i]; // update name from latest
+        if(gmvs) clientRegistry[key].gmv += gmvs[i] || 0;
+        if(completados) clientRegistry[key].completed += completados[i] || 0;
+        if(cancelados) clientRegistry[key].canceled += cancelados[i] || 0;
+      } else if(clients && clients[i] && gmvs){
+        // Fallback: use client name as key
+        const key = clients[i];
+        if(!clientRegistry[key]) clientRegistry[key] = {id:key, name:key, gmv:0, completed:0, canceled:0};
+        clientRegistry[key].gmv += gmvs[i] || 0;
+        if(completados) clientRegistry[key].completed += completados[i] || 0;
+        if(cancelados) clientRegistry[key].canceled += cancelados[i] || 0;
+      }
+
+      // Homologate leads by Record ID (update existing, add new)
+      if(recordIds && recordIds[i]){
+        leadRegistry[recordIds[i]] = {
+          id: recordIds[i],
+          client: clients ? clients[i] : '',
+          kam: kams ? kams[i] : '',
+          gmv: gmvs ? gmvs[i] : 0,
+          month: months ? months[i] : ''
+        };
+      }
+
+      // Monthly aggregation (current month override for same label)
+      if(months && months[i]){
+        const mKey = months[i];
+        if(!monthlyData[mKey]) monthlyData[mKey] = {gmv:0, bookings:0, packages:0, efect:[], meta:0, real:0, nuevos:0};
+        if(gmvs) monthlyData[mKey].gmv += gmvs[i] || 0;
+        if(bookings) monthlyData[mKey].bookings += bookings[i] || 0;
+        if(packages) monthlyData[mKey].packages += packages[i] || 0;
+        if(efects && efects[i]) monthlyData[mKey].efect.push(efects[i]);
+        if(metas) monthlyData[mKey].meta = metas[i] || monthlyData[mKey].meta;
+        if(reals) monthlyData[mKey].real += reals[i] || 0;
+        if(nuevos) monthlyData[mKey].nuevos += nuevos[i] || 0;
+      }
+
+      // KAM aggregation
+      if(kams && kams[i] && gmvs){
+        kamData[kams[i]] = (kamData[kams[i]]||0) + (gmvs[i]||0);
+      }
+    });
+  });
+
+  // Apply monthly data to DATA.ops
+  const monthLabels = Object.keys(monthlyData);
+  if(monthLabels.length > 0){
+    DATA.ops.labels = monthLabels;
+    DATA.ops.gmv = monthLabels.map(m => monthlyData[m].gmv);
+    DATA.ops.bookings = monthLabels.map(m => monthlyData[m].bookings);
+    DATA.ops.packages = monthLabels.map(m => monthlyData[m].packages);
+    DATA.ops.efect = monthLabels.map(m => monthlyData[m].efect.length > 0 ? monthlyData[m].efect.reduce((a,b)=>a+b,0)/monthlyData[m].efect.length : 0);
+  }
+
+  // Apply metas
+  const metaLabels = monthLabels.filter(m => monthlyData[m].meta > 0);
+  if(metaLabels.length > 0){
+    DATA.metas.labels = metaLabels;
+    DATA.metas.meta = metaLabels.map(m => monthlyData[m].meta);
+    DATA.metas.real = metaLabels.map(m => monthlyData[m].real);
+  }
+
+  // Apply nuevos
+  const nuevosLabels = monthLabels.filter(m => monthlyData[m].nuevos > 0);
+  if(nuevosLabels.length > 0){
+    DATA.nuevos.labels = nuevosLabels;
+    DATA.nuevos.data = nuevosLabels.map(m => monthlyData[m].nuevos);
+  }
+
+  // Apply clients (homologated by ID Compañía)
+  const clientsSorted = Object.values(clientRegistry)
+    .map(c => ({name:c.name, gmv:c.gmv, completed:c.completed, canceled:c.canceled, total:c.completed+c.canceled, eff: (c.completed+c.canceled)>0 ? c.completed/(c.completed+c.canceled) : 1}))
+    .sort((a,b) => b.gmv - a.gmv).slice(0,10);
+  if(clientsSorted.length > 0) DATA.topClients = clientsSorted;
+
+  // Apply KAMs
+  const kamSorted = Object.entries(kamData).sort((a,b) => b[1] - a[1]);
+  if(kamSorted.length > 0){
+    DATA.kamGMV.labels = kamSorted.map(s => s[0]);
+    DATA.kamGMV.data = kamSorted.map(s => s[1]);
+  }
+
+  refreshDashboard();
+}
+
+function resetDataToEmpty(){
+  DATA.ops.labels = [];
+  DATA.ops.gmv = [];
+  DATA.ops.bookings = [];
+  DATA.ops.packages = [];
+  DATA.ops.efect = [];
+  DATA.topClients = [];
+  DATA.kamGMV.labels = [];
+  DATA.kamGMV.data = [];
+  DATA.nuevos.labels = [];
+  DATA.nuevos.data = [];
+  DATA.metas.labels = [];
+  DATA.metas.meta = [];
+  DATA.metas.real = [];
+}
+
+function refreshDashboard(){
+  const totalGMV = DATA.ops.gmv.reduce((a,b) => a+b, 0);
+  const kpiGmv = document.getElementById('kpi-gmv');
+  if(kpiGmv) kpiGmv.textContent = fmtMoneyShort(totalGMV);
+  const avgEfect = DATA.ops.efect.length > 0 ? (DATA.ops.efect.reduce((a,b)=>a+b,0)/DATA.ops.efect.length).toFixed(1) : '0.0';
+  const kpiEfect = document.getElementById('kpi-efect');
+  if(kpiEfect) kpiEfect.textContent = avgEfect + '%';
+
+  setTimeout(()=>{
+    initMainCharts();
+    initMetasChart();
+    initOpsCharts();
+    initClienteCharts();
+    updateStaticMoneyValues();
+  }, 200);
+}
+
+// ── FORMAT (reset all) ──
+function showFormatConfirm(){
+  if(!currentUser || currentUser.role !== 'administrativo'){
+    toast('Solo un administrador puede formatear el tablero');
+    return;
+  }
+  document.getElementById('format-confirm-input').value = '';
+  document.getElementById('format-confirm-pass').value = '';
+  showModal('format-modal');
+}
+
+function executeFormat(){
+  const confirmText = document.getElementById('format-confirm-input').value.trim();
+  const confirmPass = document.getElementById('format-confirm-pass').value;
+
+  if(confirmText !== 'FORMATEAR'){
+    toast('Debes escribir FORMATEAR para confirmar');
+    return;
+  }
+  if(!currentUser || confirmPass !== currentUser.password){
+    toast('Contraseña incorrecta');
+    return;
+  }
+
+  // Reset everything
+  resetDataToEmpty();
+  etlHistory = [];
+  saveETLHistory();
+  refreshDashboard();
+  renderETLHistory();
+  closeModal('format-modal');
+  toast('Tablero formateado — todos los datos numéricos eliminados');
+  auditLog('FORMATEO COMPLETO del tablero — todos los datos numéricos eliminados y historial borrado','data','error','Ejecutado por: '+currentUser.name);
+}
+
 function renderETLHistory(){
   const tbody = document.getElementById('etl-history-body');
   if(!tbody) return;
   if(etlHistory.length === 0){
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px;">No hay cargas registradas</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">No hay cargas registradas</td></tr>';
     return;
   }
-  tbody.innerHTML = etlHistory.map(h => `
-    <tr>
+  tbody.innerHTML = etlHistory.map(h => {
+    const statusTag = h.active
+      ? '<span class="tag tag-green"><i class="ti ti-check" style="font-size:11px"></i> Activo</span>'
+      : '<span class="tag tag-red"><i class="ti ti-x" style="font-size:11px"></i> Inactivo</span>';
+    const toggleLabel = h.active ? 'Desactivar' : 'Activar';
+    const toggleColor = h.active ? 'color:var(--amber)' : 'color:var(--green)';
+    const homoTag = h.homoType && h.homoType !== 'Ninguna'
+      ? `<span class="tag tag-teal" style="font-size:10px;padding:1px 6px;">${h.homoType}</span>`
+      : '<span style="font-size:11px;color:var(--text3);">—</span>';
+    return `
+    <tr style="${h.active?'':'opacity:0.5;'}">
       <td style="white-space:nowrap;">${h.date} <span style="color:var(--text3);font-size:11px;">${h.time||''}</span></td>
       <td class="bold">${h.file}</td>
       <td>${h.rows.toLocaleString()}</td>
-      <td>${h.applied.map(a => `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;margin:1px;">${a}</span>`).join(' ')}</td>
-      <td><span class="tag tag-green"><i class="ti ti-check" style="font-size:11px"></i> Aplicado</span></td>
-    </tr>`).join('');
+      <td>${homoTag}</td>
+      <td>${(h.applied||[]).map(a => `<span class="tag tag-blue" style="font-size:10px;padding:1px 6px;margin:1px;">${a}</span>`).join(' ')}</td>
+      <td>${statusTag}</td>
+      <td><button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;${toggleColor}" onclick="toggleETLEntry(${h.id})"><i class="ti ti-${h.active?'player-pause':'player-play'}" style="font-size:12px"></i> ${toggleLabel}</button></td>
+    </tr>`;
+  }).join('');
 }
 
 // ─── DYNAMIC MONEY RENDERS ───
