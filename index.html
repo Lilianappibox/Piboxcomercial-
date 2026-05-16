@@ -438,7 +438,65 @@
   }
   @media (max-width: 480px) {
     .sidebar.open::after { left: 85vw; }
+    .ai-panel { width: 100vw !important; right: 0 !important; border-radius: 0 !important; }
   }
+
+  /* ─── AI ASSISTANT ─── */
+  .ai-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6C3AE0, #4F6EF7); color: #fff; border: none; cursor: pointer; z-index: 180; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(79,110,247,0.4); transition: transform 0.2s, box-shadow 0.2s; }
+  .ai-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(79,110,247,0.55); }
+  .ai-fab .ti { font-size: 26px; }
+  .ai-fab-badge { position: absolute; top: -2px; right: -2px; width: 14px; height: 14px; background: var(--green); border-radius: 50%; border: 2px solid var(--bg); }
+
+  .ai-panel { position: fixed; bottom: 90px; right: 24px; width: 420px; max-height: 70vh; background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; z-index: 190; display: none; flex-direction: column; box-shadow: 0 12px 48px rgba(0,0,0,0.5); overflow: hidden; }
+  .ai-panel.open { display: flex; }
+
+  .ai-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .ai-header-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #6C3AE0, #4F6EF7); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+  .ai-header-text { flex: 1; }
+  .ai-header-title { font-size: 14px; font-weight: 600; }
+  .ai-header-sub { font-size: 11px; color: var(--text3); }
+  .ai-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; padding: 4px; border-radius: 6px; transition: all 0.15s; }
+  .ai-close:hover { background: var(--bg3); color: var(--text); }
+
+  .ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 200px; max-height: 45vh; }
+  .ai-msg { max-width: 88%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.55; word-wrap: break-word; }
+  .ai-msg.bot { background: var(--bg3); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .ai-msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .ai-msg.system { background: var(--green-bg); color: var(--green); align-self: center; text-align: center; font-size: 11px; font-weight: 500; border-radius: 20px; padding: 6px 14px; }
+  .ai-msg.error { background: var(--red-bg); color: var(--red); align-self: center; text-align: center; font-size: 11px; border-radius: 20px; padding: 6px 14px; }
+  .ai-typing { display: flex; gap: 4px; padding: 10px 14px; align-self: flex-start; }
+  .ai-typing span { width: 7px; height: 7px; background: var(--text3); border-radius: 50%; animation: aiDot 1.4s infinite; }
+  .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes aiDot { 0%,80%,100%{ opacity:0.3; transform:scale(0.8); } 40%{ opacity:1; transform:scale(1.1); } }
+
+  .ai-file-preview { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; color: var(--text2); }
+  .ai-file-preview .ti { font-size: 18px; color: var(--accent2); }
+  .ai-file-remove { background: none; border: none; color: var(--text3); cursor: pointer; margin-left: auto; font-size: 14px; }
+  .ai-file-remove:hover { color: var(--red); }
+
+  .ai-input-area { padding: 12px 14px; border-top: 1px solid var(--border); }
+  .ai-input-row { display: flex; align-items: flex-end; gap: 8px; }
+  .ai-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; resize: none; max-height: 100px; min-height: 40px; line-height: 1.4; }
+  .ai-input:focus { border-color: var(--accent); }
+  .ai-input::placeholder { color: var(--text3); }
+  .ai-btn { width: 38px; height: 38px; border-radius: 10px; border: none; background: linear-gradient(135deg, #6C3AE0, #4F6EF7); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s; }
+  .ai-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ai-btn .ti { font-size: 18px; }
+  .ai-attach { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .ai-attach:hover { border-color: var(--accent); color: var(--accent2); }
+
+  .ai-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .ai-action-chip { padding: 5px 10px; border-radius: 20px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+  .ai-action-chip:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
+
+  .ai-key-setup { padding: 14px; text-align: center; }
+  .ai-key-input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 12px; font-family: 'DM Mono', monospace; outline: none; margin: 8px 0; }
+  .ai-key-input:focus { border-color: var(--accent); }
+
+  .ai-data-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 11px; }
+  .ai-data-summary table { min-width: auto; font-size: 11px; }
+  .ai-data-summary td, .ai-data-summary th { padding: 3px 8px; }
 </style>
 </head>
 <body>
@@ -5909,6 +5967,630 @@ applyFilters = function(){
   setTimeout(enableAllDragDrop, 300);
 };
 
+// ═══════════════════════════════════════════
+// ─── AI ASSISTANT ───
+// ═══════════════════════════════════════════
+
+const AI_SYSTEM_PROMPT = `Eres el asistente de inteligencia artificial del Pibox Dashboard Comercial. Tu rol es analizar documentos (Excel, CSV, PDF, imágenes) que el usuario sube y extraer datos estructurados para alimentar los módulos del tablero.
+
+MÓDULOS DEL TABLERO Y CAMPOS QUE NECESITAN:
+1. Resumen Ejecutivo: GMV mensual, KAM, Cliente, Ciudad, Bookings, Packages, Efectividad, Clientes Nuevos/Perdidos
+2. Metas Comerciales: Mes, Meta, Real/Cumplimiento, KAM, Utilidad Bruta
+3. Desempeño KAM: Mes, KAM, GMV, Meta, Real, Cliente, Bookings, Clientes Nuevos/Perdidos
+4. Clientes: Cliente, ID Compañía, GMV, Completados, Cancelados, Clientes Nuevos
+5. Comportamiento Operativo: Mes, Bookings, Packages, Completados, Cancelados, Efectividad
+6. Pipeline CRM: Record ID, Cliente, KAM, GMV, Mes
+7. Histórico: Mes, GMV, Meta, Cumplimiento, Utilidad
+
+CAMPOS DISPONIBLES PARA MAPEO (keys exactos):
+id_compania, record_id, mes, gmv, bookings, packages, efect, kam, cliente, ciudad, completados, cancelados, meta, real, nuevos, perdidos, utilidad, leads_mkt, leads_propios
+
+FORMATOS DE FECHA ACEPTADOS para "mes": Ene25, Febrero 2025, 2025-03, 03/2025, 2025-03-15, 15/03/2025
+
+INSTRUCCIONES:
+- Cuando el usuario suba un archivo, analiza su contenido y extrae los datos.
+- Responde en español, de forma clara y concisa.
+- Si puedes identificar datos, devuelve un bloque JSON con este formato EXACTO (envuélvelo en \`\`\`json ... \`\`\`):
+
+\`\`\`json
+{
+  "action": "load_data",
+  "headers": ["Mes", "GMV", "KAM", "Cliente", ...],
+  "columnMap": {"mes": 0, "gmv": 1, "kam": 2, "cliente": 3, ...},
+  "data": [
+    ["Ene25", 15000000, "Juan Pérez", "Empresa X", ...],
+    ["Feb25", 18000000, "Juan Pérez", "Empresa Y", ...]
+  ],
+  "summary": "Descripción breve de los datos extraídos"
+}
+\`\`\`
+
+- Los índices en columnMap corresponden a la posición en headers y en cada fila de data.
+- Solo incluye campos que realmente existan en los datos.
+- Si el documento es una imagen o PDF con tablas, extrae los datos de las tablas visibles.
+- Si no puedes extraer datos estructurados, explica qué contiene el documento y sugiere qué información necesitaría el usuario preparar.
+- Si el usuario hace preguntas sobre sus datos, responde basándote en los datos que se han cargado al tablero.
+- Sé proactivo: sugiere qué módulos se beneficiarían de los datos extraídos.`;
+
+let aiPanel, aiMessages, aiInput, aiFileInput, aiSendBtn;
+let aiPendingFiles = [];
+let aiConversation = [];
+let aiApiKey = localStorage.getItem('pibox_ai_key') || '';
+
+function initAI(){
+  // Create FAB
+  const fab = document.createElement('button');
+  fab.className = 'ai-fab';
+  fab.id = 'ai-fab';
+  fab.innerHTML = '<i class="ti ti-robot"></i><div class="ai-fab-badge"></div>';
+  fab.onclick = toggleAIPanel;
+  document.body.appendChild(fab);
+
+  // Create Panel
+  const panel = document.createElement('div');
+  panel.className = 'ai-panel';
+  panel.id = 'ai-panel';
+  panel.innerHTML = `
+    <div class="ai-header">
+      <div class="ai-header-icon"><i class="ti ti-robot"></i></div>
+      <div class="ai-header-text">
+        <div class="ai-header-title">Pibox AI Assistant</div>
+        <div class="ai-header-sub">Sube documentos para alimentar tu tablero</div>
+      </div>
+      <button class="ai-close" onclick="toggleAIPanel()" title="Cerrar"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="ai-messages" id="ai-messages"></div>
+    <div id="ai-file-list"></div>
+    <div class="ai-input-area">
+      <div class="ai-input-row">
+        <button class="ai-attach" onclick="document.getElementById('ai-file-input').click()" title="Adjuntar archivo"><i class="ti ti-paperclip"></i></button>
+        <textarea class="ai-input" id="ai-input" placeholder="Escribe un mensaje o sube un archivo..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"></textarea>
+        <button class="ai-btn" id="ai-send-btn" onclick="aiSend()"><i class="ti ti-send"></i></button>
+      </div>
+      <div class="ai-actions">
+        <span class="ai-action-chip" onclick="aiQuickAction('analyze')"><i class="ti ti-chart-bar" style="font-size:12px;margin-right:2px;"></i> Analizar datos</span>
+        <span class="ai-action-chip" onclick="aiQuickAction('suggest')"><i class="ti ti-bulb" style="font-size:12px;margin-right:2px;"></i> Sugerencias</span>
+        <span class="ai-action-chip" onclick="aiQuickAction('status')"><i class="ti ti-list-check" style="font-size:12px;margin-right:2px;"></i> Estado módulos</span>
+        <span class="ai-action-chip" onclick="aiConfigKey()"><i class="ti ti-key" style="font-size:12px;margin-right:2px;"></i> API Key</span>
+      </div>
+    </div>
+    <input type="file" id="ai-file-input" multiple accept=".csv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none" onchange="aiHandleFiles(event)">
+  `;
+  document.body.appendChild(panel);
+
+  aiPanel = panel;
+  aiMessages = document.getElementById('ai-messages');
+  aiInput = document.getElementById('ai-input');
+  aiSendBtn = document.getElementById('ai-send-btn');
+  aiFileInput = document.getElementById('ai-file-input');
+
+  // Welcome message
+  aiAddMsg('bot', 'Hola! Soy tu asistente de IA para el Pibox Dashboard. Puedo:\n\n' +
+    '<strong>1.</strong> Leer archivos (Excel, CSV, PDF, imágenes)\n' +
+    '<strong>2.</strong> Extraer datos y alimentar tus módulos automáticamente\n' +
+    '<strong>3.</strong> Analizar tus métricas actuales\n\n' +
+    'Sube un documento con el <i class="ti ti-paperclip"></i> o escríbeme qué necesitas.');
+
+  if(!aiApiKey){
+    aiAddMsg('system', 'Configura tu API Key de Anthropic para comenzar. Haz clic en "API Key" abajo.');
+  }
+
+  // Auto-resize textarea
+  aiInput.addEventListener('input', function(){
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+}
+
+function toggleAIPanel(){
+  const panel = document.getElementById('ai-panel');
+  panel.classList.toggle('open');
+}
+
+function aiAddMsg(type, html){
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.innerHTML = html;
+  aiMessages.appendChild(div);
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+  return div;
+}
+
+function aiShowTyping(){
+  const div = document.createElement('div');
+  div.className = 'ai-typing';
+  div.id = 'ai-typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  aiMessages.appendChild(div);
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+function aiHideTyping(){
+  const el = document.getElementById('ai-typing');
+  if(el) el.remove();
+}
+
+function aiConfigKey(){
+  const existing = aiApiKey ? '••••' + aiApiKey.slice(-8) : '';
+  const current = existing ? `<div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Actual: ${existing}</div>` : '';
+  const msgDiv = aiAddMsg('bot',
+    '<strong>Configurar API Key</strong><br>' +
+    '<div style="font-size:12px;color:var(--text2);margin:6px 0;">Obtén tu key en <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2);">console.anthropic.com</a></div>' +
+    current +
+    '<input type="password" id="ai-key-field" class="ai-key-input" placeholder="sk-ant-api03-..." value="">' +
+    '<div style="display:flex;gap:6px;margin-top:4px;">' +
+    '<button onclick="aiSaveKey()" class="btn btn-primary" style="font-size:12px;padding:6px 14px;">Guardar</button>' +
+    (aiApiKey ? '<button onclick="aiTestKey()" class="btn btn-ghost" style="font-size:12px;padding:6px 14px;">Probar conexión</button>' : '') +
+    '</div>'
+  );
+}
+
+function aiSaveKey(){
+  const input = document.getElementById('ai-key-field');
+  if(!input) return;
+  const key = input.value.trim();
+  if(!key){
+    aiAddMsg('error', 'Ingresa una API Key válida');
+    return;
+  }
+  aiApiKey = key;
+  localStorage.setItem('pibox_ai_key', key);
+  aiAddMsg('system', 'API Key guardada correctamente. Ya puedes subir documentos!');
+}
+
+async function aiTestKey(){
+  if(!aiApiKey){ aiAddMsg('error','No hay API Key configurada'); return; }
+  aiShowTyping();
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': aiApiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:50,
+        messages:[{role:'user', content:'Responde solo: OK'}]
+      })
+    });
+    aiHideTyping();
+    if(resp.ok){
+      aiAddMsg('system', 'Conexión exitosa! La API Key funciona correctamente.');
+    } else {
+      const err = await resp.json();
+      aiAddMsg('error', 'Error: ' + (err.error?.message || resp.statusText));
+    }
+  } catch(e){
+    aiHideTyping();
+    aiAddMsg('error', 'Error de conexión: ' + e.message);
+  }
+}
+
+// ─── FILE HANDLING ───
+
+function aiHandleFiles(e){
+  const files = [...e.target.files];
+  if(files.length === 0) return;
+  files.forEach(f => aiAddFile(f));
+  e.target.value = '';
+}
+
+function aiAddFile(file){
+  const maxSize = 50 * 1024 * 1024;
+  if(file.size > maxSize){ aiAddMsg('error','Archivo muy grande (máx 50MB)'); return; }
+  const ext = file.name.split('.').pop().toLowerCase();
+  const allowed = ['csv','xlsx','xls','pdf','png','jpg','jpeg','webp','gif'];
+  if(!allowed.includes(ext)){ aiAddMsg('error','Formato no soportado: .' + ext); return; }
+
+  const id = 'af-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+  aiPendingFiles.push({id, file, ext, name: file.name});
+
+  const iconMap = {pdf:'ti-file-type-pdf', xlsx:'ti-file-type-xls', xls:'ti-file-type-xls', csv:'ti-file-type-csv', png:'ti-photo', jpg:'ti-photo', jpeg:'ti-photo', webp:'ti-photo', gif:'ti-photo'};
+  const list = document.getElementById('ai-file-list');
+  const div = document.createElement('div');
+  div.className = 'ai-file-preview';
+  div.id = id;
+  div.innerHTML = `<i class="ti ${iconMap[ext]||'ti-file'}"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</span><span style="color:var(--text3);font-size:10px;">${(file.size/1024).toFixed(0)}KB</span><button class="ai-file-remove" onclick="aiRemoveFile('${id}')"><i class="ti ti-x"></i></button>`;
+  list.appendChild(div);
+}
+
+function aiRemoveFile(id){
+  aiPendingFiles = aiPendingFiles.filter(f => f.id !== id);
+  document.getElementById(id)?.remove();
+}
+
+async function aiProcessFile(fileObj){
+  const {file, ext, name} = fileObj;
+
+  if(['xlsx','xls','csv'].includes(ext)){
+    // Parse with SheetJS
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = new Uint8Array(ev.target.result);
+          const wb = XLSX.read(data, {type:'array', cellDates:true});
+          let allText = '';
+          wb.SheetNames.forEach(sn => {
+            const ws = wb.Sheets[sn];
+            const json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+            if(json.length === 0) return;
+            allText += `\n--- Hoja: ${sn} (${json.length} filas, ${json[0].length} columnas) ---\n`;
+            // Send headers + first 80 rows as CSV-like text
+            const rows = json.slice(0, 80);
+            allText += rows.map(r => r.map(c => {
+              if(c instanceof Date) return c.toISOString().slice(0,10);
+              return String(c);
+            }).join('\t')).join('\n');
+            if(json.length > 80) allText += `\n... (${json.length - 80} filas adicionales no mostradas)`;
+          });
+          resolve({type:'text', content: `Archivo: ${name}\nTipo: ${ext.toUpperCase()}\n${allText}`, rawWb: wb});
+        } catch(err){ reject(err); }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  if(['png','jpg','jpeg','webp','gif'].includes(ext)){
+    // Convert to base64 for Claude vision
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const base64 = ev.target.result.split(',')[1];
+        const mediaType = file.type || 'image/' + ext;
+        resolve({type:'image', mediaType, base64, name});
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if(ext === 'pdf'){
+    // Convert PDF pages to images using canvas (pdf.js)
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Load pdf.js dynamically if needed
+        if(!window.pdfjsLib){
+          await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+        const data = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data}).promise;
+        const pages = Math.min(pdf.numPages, 8); // max 8 pages
+        const images = [];
+        for(let i = 1; i <= pages; i++){
+          const page = await pdf.getPage(i);
+          const vp = page.getViewport({scale: 1.5});
+          const canvas = document.createElement('canvas');
+          canvas.width = vp.width;
+          canvas.height = vp.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({canvasContext: ctx, viewport: vp}).promise;
+          const b64 = canvas.toDataURL('image/png').split(',')[1];
+          images.push({type:'image', mediaType:'image/png', base64: b64, name: `${name} (pág ${i})`});
+        }
+        resolve({type:'pdf_images', images, totalPages: pdf.numPages, name});
+      } catch(err){ reject(err); }
+    });
+  }
+}
+
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ─── SEND MESSAGE ───
+
+async function aiSend(){
+  const text = aiInput.value.trim();
+  const hasFiles = aiPendingFiles.length > 0;
+  if(!text && !hasFiles) return;
+
+  if(!aiApiKey){
+    aiAddMsg('error', 'Configura tu API Key primero. Haz clic en "API Key".');
+    return;
+  }
+
+  // Show user message
+  if(text){
+    aiAddMsg('user', text.replace(/</g,'&lt;').replace(/\n/g,'<br>'));
+  }
+  if(hasFiles){
+    const fileNames = aiPendingFiles.map(f => f.name).join(', ');
+    aiAddMsg('user', '<i class="ti ti-file-upload" style="margin-right:4px;"></i> ' + fileNames);
+  }
+
+  aiInput.value = '';
+  aiInput.style.height = 'auto';
+  aiSendBtn.disabled = true;
+
+  // Process files
+  let fileContents = [];
+  if(hasFiles){
+    aiShowTyping();
+    try {
+      for(const f of aiPendingFiles){
+        const result = await aiProcessFile(f);
+        fileContents.push(result);
+      }
+    } catch(err){
+      aiHideTyping();
+      aiAddMsg('error', 'Error procesando archivo: ' + err.message);
+      aiSendBtn.disabled = false;
+      return;
+    }
+    aiHideTyping();
+    // Clear file list
+    aiPendingFiles = [];
+    document.getElementById('ai-file-list').innerHTML = '';
+  }
+
+  // Build Claude message content
+  const contentParts = [];
+
+  fileContents.forEach(fc => {
+    if(fc.type === 'text'){
+      contentParts.push({type:'text', text: fc.content});
+    } else if(fc.type === 'image'){
+      contentParts.push({type:'image', source:{type:'base64', media_type:fc.mediaType, data:fc.base64}});
+      contentParts.push({type:'text', text: `Imagen adjunta: ${fc.name}. Extrae todos los datos tabulares/numéricos visibles.`});
+    } else if(fc.type === 'pdf_images'){
+      fc.images.forEach(img => {
+        contentParts.push({type:'image', source:{type:'base64', media_type:img.mediaType, data:img.base64}});
+      });
+      contentParts.push({type:'text', text: `PDF: ${fc.name} (${fc.totalPages} páginas, mostrando ${fc.images.length}). Extrae todos los datos tabulares/numéricos visibles.`});
+    }
+  });
+
+  // Add current dashboard state context
+  const dashCtx = aiGetDashboardContext();
+
+  if(text){
+    contentParts.push({type:'text', text: text});
+  } else if(fileContents.length > 0){
+    contentParts.push({type:'text', text: 'Analiza este documento y extrae los datos para alimentar mi tablero Pibox. Devuelve el JSON estructurado.'});
+  }
+
+  // Add to conversation
+  aiConversation.push({role:'user', content: contentParts});
+
+  // Keep conversation manageable (last 10 exchanges)
+  if(aiConversation.length > 20) aiConversation = aiConversation.slice(-20);
+
+  // Call Claude API
+  aiShowTyping();
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': aiApiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: AI_SYSTEM_PROMPT + '\n\nESTADO ACTUAL DEL TABLERO:\n' + dashCtx,
+        messages: aiConversation
+      })
+    });
+
+    aiHideTyping();
+
+    if(!resp.ok){
+      const err = await resp.json().catch(() => ({}));
+      aiAddMsg('error', 'Error API: ' + (err.error?.message || resp.statusText));
+      aiSendBtn.disabled = false;
+      return;
+    }
+
+    const result = await resp.json();
+    const reply = result.content?.[0]?.text || 'Sin respuesta';
+
+    // Store assistant reply
+    aiConversation.push({role:'assistant', content: reply});
+
+    // Check for JSON data block
+    const jsonMatch = reply.match(/```json\s*([\s\S]*?)```/);
+    if(jsonMatch){
+      try {
+        const payload = JSON.parse(jsonMatch[1]);
+        if(payload.action === 'load_data' && payload.data && payload.headers){
+          // Show the reply text (without JSON block)
+          const textPart = reply.replace(/```json[\s\S]*?```/, '').trim();
+          if(textPart) aiAddMsg('bot', aiFormatMarkdown(textPart));
+
+          // Show data summary and apply button
+          aiShowDataPreview(payload);
+          aiSendBtn.disabled = false;
+          return;
+        }
+      } catch(e){
+        // JSON parse failed, show as normal text
+      }
+    }
+
+    // Show normal reply
+    aiAddMsg('bot', aiFormatMarkdown(reply));
+
+  } catch(err){
+    aiHideTyping();
+    aiAddMsg('error', 'Error de conexión: ' + err.message);
+  }
+  aiSendBtn.disabled = false;
+}
+
+function aiFormatMarkdown(text){
+  return text
+    .replace(/```[\s\S]*?```/g, m => '<pre style="background:var(--bg);padding:8px;border-radius:6px;font-size:11px;overflow-x:auto;margin:6px 0;">' + m.replace(/```\w*\n?/g,'').replace(/```/g,'') + '</pre>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code style="background:var(--bg);padding:1px 4px;border-radius:3px;font-size:11px;">$1</code>')
+    .replace(/\n/g, '<br>');
+}
+
+function aiShowDataPreview(payload){
+  const {headers, data, columnMap, summary} = payload;
+  const rows = data.slice(0, 8);
+  const mappedFields = Object.keys(columnMap).length;
+
+  let tableHtml = '<div class="ai-data-summary">';
+  tableHtml += `<div style="font-weight:600;margin-bottom:6px;color:var(--accent2);"><i class="ti ti-database" style="font-size:13px;margin-right:4px;"></i>Datos extraídos: ${data.length} filas, ${mappedFields} campos mapeados</div>`;
+  if(summary) tableHtml += `<div style="margin-bottom:8px;color:var(--text2);">${summary}</div>`;
+
+  // Mini table preview
+  tableHtml += '<div style="overflow-x:auto;"><table><thead><tr>';
+  headers.forEach((h,i) => {
+    const mapped = Object.entries(columnMap).find(([k,v]) => v === i);
+    const style = mapped ? 'color:var(--green);font-weight:600;' : '';
+    const badge = mapped ? ` <span class="tag tag-blue" style="font-size:8px;padding:0 4px;">${mapped[0]}</span>` : '';
+    tableHtml += `<th style="${style}font-size:10px;">${h}${badge}</th>`;
+  });
+  tableHtml += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    tableHtml += '<tr>';
+    row.forEach(cell => tableHtml += `<td style="font-size:10px;">${cell}</td>`);
+    tableHtml += '</tr>';
+  });
+  if(data.length > 8) tableHtml += `<tr><td colspan="${headers.length}" style="text-align:center;color:var(--text3);font-size:10px;">... ${data.length - 8} filas más</td></tr>`;
+  tableHtml += '</tbody></table></div>';
+
+  // Action buttons
+  tableHtml += `<div style="display:flex;gap:6px;margin-top:10px;">`;
+  tableHtml += `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick='aiApplyData(${JSON.stringify(payload).replace(/'/g,"&#39;")})'>`;
+  tableHtml += `<i class="ti ti-database-import" style="font-size:13px;"></i> Aplicar al tablero</button>`;
+  tableHtml += `<button class="btn btn-ghost" style="font-size:12px;padding:6px 14px;" onclick="this.closest('.ai-data-summary').remove()">Descartar</button>`;
+  tableHtml += `</div></div>`;
+
+  aiAddMsg('bot', tableHtml);
+}
+
+function aiApplyData(payload){
+  const {headers, data, columnMap} = payload;
+
+  // Build column map with numeric indices
+  const map = {};
+  Object.entries(columnMap).forEach(([key, idx]) => {
+    if(ETL_FIELDS.find(f => f.key === key)){
+      map[key] = idx;
+    }
+  });
+
+  if(Object.keys(map).length === 0){
+    aiAddMsg('error', 'No se encontraron campos válidos para mapear');
+    return;
+  }
+
+  // Create ETL history entry (same format as manual upload)
+  const entry = {
+    id: Date.now(),
+    date: new Date().toISOString().slice(0,10),
+    time: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+    file: 'AI: ' + (payload.summary || 'Datos extraídos').slice(0, 40),
+    rows: data.length,
+    applied: Object.keys(map).map(k => ETL_FIELDS.find(f=>f.key===k)?.label || k),
+    active: true,
+    homoType: map.id_compania !== undefined ? 'ID Compañía' : map.record_id !== undefined ? 'Record ID' : 'Ninguna',
+    modules: 'all',
+    period: {year:'auto', month:'auto'},
+    targetTable: 'auto',
+    targetTableLabel: 'Auto (IA)',
+    columnMap: map,
+    data: data.slice(0, 5000)
+  };
+
+  etlHistory.unshift(entry);
+  if(etlHistory.length > 50) etlHistory = etlHistory.slice(0,50);
+  saveETLHistory();
+  rebuildFromHistory();
+  renderETLHistory();
+
+  // Count what was loaded
+  const modulesAffected = [];
+  if(map.gmv !== undefined || map.bookings !== undefined) modulesAffected.push('Resumen Ejecutivo');
+  if(map.meta !== undefined || map.real !== undefined) modulesAffected.push('Metas Comerciales');
+  if(map.kam !== undefined) modulesAffected.push('Desempeño KAM');
+  if(map.cliente !== undefined) modulesAffected.push('Clientes');
+  if(map.bookings !== undefined || map.packages !== undefined) modulesAffected.push('Comportamiento Operativo');
+  if(map.record_id !== undefined) modulesAffected.push('Pipeline CRM');
+
+  aiAddMsg('system', `Datos aplicados exitosamente! ${data.length} filas cargadas.`);
+  if(modulesAffected.length > 0){
+    aiAddMsg('bot', `<strong>Módulos actualizados:</strong><br>` + modulesAffected.map(m => `<span class="tag tag-green" style="margin:2px;">${m}</span>`).join(' '));
+  }
+
+  toast(`IA: ${data.length} filas aplicadas al tablero`);
+  auditLog(`IA extrajo y aplicó datos: ${data.length} filas · ${Object.keys(map).length} campos`,'data','success','Fuente: AI Assistant');
+}
+
+// ─── QUICK ACTIONS ───
+
+function aiQuickAction(action){
+  if(!aiApiKey && action !== 'status'){
+    aiAddMsg('error', 'Configura tu API Key primero.');
+    return;
+  }
+  if(action === 'analyze'){
+    aiInput.value = 'Analiza los datos actuales de mi tablero. ¿Cuáles son las tendencias principales y qué insights puedes darme?';
+    aiSend();
+  } else if(action === 'suggest'){
+    aiInput.value = '¿Qué datos me faltan por cargar? ¿Qué módulos necesitan más información? Dame recomendaciones.';
+    aiSend();
+  } else if(action === 'status'){
+    aiShowModuleStatus();
+  }
+}
+
+function aiShowModuleStatus(){
+  const modules = [
+    {name:'Resumen Ejecutivo', fields:['gmv','bookings','packages','efect'], check: () => DATA.ops.labels.length > 0},
+    {name:'Metas Comerciales', fields:['meta','real'], check: () => DATA.metas.labels.length > 0},
+    {name:'Desempeño KAM', fields:['kam','gmv'], check: () => DATA.kamGMV.labels.length > 0},
+    {name:'Clientes', fields:['cliente','gmv'], check: () => DATA.topClients.length > 0},
+    {name:'Comportamiento Operativo', fields:['bookings','packages','completados'], check: () => DATA.ops.bookings.some(v=>v>0)},
+    {name:'Pipeline CRM', fields:['record_id','cliente','gmv'], check: () => false},
+    {name:'Histórico', fields:['mes','gmv','meta'], check: () => DATA.ops.labels.length > 2}
+  ];
+
+  let html = '<strong>Estado de módulos</strong><br><div style="margin-top:8px;">';
+  modules.forEach(m => {
+    const active = m.check();
+    const icon = active ? '<i class="ti ti-circle-check" style="color:var(--green);"></i>' : '<i class="ti ti-circle-x" style="color:var(--text3);"></i>';
+    const tag = active ? '<span class="tag tag-green" style="font-size:9px;">Con datos</span>' : '<span class="tag tag-amber" style="font-size:9px;">Sin datos</span>';
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;">${icon} <span style="flex:1;">${m.name}</span> ${tag}</div>`;
+  });
+
+  const totalCargas = etlHistory.length;
+  const activas = etlHistory.filter(h => h.active).length;
+  html += `<div style="margin-top:8px;font-size:11px;color:var(--text3);">${totalCargas} cargas en historial (${activas} activas)</div>`;
+  html += '</div>';
+
+  aiAddMsg('bot', html);
+}
+
+function aiGetDashboardContext(){
+  const ctx = [];
+  ctx.push(`Períodos cargados: ${DATA.ops.labels.length} (${DATA.ops.labels.join(', ') || 'ninguno'})`);
+  ctx.push(`GMV total: ${DATA.ops.gmv.reduce((a,b)=>a+b,0)}`);
+  ctx.push(`KAMs: ${DATA.kamGMV.labels.length} (${DATA.kamGMV.labels.join(', ') || 'ninguno'})`);
+  ctx.push(`Top Clientes: ${DATA.topClients.length}`);
+  ctx.push(`Metas: ${DATA.metas.labels.length} períodos`);
+  ctx.push(`Bookings total: ${DATA.ops.bookings.reduce((a,b)=>a+b,0)}`);
+  ctx.push(`Packages total: ${DATA.ops.packages.reduce((a,b)=>a+b,0)}`);
+  ctx.push(`Cargas ETL activas: ${etlHistory.filter(h=>h.active).length}`);
+  return ctx.join('\n');
+}
+
 // ─── INIT ───
 window.addEventListener('resize', checkMobile);
 window.addEventListener('hashchange', onHashChange);
@@ -5923,6 +6605,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAllModuleFilters();
   setTimeout(initMainCharts, 150);
   setTimeout(enableAllDragDrop, 500);
+  setTimeout(initAI, 300);
   onHashChange();
 });
 </script>
