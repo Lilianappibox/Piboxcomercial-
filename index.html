@@ -2935,18 +2935,19 @@ let etlHistory = JSON.parse(localStorage.getItem('pibox_etl_history') || '[]');
 const ETL_FIELDS = [
   {key:'id_compania', label:'ID Compañía',     desc:'Identificador único del cliente para homologación'},
   {key:'record_id',   label:'Record ID',       desc:'Identificador de lead/registro CRM para homologación'},
-  {key:'mes',       label:'Mes / Período',    desc:'Ene25, Feb26, etc.'},
-  {key:'gmv',       label:'GMV',              desc:'Valor monetario operativo'},
-  {key:'bookings',  label:'Bookings',         desc:'Total de reservas'},
-  {key:'packages',  label:'Packages',         desc:'Paquetes entregados'},
+  {key:'anio',      label:'Año',              desc:'Columna que contiene el año (2024, 2025, 2026...)'},
+  {key:'mes',       label:'Mes / Período',    desc:'Ene25, Febrero, etc. Puedes seleccionar varias columnas si cada mes es una columna', multi:true},
+  {key:'gmv',       label:'GMV',              desc:'Valor monetario operativo. Selecciona varias si hay una columna por mes', multi:true},
+  {key:'bookings',  label:'Bookings',         desc:'Total de reservas', multi:true},
+  {key:'packages',  label:'Packages',         desc:'Paquetes entregados', multi:true},
   {key:'efect',     label:'Efectividad %',    desc:'Porcentaje de efectividad'},
   {key:'kam',       label:'KAM',              desc:'Nombre del KAM'},
   {key:'cliente',   label:'Cliente',          desc:'Nombre del cliente'},
   {key:'ciudad',    label:'Ciudad',           desc:'Ciudad de operación'},
   {key:'completados',label:'Completados',     desc:'Servicios completados'},
   {key:'cancelados', label:'Cancelados',      desc:'Servicios cancelados'},
-  {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial'},
-  {key:'real',      label:'Real / Cumplimiento', desc:'Valor real cumplido'},
+  {key:'meta',      label:'Meta',             desc:'Objetivo de meta comercial', multi:true},
+  {key:'real',      label:'Real / Cumplimiento', desc:'Valor real cumplido', multi:true},
   {key:'nuevos',      label:'Clientes Nuevos',    desc:'Cantidad de clientes nuevos'},
   {key:'perdidos',    label:'Clientes Perdidos',   desc:'Cantidad de clientes perdidos'},
   {key:'utilidad',    label:'Utilidad Bruta',         desc:'Utilidad bruta (ingresos - costos)'},
@@ -3223,12 +3224,22 @@ function showETLPreview(){
   runValidation();
 }
 
+// Month names for auto-detecting pivoted columns (Enero, Febrero, etc.)
+const MONTH_COL_NAMES = {
+  'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
+  'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12,
+  'ene':1,'feb':2,'mar':3,'abr':4,'may':5,'jun':6,'jul':7,'ago':8,'sep':9,'oct':10,'nov':11,'dic':12,
+  'january':1,'february':2,'march':3,'april':4,'june':6,'july':7,'august':8,'september':9,'october':10,'november':11,'december':12,
+  'jan':1,'apr':4,'aug':8,'dec':12
+};
+
 function autoMapColumns(){
   etlColumnMap = {};
-  const headerLower = etlHeaders.map(h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const headerLower = etlHeaders.map(h => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim());
   const patterns = {
     id_compania:['id compania','id_compania','company_id','id empresa','company id','nit','id cliente'],
     record_id:  ['record id','record_id','recordid','id registro','lead_id','lead id','id lead','id negocio','deal_id'],
+    anio:       ['año','anio','year','ano','yr'],
     mes:        ['mes','periodo','period','month','fecha','date','mes/periodo','mes_periodo','periodo_mes','month_year','año_mes','anio_mes'],
     gmv:        ['gmv','valor','revenue','ingreso','monto','amount','ventas','sales'],
     bookings:   ['booking','bookings','reservas','reserva','ordenes','orders'],
@@ -3248,33 +3259,107 @@ function autoMapColumns(){
     leads_propios:['leads propios','lead propio','propios','leads comercial','comercial leads']
   };
 
+  // Standard single-column mapping
   ETL_FIELDS.forEach(field => {
     const pats = patterns[field.key] || [];
     const idx = headerLower.findIndex(h => pats.some(p => h.includes(p)));
     if(idx !== -1) etlColumnMap[field.key] = idx;
   });
+
+  // Auto-detect pivoted month columns (Enero, Febrero, Marzo...)
+  if(etlColumnMap.mes === undefined){
+    const monthCols = [];
+    headerLower.forEach((h, i) => {
+      // Check if this header is a month name (with optional year suffix)
+      const clean = h.replace(/[\d\s\-_\.\/]+/g,'').trim();
+      if(MONTH_COL_NAMES[clean] || MONTH_COL_NAMES[h.replace(/[\d\s]/g,'').trim()]){
+        monthCols.push(i);
+      }
+    });
+    if(monthCols.length >= 2){
+      etlColumnMap.mes = monthCols; // Array = multi-column (pivoted)
+    }
+  }
 }
+
+// Helper: check if a map value is multi (array)
+function isMultiMap(val){ return Array.isArray(val); }
+function getMapIndices(val){ return isMultiMap(val) ? val : (val !== undefined ? [val] : []); }
 
 function renderColumnMapping(){
   const container = document.getElementById('etl-mapping');
   container.innerHTML = ETL_FIELDS.map(field => {
     const mapped = etlColumnMap[field.key];
-    const opts = etlHeaders.map((h,i) => `<option value="${i}" ${mapped===i?'selected':''}>${h}</option>`).join('');
-    const statusClass = mapped !== undefined ? 'tag-green' : 'tag-amber';
-    const statusText = mapped !== undefined ? 'Mapeado' : 'Sin asignar';
-    return `
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:12px;font-weight:500;">${field.label}</span>
-          <span class="tag ${statusClass}" style="font-size:9px;padding:1px 5px;">${statusText}</span>
-        </div>
-        <select class="form-select" style="font-size:12px;padding:4px 8px;" onchange="etlColumnMap['${field.key}']=this.value===''?undefined:parseInt(this.value);renderColumnMapping();renderPreviewTable();runValidation();">
+    const isMulti = field.multi;
+    const multiActive = isMulti && isMultiMap(mapped);
+    const singleVal = isMulti ? (multiActive ? '' : mapped) : mapped;
+    const multiVals = multiActive ? mapped : [];
+    const count = multiActive ? multiVals.length : (mapped !== undefined ? 1 : 0);
+    const statusClass = count > 0 ? 'tag-green' : 'tag-amber';
+    const statusText = count > 1 ? count + ' cols' : count === 1 ? 'Mapeado' : 'Sin asignar';
+
+    let inputHtml;
+    if(isMulti){
+      // Toggle between single select and multi-checkbox
+      const mode = multiActive ? 'multi' : 'single';
+      const toggleLabel = multiActive ? 'Una columna' : 'Varias columnas';
+      const toggleIcon = multiActive ? 'ti-list' : 'ti-checkbox';
+
+      let singleSelect = `<select class="form-select" style="font-size:11px;padding:3px 6px;${mode==='multi'?'display:none':''}" id="etl-sel-${field.key}" onchange="etlColumnMap['${field.key}']=this.value===''?undefined:parseInt(this.value);renderColumnMapping();renderPreviewTable();runValidation();">
           <option value="">— No asignar —</option>
-          ${opts}
-        </select>
-        <div style="font-size:10px;color:var(--text3);margin-top:4px;">${field.desc}</div>
+          ${etlHeaders.map((h,i) => `<option value="${i}" ${singleVal===i?'selected':''}>${h}</option>`).join('')}
+        </select>`;
+
+      let checkboxes = `<div style="max-height:120px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:4px;${mode==='single'?'display:none':''}" id="etl-multi-${field.key}">
+          ${etlHeaders.map((h,i) => `<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);padding:2px 4px;cursor:pointer;">
+            <input type="checkbox" value="${i}" ${multiVals.includes(i)?'checked':''} style="accent-color:var(--accent);width:12px;height:12px;" onchange="etlUpdateMulti('${field.key}')"> ${h}
+          </label>`).join('')}
+        </div>`;
+
+      inputHtml = `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+          <button class="btn btn-ghost" style="font-size:9px;padding:2px 6px;" onclick="etlToggleMulti('${field.key}')"><i class="ti ${toggleIcon}" style="font-size:10px;"></i> ${toggleLabel}</button>
+        </div>${singleSelect}${checkboxes}`;
+    } else {
+      inputHtml = `<select class="form-select" style="font-size:11px;padding:3px 6px;" onchange="etlColumnMap['${field.key}']=this.value===''?undefined:parseInt(this.value);renderColumnMapping();renderPreviewTable();runValidation();">
+          <option value="">— No asignar —</option>
+          ${etlHeaders.map((h,i) => `<option value="${i}" ${mapped===i?'selected':''}>${h}</option>`).join('')}
+        </select>`;
+    }
+
+    return `
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:11px;font-weight:500;">${field.label}</span>
+          <span class="tag ${statusClass}" style="font-size:8px;padding:1px 4px;">${statusText}</span>
+        </div>
+        ${inputHtml}
+        <div style="font-size:9px;color:var(--text3);margin-top:3px;">${field.desc}</div>
       </div>`;
   }).join('');
+}
+
+function etlToggleMulti(key){
+  const current = etlColumnMap[key];
+  if(isMultiMap(current)){
+    // Switch back to single — take first item or undefined
+    etlColumnMap[key] = current.length > 0 ? current[0] : undefined;
+  } else {
+    // Switch to multi — wrap current in array or start empty
+    etlColumnMap[key] = current !== undefined ? [current] : [];
+  }
+  renderColumnMapping();
+  renderPreviewTable();
+  runValidation();
+}
+
+function etlUpdateMulti(key){
+  const container = document.getElementById('etl-multi-' + key);
+  if(!container) return;
+  const checked = [...container.querySelectorAll('input:checked')].map(cb => parseInt(cb.value));
+  etlColumnMap[key] = checked.length > 0 ? checked : [];
+  renderColumnMapping();
+  renderPreviewTable();
+  runValidation();
 }
 
 function renderPreviewTable(){
@@ -3342,13 +3427,23 @@ function runValidation(){
   panel.style.display = 'block';
 
   const checks = [];
-  const mappedKeys = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined);
+  const mappedKeys = Object.keys(etlColumnMap).filter(k => { const v=etlColumnMap[k]; return v!==undefined && (!isMultiMap(v)||v.length>0); });
 
   // Check: at least some columns mapped
   if(mappedKeys.length === 0){
     checks.push({type:'critical', text:'No hay columnas mapeadas. Asigna al menos una columna a un campo del tablero.', meta:''});
   } else {
-    checks.push({type:'info', text:`${mappedKeys.length} columna(s) mapeada(s) correctamente.`, meta: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label).join(', ')});
+    checks.push({type:'info', text:`${mappedKeys.length} campo(s) mapeado(s) correctamente.`, meta: mappedKeys.map(k => ETL_FIELDS.find(f=>f.key===k)?.label).join(', ')});
+  }
+
+  // Check: multi-column (pivoted) detection
+  const multiKeys = mappedKeys.filter(k => isMultiMap(etlColumnMap[k]));
+  if(multiKeys.length > 0){
+    multiKeys.forEach(k => {
+      const cols = etlColumnMap[k];
+      const colNames = cols.map(i => etlHeaders[i]).join(', ');
+      checks.push({type:'opportunity', text:`"${ETL_FIELDS.find(f=>f.key===k)?.label}" tiene ${cols.length} columnas seleccionadas — los datos se des-pivotarán automáticamente.`, meta: colNames});
+    });
   }
 
   // Check: row count
@@ -3362,11 +3457,15 @@ function runValidation(){
   const numericFields = ['gmv','bookings','packages','efect','completados','cancelados','meta','real','nuevos','perdidos'];
   numericFields.forEach(key => {
     if(etlColumnMap[key] === undefined) return;
-    const ci = etlColumnMap[key];
-    const nonNumeric = etlParsedData.filter(row => {
-      const v = row[ci];
-      return v !== '' && v !== null && v !== undefined && isNaN(Number(String(v).replace(/[,$%]/g,'')));
-    }).length;
+    const indices = getMapIndices(etlColumnMap[key]);
+    if(indices.length === 0) return;
+    let nonNumeric = 0;
+    indices.forEach(ci => {
+      nonNumeric += etlParsedData.filter(row => {
+        const v = row[ci];
+        return v !== '' && v !== null && v !== undefined && isNaN(Number(String(v).replace(/[,$%]/g,'')));
+      }).length;
+    });
     if(nonNumeric > 0){
       checks.push({type:'warning', text:`Campo "${ETL_FIELDS.find(f=>f.key===key)?.label}": ${nonNumeric} valor(es) no numérico(s) detectados.`, meta:'Se omitirán al procesar'});
     }
@@ -3374,7 +3473,9 @@ function runValidation(){
 
   // Check: empty cells in mapped columns
   mappedKeys.forEach(key => {
-    const ci = etlColumnMap[key];
+    const indices = getMapIndices(etlColumnMap[key]);
+    if(indices.length === 0) return;
+    const ci = indices[0]; // check first column for empties
     const empties = etlParsedData.filter(row => row[ci] === '' || row[ci] === null || row[ci] === undefined).length;
     if(empties > 0 && empties < etlParsedData.length){
       checks.push({type:'warning', text:`Campo "${ETL_FIELDS.find(f=>f.key===key)?.label}": ${empties} celda(s) vacía(s).`, meta:'Se usará valor 0 por defecto'});
@@ -3407,7 +3508,8 @@ function cancelETL(){
 // Helper functions for ETL
 function etlGetNumCol(data, map, key){
   const ci = map[key];
-  if(ci === undefined) return null;
+  if(ci === undefined || (isMultiMap(ci) && ci.length === 0)) return null;
+  if(isMultiMap(ci)) return null; // multi handled by unpivot
   return data.map(row => {
     const v = row[ci];
     if(v === '' || v === null || v === undefined) return 0;
@@ -3417,12 +3519,79 @@ function etlGetNumCol(data, map, key){
 }
 function etlGetStrCol(data, map, key){
   const ci = map[key];
-  if(ci === undefined) return null;
+  if(ci === undefined || (isMultiMap(ci) && ci.length === 0)) return null;
+  if(isMultiMap(ci)) return null; // multi handled by unpivot
   return data.map(row => String(row[ci] ?? '').trim());
 }
 
+// Unpivot: converts wide-format data (month columns) into long-format rows
+// Example: {KAM, Cliente, Enero, Febrero, Marzo} → {KAM, Cliente, Mes, Valor} x3
+function etlUnpivotData(data, headers, map){
+  const mesMap = map.mes;
+  // Check which numeric fields also have multi-column mapping
+  const multiNumFields = ['gmv','bookings','packages','meta','real'].filter(k => isMultiMap(map[k]));
+
+  // If mes is multi, each month column index becomes a separate row
+  if(isMultiMap(mesMap) && mesMap.length > 0){
+    const newData = [];
+    const newMap = {...map};
+    // Determine the value field for each month column
+    // If gmv is also multi with same count, pair them; otherwise use mes columns as values
+    const pairedField = multiNumFields.find(k => isMultiMap(map[k]) && map[k].length === mesMap.length);
+
+    // New columns: keep all non-multi single columns, add mes(single) + value(single)
+    const singleKeys = Object.keys(map).filter(k => !isMultiMap(map[k]) && k !== 'mes' && k !== 'anio');
+
+    data.forEach(row => {
+      mesMap.forEach((colIdx, mi) => {
+        const monthLabel = headers[colIdx] || '';
+        const newRow = [...row]; // copy original row
+
+        // If there's year column, combine it with month
+        const yearCol = map.anio;
+        let fullLabel = monthLabel;
+        if(yearCol !== undefined && !isMultiMap(yearCol)){
+          const yr = String(row[yearCol] ?? '').trim();
+          if(yr) fullLabel = monthLabel + ' ' + yr;
+        }
+
+        // Set the month value in a virtual column at end
+        const mesIdx = newRow.length;
+        newRow.push(fullLabel);
+
+        // If paired value field exists, set its value
+        if(pairedField){
+          const valIdx = newRow.length;
+          const pairColIdx = map[pairedField][mi];
+          newRow.push(row[pairColIdx] ?? 0);
+          newMap[pairedField] = valIdx; // will be overwritten each time but same index
+        } else {
+          // Use the month column value itself as GMV if no separate value column
+          const valIdx = newRow.length;
+          const cellVal = row[colIdx];
+          newRow.push(cellVal ?? 0);
+          // Auto-assign as gmv if not already mapped
+          if(map.gmv === undefined) newMap.gmv = valIdx;
+        }
+
+        newMap.mes = mesIdx;
+        newData.push(newRow);
+      });
+    });
+
+    // Clear multi arrays — they've been unpivoted to single indices
+    multiNumFields.forEach(k => {
+      if(k !== pairedField && isMultiMap(newMap[k])) delete newMap[k];
+    });
+
+    return {data: newData, map: newMap};
+  }
+
+  return {data, map};
+}
+
 function runETL(){
-  const mappedKeys = Object.keys(etlColumnMap).filter(k => etlColumnMap[k] !== undefined);
+  const mappedKeys = Object.keys(etlColumnMap).filter(k => { const v=etlColumnMap[k]; return v!==undefined && (!isMultiMap(v)||v.length>0); });
   if(mappedKeys.length === 0){toast('Mapea al menos una columna antes de procesar');return;}
   if(etlParsedData.length === 0){toast('No hay datos para procesar');return;}
 
@@ -3450,7 +3619,8 @@ function runETL(){
       existing.period = period;
       existing.targetTable = targetTable;
       existing.targetTableLabel = tableLabels[targetTable] || targetTable;
-      existing.columnMap = {...etlColumnMap};
+      existing.columnMap = JSON.parse(JSON.stringify(etlColumnMap));
+      existing.headers = [...etlHeaders];
       existing.data = etlParsedData.slice(0, 5000);
       saveETLHistory();
       rebuildFromHistory();
@@ -3474,7 +3644,8 @@ function runETL(){
       period: period,
       targetTable: targetTable,
       targetTableLabel: tableLabels[targetTable] || targetTable,
-      columnMap: {...etlColumnMap},
+      columnMap: JSON.parse(JSON.stringify(etlColumnMap)),
+      headers: [...etlHeaders],
       data: etlParsedData.slice(0, 5000)
     };
     etlHistory.unshift(entry);
@@ -3624,8 +3795,10 @@ function rebuildFromHistory(){
   const kamData = {};
 
   activeEntries.forEach(entry => {
-    const map = entry.columnMap;
-    const data = entry.data;
+    // Unpivot if multi-column mapping (e.g., months as separate columns)
+    const unpivoted = etlUnpivotData(entry.data, entry.headers || [], entry.columnMap);
+    const map = unpivoted.map;
+    const data = unpivoted.data;
     const ids = etlGetStrCol(data, map, 'id_compania');
     const recordIds = etlGetStrCol(data, map, 'record_id');
     const monthsRaw = etlGetStrCol(data, map, 'mes');
