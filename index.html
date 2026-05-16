@@ -42,8 +42,24 @@
 
   /* ─── LAYOUT ─── */
   .app { display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar-w); background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; height: 100vh; z-index: 100; transition: transform 0.25s; }
-  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; height: 100vh; z-index: 100; transition: transform 0.25s, width 0.25s; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.25s; }
+
+  /* Sidebar collapsed (desktop) */
+  .sidebar.collapsed { width: 64px; }
+  .sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub { display: none; }
+  .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-badge { display: none; }
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 10px; }
+  .sidebar.collapsed .nav-item .ti { font-size: 20px; margin: 0; }
+  .sidebar.collapsed .nav-label { font-size: 0; padding: 6px 0; }
+  .sidebar.collapsed .sidebar-user .user-info { display: none; }
+  .sidebar.collapsed .sidebar-user { justify-content: center; padding: 14px 8px; }
+  .sidebar.collapsed .sidebar-logo { padding: 18px 14px 14px; justify-content: center; }
+  .sidebar.collapsed + .main, .app:has(.sidebar.collapsed) .main { margin-left: 64px; }
+  .sidebar-toggle { position: absolute; top: 14px; right: -14px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--border); color: var(--text3); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 101; transition: all 0.2s; font-size: 14px; }
+  .sidebar-toggle:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  .sidebar.collapsed .sidebar-toggle { right: -14px; }
+  .sidebar.collapsed .sidebar-toggle .ti { transform: rotate(180deg); }
   .topbar { height: var(--header-h); background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; position: sticky; top: 0; z-index: 50; }
   /* ─── SIDEBAR ─── */
   .sidebar-logo { padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
@@ -375,7 +391,9 @@
   /* Tablet portrait (<=900px) — sidebar collapses */
   @media (max-width: 900px) {
     #menu-btn { display: flex; }
-    .sidebar { transform: translateX(-100%); }
+    .sidebar-toggle { display: none !important; }
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-w) !important; }
+    .sidebar.collapsed { width: var(--sidebar-w) !important; }
     .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
     .main { margin-left: 0; }
     .charts-grid { grid-template-columns: 1fr; }
@@ -642,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ─── SIDEBAR ─── -->
 <aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleCollapse()" title="Colapsar menú"><i class="ti ti-chevron-left"></i></button>
   <div class="sidebar-logo">
     <div class="logo-mark">
       <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -678,46 +697,46 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
   <nav class="nav">
     <div class="nav-label">Principal</div>
-    <a class="nav-item active" href="#/resumen-ejecutivo">
-      <i class="ti ti-layout-dashboard"></i> Resumen Ejecutivo
+    <a class="nav-item active" href="#/resumen-ejecutivo" title="Resumen Ejecutivo">
+      <i class="ti ti-layout-dashboard"></i> <span>Resumen Ejecutivo</span>
     </a>
-    <a class="nav-item" href="#/metas-comerciales">
-      <i class="ti ti-target"></i> Metas Comerciales
+    <a class="nav-item" href="#/metas-comerciales" title="Metas Comerciales">
+      <i class="ti ti-target"></i> <span>Metas Comerciales</span>
     </a>
-    <a class="nav-item" href="#/desempeno-kam">
-      <i class="ti ti-users"></i> Desempeño KAM
+    <a class="nav-item" href="#/desempeno-kam" title="Desempeño KAM">
+      <i class="ti ti-users"></i> <span>Desempeño KAM</span>
     </a>
-    <a class="nav-item" href="#/clientes">
-      <i class="ti ti-building-store"></i> Clientes
+    <a class="nav-item" href="#/clientes" title="Clientes">
+      <i class="ti ti-building-store"></i> <span>Clientes</span>
     </a>
-    <a class="nav-item" href="#/recursos">
-      <i class="ti ti-school"></i> Recursos
+    <a class="nav-item" href="#/recursos" title="Recursos">
+      <i class="ti ti-school"></i> <span>Recursos</span>
     </a>
     <div class="nav-label">Operaciones</div>
-    <a class="nav-item" href="#/comportamiento-operativo">
-      <i class="ti ti-truck"></i> Comportamiento Operativo
+    <a class="nav-item" href="#/comportamiento-operativo" title="Comportamiento Operativo">
+      <i class="ti ti-truck"></i> <span>Comportamiento Operativo</span>
     </a>
-    <a class="nav-item" href="#/pipeline-crm">
-      <i class="ti ti-radar"></i> Pipeline CRM
+    <a class="nav-item" href="#/pipeline-crm" title="Pipeline CRM">
+      <i class="ti ti-radar"></i> <span>Pipeline CRM</span>
     </a>
     <div class="nav-label">Configuración</div>
-    <a class="nav-item" href="#/cargar-datos">
-      <i class="ti ti-file-upload"></i> Cargar Datos <span class="nav-badge">ETL</span>
+    <a class="nav-item" href="#/cargar-datos" title="Cargar Datos">
+      <i class="ti ti-file-upload"></i> <span>Cargar Datos</span> <span class="nav-badge">ETL</span>
     </a>
-    <a class="nav-item" href="#/configurar-metricas">
-      <i class="ti ti-settings-2"></i> Configurar Métricas
+    <a class="nav-item" href="#/configurar-metricas" title="Configurar Métricas">
+      <i class="ti ti-settings-2"></i> <span>Configurar Métricas</span>
     </a>
-    <a class="nav-item" href="#/auditoria">
-      <i class="ti ti-clipboard-list"></i> Auditoría
+    <a class="nav-item" href="#/auditoria" title="Auditoría">
+      <i class="ti ti-clipboard-list"></i> <span>Auditoría</span>
     </a>
-    <a class="nav-item" href="#/usuarios-roles">
-      <i class="ti ti-users-group"></i> Usuarios y Roles
+    <a class="nav-item" href="#/usuarios-roles" title="Usuarios y Roles">
+      <i class="ti ti-users-group"></i> <span>Usuarios y Roles</span>
     </a>
-    <a class="nav-item" href="#/historico">
-      <i class="ti ti-history"></i> Histórico Pibox
+    <a class="nav-item" href="#/historico" title="Histórico Pibox">
+      <i class="ti ti-history"></i> <span>Histórico Pibox</span>
     </a>
-    <a class="nav-item" href="#/mi-perfil">
-      <i class="ti ti-user-circle"></i> Mi Perfil
+    <a class="nav-item" href="#/mi-perfil" title="Mi Perfil">
+      <i class="ti ti-user-circle"></i> <span>Mi Perfil</span>
     </a>
   </nav>
   <div class="sidebar-user" style="cursor:pointer;" onclick="location.hash='#/mi-perfil'">
@@ -2824,6 +2843,11 @@ function applyFilters(){
 
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
+}
+function toggleCollapse(){
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  localStorage.setItem('pibox_sidebar_collapsed', sb.classList.contains('collapsed') ? '1' : '0');
 }
 document.addEventListener('click', function(e){
   var sb = document.getElementById('sidebar');
@@ -6596,6 +6620,10 @@ window.addEventListener('resize', checkMobile);
 window.addEventListener('hashchange', onHashChange);
 document.addEventListener('DOMContentLoaded',()=>{
   checkMobile();
+  // Restore sidebar state
+  if(localStorage.getItem('pibox_sidebar_collapsed') === '1' && window.innerWidth > 900){
+    document.getElementById('sidebar').classList.add('collapsed');
+  }
   // Check if user is logged in
   if(currentUser){
     document.getElementById('login-screen').classList.remove('active');
