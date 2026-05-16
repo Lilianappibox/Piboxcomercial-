@@ -255,11 +255,39 @@
   .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
   /* ─── UPLOAD ZONE ─── */
-  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); }
+  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); }
   .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-bg); }
-  .upload-icon { font-size: 36px; color: var(--text3); margin-bottom: 12px; }
-  .upload-text { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
-  .upload-sub { font-size: 12px; color: var(--text3); }
+  .upload-icon { font-size: 28px; color: var(--text3); margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+  .upload-sub { font-size: 11px; color: var(--text3); }
+
+  /* ─── ETL COMPACT ─── */
+  #view-upload { overflow: hidden; max-width: 100%; }
+  #view-upload .chart-card { padding: 14px 16px; margin-bottom: 12px; overflow: hidden; }
+  #view-upload .kpi-grid { margin-bottom: 12px; gap: 10px; }
+  #view-upload .kpi-card { padding: 12px 14px; }
+  #view-upload .kpi-value { font-size: 20px; }
+  #view-upload .kpi-label { font-size: 10px; margin-bottom: 4px; }
+  #view-upload .kpi-sub { font-size: 11px; }
+  #view-upload .table-card { margin-bottom: 12px; }
+  #view-upload .table-header { padding: 10px 14px; }
+  #view-upload .chart-title { font-size: 12px; margin-bottom: 2px; }
+  #view-upload .chart-sub { font-size: 10px; margin-bottom: 10px; }
+  #view-upload .section-head { margin-bottom: 12px; }
+  #view-upload .insight-panel { padding: 14px; margin-bottom: 12px; }
+  #view-upload .insights-grid { gap: 8px; }
+  #view-upload .insight-item { padding: 10px 12px; }
+  #view-upload #etl-preview-table { font-size: 11px; }
+  #view-upload #etl-preview-table thead th { padding: 6px 10px; font-size: 10px; }
+  #view-upload #etl-preview-table tbody td { padding: 5px 10px; font-size: 11px; }
+  #view-upload .filter-bar { padding: 8px 12px; margin-bottom: 12px; }
+
+  .etl-guide-toggle { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; transition: transform 0.2s; padding: 2px; }
+  .etl-guide-toggle.collapsed { transform: rotate(-90deg); }
+  .etl-guide-body { transition: max-height 0.3s ease, opacity 0.2s; overflow: hidden; }
+  .etl-guide-body.collapsed { max-height: 0 !important; opacity: 0; padding: 0 !important; margin: 0 !important; }
+
+  .etl-preview-scroll { overflow-x: auto; overflow-y: auto; max-height: 360px; }
   .upload-formats { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
   .upload-list { margin-top: 16px; }
   .upload-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
@@ -1142,51 +1170,52 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <!-- ────────────────── UPLOAD VIEW ────────────────── -->
-  <div class="view" id="view-upload" style="overflow-x:auto;">
+  <div class="view" id="view-upload">
     <div class="section-head"><div><div class="section-title">Cargar & Actualizar Datos</div><div class="section-sub">Sube archivos CSV, XLSX o XLS para alimentar las métricas del tablero</div></div></div>
 
     <!-- Upload Zone -->
-    <div class="chart-card" style="margin-bottom:16px;">
-      <div class="chart-title" style="margin-bottom:16px">Zona de carga de archivos</div>
+    <div class="chart-card">
+      <div class="chart-title" style="margin-bottom:10px">Zona de carga de archivos</div>
       <div class="upload-zone" id="drop-zone" ondragover="handleDrag(event)" ondragleave="document.getElementById('drop-zone').classList.remove('dragover')" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
         <div class="upload-icon"><i class="ti ti-file-upload"></i></div>
         <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
-        <div class="upload-sub">Soporta: CSV, XLSX, XLS · Máximo 50MB por archivo</div>
-        <div class="upload-formats">
-          <span class="tag tag-green">CSV</span>
-          <span class="tag tag-blue">XLSX</span>
-          <span class="tag tag-amber">XLS</span>
+        <div class="upload-sub">CSV, XLSX, XLS · Máx 50MB</div>
+        <div class="upload-formats" style="margin-top:6px;">
+          <span class="tag tag-green" style="font-size:10px;">CSV</span>
+          <span class="tag tag-blue" style="font-size:10px;">XLSX</span>
+          <span class="tag tag-amber" style="font-size:10px;">XLS</span>
         </div>
       </div>
       <input type="file" id="file-input" multiple accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFiles(event)">
       <div class="upload-list" id="upload-list"></div>
     </div>
 
-    <!-- Guía de carga de datos -->
-    <div class="chart-card" style="margin-bottom:16px; border-left:3px solid var(--accent); overflow-x:auto;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <i class="ti ti-info-circle" style="font-size:22px;color:var(--accent);"></i>
-        <div class="chart-title" style="margin:0;">Guía: Cómo subir archivos correctamente</div>
+    <!-- Guía de carga de datos (collapsible) -->
+    <div class="chart-card" style="border-left:3px solid var(--accent);">
+      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="var b=document.getElementById('etl-guide-body');var t=this.querySelector('.etl-guide-toggle');b.classList.toggle('collapsed');t.classList.toggle('collapsed');">
+        <i class="ti ti-info-circle" style="font-size:18px;color:var(--accent);"></i>
+        <div class="chart-title" style="margin:0;flex:1;">Guía: Cómo subir archivos correctamente</div>
+        <button class="etl-guide-toggle" type="button"><i class="ti ti-chevron-down"></i></button>
       </div>
 
-      <div class="resp-grid-2" style="gap:16px;">
+      <div class="etl-guide-body" id="etl-guide-body" style="margin-top:12px;">
+      <div class="resp-grid-2" style="gap:12px;">
 
         <!-- Estructura del archivo -->
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
-          <div style="font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:10px;"><i class="ti ti-file-spreadsheet" style="margin-right:4px;"></i> Estructura del archivo</div>
-          <ul style="font-size:12px;color:var(--text2);line-height:1.8;list-style:none;padding:0;">
-            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">1.</span> La <strong style="color:var(--text);">primera fila</strong> debe contener los encabezados (nombres de columnas).</li>
-            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">2.</span> A partir de la <strong style="color:var(--text);">fila 2</strong> deben ir los datos.</li>
-            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">3.</span> No dejes filas en blanco entre los datos.</li>
-            <li style="padding:2px 0;"><span style="color:var(--green);margin-right:4px;">4.</span> Formatos: <span class="tag tag-green" style="font-size:10px;">CSV</span> <span class="tag tag-blue" style="font-size:10px;">XLSX</span> <span class="tag tag-amber" style="font-size:10px;">XLS</span> — máx. 50MB.</li>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:6px;"><i class="ti ti-file-spreadsheet" style="margin-right:4px;"></i> Estructura del archivo</div>
+          <ul style="font-size:11px;color:var(--text2);line-height:1.6;list-style:none;padding:0;">
+            <li><span style="color:var(--green);margin-right:3px;">1.</span> <strong style="color:var(--text);">Fila 1</strong> = encabezados. <strong style="color:var(--text);">Fila 2+</strong> = datos.</li>
+            <li><span style="color:var(--green);margin-right:3px;">2.</span> No dejes filas en blanco entre datos.</li>
+            <li><span style="color:var(--green);margin-right:3px;">3.</span> Formatos: <span class="tag tag-green" style="font-size:9px;">CSV</span> <span class="tag tag-blue" style="font-size:9px;">XLSX</span> <span class="tag tag-amber" style="font-size:9px;">XLS</span> — máx 50MB.</li>
           </ul>
         </div>
 
         <!-- Columnas reconocidas -->
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
-          <div style="font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:10px;"><i class="ti ti-columns-3" style="margin-right:4px;"></i> Nombres de columna recomendados</div>
-          <div style="font-size:11px;color:var(--text2);line-height:1.7;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:6px;"><i class="ti ti-columns-3" style="margin-right:4px;"></i> Nombres de columna recomendados</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.6;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;">
               <span><strong style="color:var(--text);">Mes:</strong> mes, periodo, fecha</span>
               <span><strong style="color:var(--text);">GMV:</strong> gmv, valor, ventas</span>
               <span><strong style="color:var(--text);">Bookings:</strong> bookings, reservas</span>
@@ -1202,10 +1231,10 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- Formatos de fecha -->
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
-          <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:10px;"><i class="ti ti-calendar" style="margin-right:4px;"></i> Formatos de fecha aceptados (columna Mes)</div>
-          <div style="font-size:11px;color:var(--text2);line-height:1.8;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px;"><i class="ti ti-calendar" style="margin-right:4px;"></i> Formatos de fecha (columna Mes)</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.6;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;">
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Ene25</span> Abreviado + año corto</span>
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Enero 2025</span> Nombre completo + año</span>
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">2025-03</span> Año-mes ISO</span>
@@ -1217,31 +1246,32 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- Tips -->
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
-          <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:10px;"><i class="ti ti-bulb" style="margin-right:4px;"></i> Tips para mejores resultados</div>
-          <ul style="font-size:12px;color:var(--text2);line-height:1.8;list-style:none;padding:0;">
-            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Incluye siempre la columna <strong style="color:var(--text);">Mes/Periodo</strong> — es la clave para alimentar gráficos y tablas.</li>
-            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Usa <strong style="color:var(--text);">ID Compañía</strong> para homologar clientes entre distintos archivos.</li>
-            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Los valores numéricos (GMV, Bookings) no deben tener símbolos de moneda — solo números.</li>
-            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Revisa el <strong style="color:var(--text);">mapeo de columnas</strong> después de cargar — el sistema auto-detecta, pero verifica que sea correcto.</li>
-            <li style="padding:2px 0;"><span style="color:var(--amber);margin-right:4px;">&#x2726;</span> Puedes cargar <strong style="color:var(--text);">múltiples archivos</strong> — se combinan automáticamente por mes y cliente.</li>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;"><i class="ti ti-bulb" style="margin-right:4px;"></i> Tips</div>
+          <ul style="font-size:11px;color:var(--text2);line-height:1.6;list-style:none;padding:0;">
+            <li><span style="color:var(--amber);margin-right:3px;">&#x2726;</span> Columna <strong style="color:var(--text);">Mes</strong> es clave para alimentar gráficos.</li>
+            <li><span style="color:var(--amber);margin-right:3px;">&#x2726;</span> Usa <strong style="color:var(--text);">ID Compañía</strong> para homologar clientes.</li>
+            <li><span style="color:var(--amber);margin-right:3px;">&#x2726;</span> Valores numéricos sin símbolos de moneda.</li>
+            <li><span style="color:var(--amber);margin-right:3px;">&#x2726;</span> Verifica el <strong style="color:var(--text);">mapeo de columnas</strong> tras cargar.</li>
+            <li><span style="color:var(--amber);margin-right:3px;">&#x2726;</span> Múltiples archivos se combinan por mes y cliente.</li>
           </ul>
         </div>
 
       </div>
 
       <!-- Módulos que alimenta cada columna -->
-      <div style="margin-top:14px;background:var(--bg3);border-radius:var(--radius-sm);padding:14px;">
-        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:10px;"><i class="ti ti-hierarchy" style="margin-right:4px;"></i> ¿Qué columnas alimentan cada módulo?</div>
-        <div class="resp-grid-3" style="gap:10px;font-size:11px;color:var(--text2);">
-          <div><strong style="color:var(--text);font-size:12px;">Resumen Ejecutivo</strong><br>Mes, GMV, KAM, Cliente, Ciudad, Bookings, Packages, Efectividad, Clientes Nuevos, Clientes Perdidos</div>
-          <div><strong style="color:var(--text);font-size:12px;">Metas Comerciales</strong><br>Mes, Meta, Real, KAM, Utilidad Bruta</div>
-          <div><strong style="color:var(--text);font-size:12px;">Desempeño KAM</strong><br>Mes, KAM, GMV, Meta, Real, Cliente, Bookings, Clientes Nuevos, Clientes Perdidos</div>
-          <div><strong style="color:var(--text);font-size:12px;">Clientes</strong><br>Cliente, ID Compañía, GMV, Completados, Cancelados, Clientes Nuevos</div>
-          <div><strong style="color:var(--text);font-size:12px;">Comportamiento Operativo</strong><br>Mes, Bookings, Packages, Completados, Cancelados, Efectividad</div>
-          <div><strong style="color:var(--text);font-size:12px;">Pipeline CRM</strong><br>Record ID, Cliente, KAM, GMV, Mes</div>
+      <div style="margin-top:10px;background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px;"><i class="ti ti-hierarchy" style="margin-right:4px;"></i> ¿Qué columnas alimentan cada módulo?</div>
+        <div class="resp-grid-3" style="gap:8px;font-size:10px;color:var(--text2);">
+          <div><strong style="color:var(--text);font-size:11px;">Resumen Ejecutivo</strong><br>Mes, GMV, KAM, Cliente, Ciudad, Bookings, Packages, Efectividad</div>
+          <div><strong style="color:var(--text);font-size:11px;">Metas Comerciales</strong><br>Mes, Meta, Real, KAM, Utilidad Bruta</div>
+          <div><strong style="color:var(--text);font-size:11px;">Desempeño KAM</strong><br>Mes, KAM, GMV, Meta, Real, Cliente, Bookings</div>
+          <div><strong style="color:var(--text);font-size:11px;">Clientes</strong><br>Cliente, ID Compañía, GMV, Completados, Cancelados</div>
+          <div><strong style="color:var(--text);font-size:11px;">Comportamiento Operativo</strong><br>Mes, Bookings, Packages, Completados, Cancelados</div>
+          <div><strong style="color:var(--text);font-size:11px;">Pipeline CRM</strong><br>Record ID, Cliente, KAM, GMV, Mes</div>
         </div>
       </div>
+      </div><!-- /etl-guide-body -->
     </div>
 
     <!-- Preview Panel (hidden until file loaded) -->
@@ -1263,15 +1293,15 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Destination Config -->
-      <div class="chart-card" style="margin-bottom:16px;overflow-x:auto;">
-        <div class="chart-title"><i class="ti ti-settings-2" style="font-size:15px;margin-right:4px;"></i> Configuración de carga</div>
-        <div class="chart-sub" style="margin-bottom:12px;">Define el destino, período y tabla para aplicar los datos.</div>
+      <div class="chart-card" style="overflow-x:auto;">
+        <div class="chart-title"><i class="ti ti-settings-2" style="font-size:13px;margin-right:4px;"></i> Configuración de carga</div>
+        <div class="chart-sub">Define el destino, período y tabla.</div>
 
         <div class="resp-grid-3" style="gap:14px;">
           <!-- 1. Módulos destino (dinámico) -->
           <div class="form-group">
             <label class="form-label">Módulos destino</label>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;max-height:160px;overflow-y:auto;" id="etl-modules-list"></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;max-height:130px;overflow-y:auto;font-size:11px;" id="etl-modules-list"></div>
           </div>
 
           <!-- 2. Período (dinámico) -->
@@ -1310,19 +1340,19 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Column Mapping -->
-      <div class="chart-card" style="margin-bottom:16px;overflow-x:auto;">
-        <div class="chart-title"><i class="ti ti-map" style="font-size:15px;margin-right:4px;"></i> Mapeo de columnas</div>
-        <div class="chart-sub" style="margin-bottom:12px;">Asigna las columnas del archivo a los campos del tablero. El sistema detecta automáticamente los campos compatibles.</div>
+      <div class="chart-card" style="overflow-x:auto;">
+        <div class="chart-title"><i class="ti ti-map" style="font-size:13px;margin-right:4px;"></i> Mapeo de columnas</div>
+        <div class="chart-sub">Asigna columnas del archivo a campos del tablero (auto-detectado).</div>
         <div id="etl-mapping" class="resp-grid-3" style="gap:10px;min-width:0;"></div>
       </div>
 
       <!-- Data Preview Table -->
-      <div class="table-card" style="margin-bottom:16px;">
+      <div class="table-card">
         <div class="table-header">
-          <div class="table-header-title">Vista previa de datos <span style="font-size:11px;color:var(--text3);font-weight:400;">(primeras 15 filas)</span></div>
-          <span class="tag tag-blue" id="etl-preview-tag">—</span>
+          <div class="table-header-title">Vista previa <span style="font-size:10px;color:var(--text3);font-weight:400;">(primeras 15 filas)</span></div>
+          <span class="tag tag-blue" id="etl-preview-tag" style="font-size:10px;">—</span>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="etl-preview-scroll">
           <table id="etl-preview-table"><thead><tr></tr></thead><tbody></tbody></table>
         </div>
       </div>
@@ -1339,9 +1369,9 @@ document.addEventListener('DOMContentLoaded', function() {
         <div id="etl-validation-items" class="insights-grid"></div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-bottom:24px;">
-        <button class="btn btn-primary" onclick="runETL()"><i class="ti ti-cpu"></i> Procesar y aplicar al tablero</button>
-        <button class="btn btn-ghost" onclick="cancelETL()"><i class="ti ti-x"></i> Cancelar</button>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px;" onclick="runETL()"><i class="ti ti-cpu"></i> Procesar y aplicar</button>
+        <button class="btn btn-ghost" style="font-size:12px;padding:8px 14px;" onclick="cancelETL()"><i class="ti ti-x"></i> Cancelar</button>
       </div>
     </div>
 
