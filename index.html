@@ -261,26 +261,34 @@
   .upload-text { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
   .upload-sub { font-size: 11px; color: var(--text3); }
 
-  /* ─── ETL COMPACT ─── */
-  #view-upload { overflow: hidden; max-width: 100%; }
-  #view-upload .chart-card { padding: 14px 16px; margin-bottom: 12px; overflow: hidden; }
-  #view-upload .kpi-grid { margin-bottom: 12px; gap: 10px; }
-  #view-upload .kpi-card { padding: 12px 14px; }
-  #view-upload .kpi-value { font-size: 20px; }
-  #view-upload .kpi-label { font-size: 10px; margin-bottom: 4px; }
-  #view-upload .kpi-sub { font-size: 11px; }
-  #view-upload .table-card { margin-bottom: 12px; }
-  #view-upload .table-header { padding: 10px 14px; }
-  #view-upload .chart-title { font-size: 12px; margin-bottom: 2px; }
-  #view-upload .chart-sub { font-size: 10px; margin-bottom: 10px; }
-  #view-upload .section-head { margin-bottom: 12px; }
-  #view-upload .insight-panel { padding: 14px; margin-bottom: 12px; }
-  #view-upload .insights-grid { gap: 8px; }
-  #view-upload .insight-item { padding: 10px 12px; }
+  /* ─── COMPACT LAYOUT (ALL VIEWS) ─── */
+  .view { overflow: hidden; max-width: 100%; }
+  .view .chart-card { padding: 14px 16px; margin-bottom: 12px; }
+  .view .kpi-grid { margin-bottom: 12px; gap: 10px; }
+  .view .kpi-card { padding: 12px 14px; }
+  .view .kpi-value { font-size: 22px; }
+  .view .kpi-label { font-size: 10px; margin-bottom: 4px; }
+  .view .kpi-sub { font-size: 11px; }
+  .view .table-card { margin-bottom: 12px; }
+  .view .table-header { padding: 10px 14px; }
+  .view .chart-title { font-size: 12px; margin-bottom: 2px; }
+  .view .chart-sub { font-size: 10px; margin-bottom: 10px; }
+  .view .section-head { margin-bottom: 12px; }
+  .view .insight-panel { padding: 14px; margin-bottom: 12px; }
+  .view .insights-grid { gap: 8px; }
+  .view .insight-item { padding: 10px 12px; }
+  .view .filter-bar { padding: 8px 12px; margin-bottom: 12px; }
+  .view .charts-grid { gap: 12px; margin-bottom: 12px; }
+  .view .meta-grid { gap: 10px; margin-bottom: 12px; }
+  .view table { font-size: 12px; }
+  .view thead th { padding: 8px 12px; font-size: 10px; }
+  .view tbody td { padding: 8px 12px; }
+  .view .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* ETL specific */
   #view-upload #etl-preview-table { font-size: 11px; }
   #view-upload #etl-preview-table thead th { padding: 6px 10px; font-size: 10px; }
   #view-upload #etl-preview-table tbody td { padding: 5px 10px; font-size: 11px; }
-  #view-upload .filter-bar { padding: 8px 12px; margin-bottom: 12px; }
 
   .etl-guide-toggle { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; transition: transform 0.2s; padding: 2px; }
   .etl-guide-toggle.collapsed { transform: rotate(-90deg); }
@@ -288,6 +296,19 @@
   .etl-guide-body.collapsed { max-height: 0 !important; opacity: 0; padding: 0 !important; margin: 0 !important; }
 
   .etl-preview-scroll { overflow-x: auto; overflow-y: auto; max-height: 360px; }
+  .chart-canvas-wrap { max-width: 100%; }
+
+  @media (max-width: 768px) {
+    .chart-canvas-wrap { height: 180px !important; }
+    .view .kpi-value { font-size: 20px; }
+  }
+  @media (max-width: 480px) {
+    .chart-canvas-wrap { height: 160px !important; }
+    .view .kpi-value { font-size: 18px; }
+    .view .chart-card { padding: 10px 12px; }
+    .view thead th { padding: 6px 8px; font-size: 9px; }
+    .view tbody td { padding: 6px 8px; font-size: 11px; }
+  }
   .upload-formats { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
   .upload-list { margin-top: 16px; }
   .upload-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
@@ -952,6 +973,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="table-header-title">Top 10 Clientes por GMV</div>
         <button class="btn btn-ghost" style="font-size:12px;" onclick="toast('Exportando tabla...')"><i class="ti ti-download"></i> Exportar</button>
       </div>
+      <div class="table-scroll">
       <table>
         <thead>
           <tr>
@@ -966,6 +988,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </thead>
         <tbody id="top-clients-body"></tbody>
       </table>
+      </div>
     </div>
 
     <!-- KAM Cumplimiento Table -->
@@ -973,10 +996,12 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="table-header">
         <div class="table-header-title">Cumplimiento por KAM</div>
       </div>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>KAM</th><th>GMV</th><th>% del Total</th><th>Participación</th></tr></thead>
         <tbody id="overview-kam-body"></tbody>
       </table>
+      </div>
     </div>
 
     <!-- Insights (at the end) -->
@@ -1024,10 +1049,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- KAM Breakdown table -->
     <div class="table-card" style="margin-top:20px">
       <div class="table-header"><div class="table-header-title">Cumplimiento por KAM</div></div>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>KAM</th><th>GMV Acumulado</th><th>% del Total</th><th>Clientes Activos</th><th>Rank</th></tr></thead>
         <tbody id="kam-breakdown-body"></tbody>
       </table>
+      </div>
     </div>
 
     <!-- Utilidad Bruta por Mes -->
@@ -1108,10 +1135,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <div id="cli-top" style="display:none">
       <div class="table-card">
         <div class="table-header"><div class="table-header-title">Top 10 Clientes — GMV + Efectividad</div></div>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>#</th><th>Cliente</th><th>Completados</th><th>Cancelados</th><th>Total Bookings</th><th>GMV</th><th>Efectividad</th></tr></thead>
           <tbody id="top10-body"></tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>
@@ -1156,6 +1185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="table-card">
       <div class="table-header"><div class="table-header-title">Negocios recientes — CRM</div></div>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>ID</th><th>Negocio</th><th>Etapa</th><th>KAM</th><th>Tipo</th></tr></thead>
         <tbody>
@@ -1166,6 +1196,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:11px">59814891176</td><td class="bold">Colegio Gran Bretaña</td><td><span class="tag tag-green">Cierre ganado</span></td><td>Juliana Rojas</td><td><span class="tag tag-green">Propio</span></td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 
@@ -1215,7 +1246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
           <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:6px;"><i class="ti ti-columns-3" style="margin-right:4px;"></i> Nombres de columna recomendados</div>
           <div style="font-size:10px;color:var(--text2);line-height:1.6;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;">
+            <div class="resp-grid-2" style="gap:1px 10px;">
               <span><strong style="color:var(--text);">Mes:</strong> mes, periodo, fecha</span>
               <span><strong style="color:var(--text);">GMV:</strong> gmv, valor, ventas</span>
               <span><strong style="color:var(--text);">Bookings:</strong> bookings, reservas</span>
@@ -1234,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;">
           <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px;"><i class="ti ti-calendar" style="margin-right:4px;"></i> Formatos de fecha (columna Mes)</div>
           <div style="font-size:10px;color:var(--text2);line-height:1.6;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;">
+            <div class="resp-grid-2" style="gap:1px 10px;">
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Ene25</span> Abreviado + año corto</span>
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">Enero 2025</span> Nombre completo + año</span>
               <span><span class="tag tag-teal" style="font-size:9px;padding:1px 6px;">2025-03</span> Año-mes ISO</span>
@@ -1563,6 +1594,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </select>
           </div>
         </div>
+        <div class="table-scroll">
         <table>
           <thead>
             <tr>
@@ -1578,6 +1610,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </thead>
           <tbody id="users-table-body"></tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -3961,11 +3994,11 @@ function renderKamSections(){
         <!-- Monthly meta/gmv/cumplimiento -->
         <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;">META · GMV · CUMPLIMIENTO POR MES</div>
         <div style="overflow-x:auto;margin-bottom:16px;">
-          <table style="min-width:700px;"><tbody><tr>${metaHtml}</tr></tbody></table>
+          <div class="table-scroll"><table><tbody><tr>${metaHtml}</tr></tbody></table></div>
         </div>
 
         <!-- Clientes Nuevos vs Perdidos -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        <div class="resp-grid-2" style="gap:12px;margin-bottom:12px;">
           <div class="kpi-card green" style="margin:0;">
             <div class="kpi-label"><i class="ti ti-users-plus"></i> Clientes Nuevos</div>
             <div class="kpi-value" style="font-size:20px;">${detail.nuevos > 0 ? detail.nuevos : 'NA'}</div>
@@ -4450,7 +4483,7 @@ function renderMetasCards(){
       <div style="font-size:12px;font-weight:600;color:${qColors[q]};letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
         <span style="background:${qColors[q]};width:4px;height:16px;border-radius:2px;display:inline-block;"></span> ${qNames[q]}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;">
+      <div class="meta-grid" style="gap:10px;">
         ${buildCard(q*3)}${buildCard(q*3+1)}${buildCard(q*3+2)}
       </div>
     </div>`;
