@@ -234,8 +234,10 @@
   .resp-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
   /* ─── PAGE VIEWS ─── */
-  .view { display: none; }
+  .view { display: none; min-width: 0; }
   .view.active { display: block; }
+  .view .table-card > table, .view .table-card > div:has(table) { overflow-x: auto; }
+  .view .chart-card { min-width: 0; }
 
   /* ─── MODALS / PANELS ─── */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
@@ -1140,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <!-- ────────────────── UPLOAD VIEW ────────────────── -->
-  <div class="view" id="view-upload">
+  <div class="view" id="view-upload" style="overflow-x:auto;">
     <div class="section-head"><div><div class="section-title">Cargar & Actualizar Datos</div><div class="section-sub">Sube archivos CSV, XLSX o XLS para alimentar las métricas del tablero</div></div></div>
 
     <!-- Upload Zone -->
@@ -1161,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- Guía de carga de datos -->
-    <div class="chart-card" style="margin-bottom:16px; border-left:3px solid var(--accent);">
+    <div class="chart-card" style="margin-bottom:16px; border-left:3px solid var(--accent); overflow-x:auto;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
         <i class="ti ti-info-circle" style="font-size:22px;color:var(--accent);"></i>
         <div class="chart-title" style="margin:0;">Guía: Cómo subir archivos correctamente</div>
@@ -1261,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Destination Config -->
-      <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card" style="margin-bottom:16px;overflow-x:auto;">
         <div class="chart-title"><i class="ti ti-settings-2" style="font-size:15px;margin-right:4px;"></i> Configuración de carga</div>
         <div class="chart-sub" style="margin-bottom:12px;">Define el destino, período y tabla para aplicar los datos.</div>
 
@@ -1308,10 +1310,10 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Column Mapping -->
-      <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card" style="margin-bottom:16px;overflow-x:auto;">
         <div class="chart-title"><i class="ti ti-map" style="font-size:15px;margin-right:4px;"></i> Mapeo de columnas</div>
         <div class="chart-sub" style="margin-bottom:12px;">Asigna las columnas del archivo a los campos del tablero. El sistema detecta automáticamente los campos compatibles.</div>
-        <div id="etl-mapping" class="resp-grid-3" style="gap:10px;"></div>
+        <div id="etl-mapping" class="resp-grid-3" style="gap:10px;min-width:0;"></div>
       </div>
 
       <!-- Data Preview Table -->
@@ -1349,10 +1351,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="table-header-title">Historial de cargas</div>
         <button class="btn btn-ghost" style="color:var(--red);font-size:12px;" onclick="showFormatConfirm()"><i class="ti ti-trash"></i> FORMATEAR</button>
       </div>
-      <table>
-        <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Tabla</th><th>Período</th><th>Homologación</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody id="etl-history-body"></tbody>
-      </table>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Fecha</th><th>Archivo</th><th>Registros</th><th>Tabla</th><th>Período</th><th>Homologación</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="etl-history-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Format confirmation modal -->
