@@ -45,8 +45,6 @@
   .sidebar { width: var(--sidebar-w); background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; height: 100vh; z-index: 100; transition: transform 0.25s; }
   .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
   .topbar { height: var(--header-h); background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; position: sticky; top: 0; z-index: 50; }
-  .content { padding: 28px 28px 48px; flex: 1; }
-
   /* ─── SIDEBAR ─── */
   .sidebar-logo { padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
   .logo-mark { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
@@ -113,7 +111,6 @@
   .section-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
 
   /* ─── METRIC CARDS ─── */
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.15s, opacity 0.15s; }
   .kpi-card:hover { border-color: var(--border2); }
   .kpi-card[draggable="true"] { cursor: grab; }
@@ -145,19 +142,15 @@
   .kpi-sparkline { margin-top: 12px; height: 36px; }
 
   /* ─── CHARTS GRID ─── */
-  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .charts-grid.triple { grid-template-columns: 2fr 1fr 1fr; }
-  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
   .chart-card.full { grid-column: 1 / -1; }
   .chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
   .chart-sub { font-size: 11px; color: var(--text3); margin-bottom: 16px; }
   .chart-canvas-wrap { position: relative; width: 100%; }
 
   /* ─── TABLE ─── */
-  .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
   .table-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
   .table-header-title { font-size: 13px; font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
   tbody tr:last-child { border-bottom: none; }
@@ -182,7 +175,6 @@
   .insight-head .ti { font-size: 18px; color: var(--accent2); }
   .insight-head-text { font-size: 13px; font-weight: 600; }
   .insight-head-sub { font-size: 11px; color: var(--text3); }
-  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
   .insight-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
   .insight-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
   .insight-type.warning { color: var(--amber); }
@@ -193,7 +185,6 @@
   .insight-meta { font-size: 11px; color: var(--text3); margin-top: 6px; }
 
   /* ─── METAS SECTION ─── */
-  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .meta-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; min-width: 0; }
   .meta-month { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
   .meta-values { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
@@ -202,6 +193,25 @@
   .meta-pct { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
   .meta-bar { height: 6px; background: var(--bg4); border-radius: 10px; overflow: hidden; }
   .meta-bar-fill { height: 100%; border-radius: 10px; background: var(--accent); transition: width 0.5s ease; }
+
+  /* ─── SCROLLBARS ─── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 8px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+  ::-webkit-scrollbar-corner { background: var(--bg); }
+  /* Firefox */
+  * { scrollbar-width: thin; scrollbar-color: var(--bg4) var(--bg); }
+
+  .content { padding: 28px 28px 48px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
+  .table-card > div:has(table), .table-card > table { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: max-content; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; overflow-x: auto; overflow-y: hidden; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; overflow-x: auto; }
+  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; max-height: 500px; padding-right: 4px; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; }
 
   /* ─── PAGE VIEWS ─── */
   .view { display: none; }
